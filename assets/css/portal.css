@@ -2102,3 +2102,41 @@ a.tile:hover{ transform:translateY(-2px); }
   color-scheme:dark;
   font-variant-numeric:tabular-nums;
 }
+
+/* --- Casual dating: fewer, and quieter ----------------------------------- */
+/* Less on the card, deliberately. The luxury signal here is restraint, so the
+   grid is wider-gutter and the card carries a name, a place, a figure and an
+   intent — and stops. */
+.cas-grid{ grid-template-columns:repeat(auto-fill,minmax(17rem,1fr)); gap:clamp(1rem,1.8vw,1.7rem); }
+.cas-card .ltr-card__body{ gap:.6rem; padding:1.3rem 1.4rem 1.4rem; }
+.cas-card .ltr-card__plate{ aspect-ratio:1/1; }
+
+.cas-avail{
+  margin:0; font-size:.62rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--champagne);
+}
+.cas-avail--warn{ color:#D8A15E; }
+
+.cas-acts{ display:flex; flex-direction:column; gap:.5rem; margin-top:.5rem; }
+.cas-acts .btn{ justify-content:center; }
+
+.cas-curated{
+  margin:1.4rem 0 0; max-width:60ch;
+  font-size:.78rem; line-height:1.7; color:var(--fg-faint);
+}
+
+.cas-private{ margin-bottom:1.4rem; }
+.cas-private b{ color:#EDEAE3; font-weight:500; }
+
+/* the mutual-intent check, before a request can be sent */
+.cas-check{
+  border:1px solid rgba(207,196,176,.3); border-radius:var(--r-sm);
+  padding:1rem 1.1rem; margin:.4rem 0 1rem;
+  background:rgba(207,196,176,.05);
+}
+.cas-check--warn{ border-color:rgba(216,161,94,.45); background:rgba(216,161,94,.07); }
+.cas-check .kv{ margin:0; }
+.cas-check__v{
+  margin:.9rem 0 0; font-size:.82rem; line-height:1.6; color:var(--champagne);
+}
+.cas-check--warn .cas-check__v{ color:#E8BC80; }

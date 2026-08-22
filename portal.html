@@ -1069,46 +1069,104 @@
 
       <!-- ============================================= FIND — CASUAL -->
       <section class="view" id="view-find-casual" tabindex="-1" aria-label="Casual dating">
-        <p class="lede">Casual dating</p>
+        <p class="lede">Casual Dating</p>
         <p class="sub">
-          Lighter, and without an intention attached. The same verification and the same discretion
-          as every other track — we simply do not ask where it is going.
+          Private, discreet and curated. A small number of people the house believes are right for
+          you, with expectations stated on both sides before anyone is introduced — not a feed to
+          scroll, and nothing here is decided by swiping.
         </p>
 
-        <div class="cols cols--7-5" style="margin-top:2.6rem">
-          <div class="panel">
-            <div class="panel__head"><h2>What is different</h2></div>
-            <div class="panel__body">
-              <ul class="includes">
-                <li>No brief, and no assessment unless you want one.</li>
-                <li>No case written, no reasoning to read — an introduction and a name.</li>
-                <li>Nothing is asked of you afterwards. No reflection, and no standing.</li>
-              </ul>
-              <p class="ask__lbl">What is not different</p>
-              <ul class="includes">
-                <li>Every person is met and verified before you meet them.</li>
-                <li>Consent is asked case by case, exactly as elsewhere.</li>
-                <li>Nothing about it appears anywhere another member can see.</li>
-              </ul>
+        <div class="ltr-stats" id="cas-stats" role="status">
+          <div><span class="n" id="cas-count">—</span><span class="l">Curated for you</span></div>
+          <div><span class="n" id="cas-where">—</span><span class="l">Location</span></div>
+          <div><span class="n" id="cas-when">—</span><span class="l">Your availability</span></div>
+          <div><span class="n" id="cas-shortlist">—</span><span class="l">Private shortlist</span></div>
+        </div>
+
+        <!-- intent, expectations, availability, place --------------------- -->
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head">
+            <h2>Your dating preferences</h2>
+            <span class="pill pill--action" id="cas-intent-pill">Intent required</span>
+          </div>
+          <div class="panel__body">
+            <p class="ask__lbl">What are you looking for?</p>
+            <div class="chips" id="cas-intents" role="radiogroup" aria-label="Your dating intent"></div>
+
+            <p class="ask__lbl" style="margin-top:1.6rem">What you expect, said plainly</p>
+            <div class="chips" id="cas-expect" role="radiogroup" aria-label="Relationship expectations"></div>
+
+            <p class="ask__lbl" style="margin-top:1.6rem">When you are free</p>
+            <div class="chips" id="cas-avail" role="radiogroup" aria-label="Your availability"></div>
+
+            <div class="ltr-filters" id="cas-where-fields" style="margin-top:1.8rem"></div>
+
+            <div class="note-inline">
+              A city is shown, never an address or a live position. What you expect is shown to
+              anyone the house proposes you to — that is the point of stating it.
             </div>
           </div>
-          <div class="stack" style="gap:1.6rem">
-            <div class="panel">
-              <div class="panel__head"><h2>What to expect</h2></div>
-              <div class="panel__body">
-                <dl class="kv">
-                  <dt>Pace</dt><dd>Days to a first introduction</dd>
-                  <dt>Obligation</dt><dd>None, on either side</dd>
-                  <dt>Held on file</dt><dd>The introduction only</dd>
-                  <dt>Ending it</dt><dd>Silence is an acceptable answer</dd>
-                </dl>
-                <div class="note-inline">
-                  Members on this track are not shown to members on the long-term track, and the
-                  reverse. Nobody is met under a description they did not agree to.
-                </div>
-              </div>
+        </div>
+
+        <!-- privacy, which is the product here ----------------------------- -->
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head">
+            <h2>Privacy</h2>
+            <span class="pill pill--rest" id="cas-privacy-pill">Standard</span>
+          </div>
+          <div class="panel__body">
+            <label class="ltr-toggle cas-private">
+              <input type="checkbox" id="cas-private">
+              <span><b>Private profile</b> — nobody sees you until you have agreed to it, one person at a time</span>
+            </label>
+            <div class="ltr-filters" id="cas-privacy"></div>
+            <div class="note-inline">
+              With a private profile you are not curated to anyone without being asked first. It is
+              the quietest setting and it will slow your search down; members who use it say that is
+              what they wanted.
             </div>
           </div>
+        </div>
+
+        <!-- a narrow search, deliberately ---------------------------------- -->
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head">
+            <h2>Refine</h2>
+            <button type="button" class="btn btn--quiet" id="cas-clear">Clear all</button>
+          </div>
+          <div class="panel__body">
+            <div class="ltr-search">
+              <input type="search" id="cas-q" placeholder="Search a city, a lifestyle, an interest"
+                     aria-label="Search curated matches">
+            </div>
+            <div class="ltr-filters" id="cas-filters"></div>
+            <div class="ltr-toggles">
+              <label class="ltr-toggle">
+                <input type="checkbox" id="cas-verified-only" checked><span>Legend Verified only</span>
+              </label>
+              <label class="ltr-toggle">
+                <input type="checkbox" id="cas-intent-only"><span>Only where our expectations agree</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="ltr-sections" id="cas-sections" role="tablist" aria-label="How matches are grouped"></div>
+
+        <p class="cas-curated" id="cas-note"></p>
+
+        <p class="ltr-empty" id="cas-empty" hidden>
+          Nothing in this group answers to those preferences. The house curates a few rather than
+          many, so an empty group is ordinary — widen one thing, or leave it and let your advisor
+          bring someone.
+        </p>
+
+        <div class="ltr-grid cas-grid" id="cas-grid" aria-live="polite"></div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          <b>Design preview.</b> Everyone below is illustrative sample content, and the figures are
+          computed here in the page from that sample — written rules, not a language model, and
+          nothing you do on this page leaves it.
         </div>
       </section>
 
