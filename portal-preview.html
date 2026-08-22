@@ -2968,17 +2968,7 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
           <a class="sub" href="#find-long" data-view="find-long">Long-term relationship</a>
           <a class="sub" href="#find-short" data-view="find-short">Short-term relationship</a>
           <a class="sub" href="#find-casual" data-view="find-casual">Casual dating</a>
-          <a class="sub" href="#find-companion" data-view="find-companion">Event &amp; party companion</a>
         </div>
-        <a class="cat" href="#long" data-view="long" data-label="Long partner">
-          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"/></svg></span>
-          <span>Long partner<span class="cat__n">The search, and all of it</span></span>
-          <span class="count">3</span>
-        </a>
-        <a class="cat" href="#short" data-view="short" data-label="Short partner">
-          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><polyline points="12 6.6 12 12 15.8 14"/></svg></span>
-          <span>Short partner<span class="cat__n">Companionship, on stated terms</span></span>
-        </a>
         <a class="cat" href="#events" data-view="events" data-label="Party and event">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/></svg></span>
           <span>Party &amp; event<span class="cat__n">Gatherings of the house</span></span>
@@ -2986,7 +2976,7 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
         <a class="cat" href="#occasions" data-view="occasions" data-label="Events"
            aria-expanded="false" aria-controls="rail-sub-occasions">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.2" y="5" width="17.6" height="15.6" rx="2"/><path d="M3.2 9.6h17.6"/><path d="M8 3.4v3.2"/><path d="M16 3.4v3.2"/></svg></span>
-          <span>Events<span class="cat__n">Where you are seen, and with whom</span></span>
+          <span>Events &amp; Companionship<span class="cat__n">Where you are seen, and with whom</span></span>
         </a>
         <div class="rail__sub" id="rail-sub-occasions" data-branch="occasions" hidden>
           <a class="sub" href="#occasions-parties" data-view="occasions-parties">Parties</a>
@@ -3286,8 +3276,8 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
               <div class="panel__head"><h2>Also here</h2></div>
               <div class="panel__body">
                 <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
-                  If you are looking for a companion rather than an occasion, that sits under Find a
-                  partner. The arrangements below are for an evening already in your diary.
+                  The five above are arrangements for an occasion already in your diary. If what you
+                  want is the companion rather than the occasion, that is here too.
                 </p>
               </div>
               <div class="panel__foot">
@@ -6468,7 +6458,7 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
     verified:        'Legend Verified',
     academy:         'Legend Academy',
     find:            'Find a partner',
-    occasions:              'Events',
+    occasions:              'Events & Companionship',
     'occasions-parties':    'Parties',
     'occasions-events':     'Events',
     'occasions-business':   'Business events',
@@ -6561,11 +6551,16 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
   // once you have gone one level down.
   var PARENT = {
     'find-long': 'find', 'find-short': 'find',
-    'find-casual': 'find', 'find-companion': 'find',
+    'find-casual': 'find',
+    // Companionship moved under Events & Companionship; the page stays where it
+    // is and this is what gives it the right way back up.
+    'find-companion': 'occasions',
     'occasions-parties': 'occasions', 'occasions-events': 'occasions',
     'occasions-business': 'occasions', 'occasions-travel': 'occasions',
     'occasions-social': 'occasions',
-    proposed: 'long', requests: 'long', introductions: 'long', appointments: 'long',
+    // These four were the working sections of the retired Long partner category;
+    // Find a partner is what carries that ground now.
+    proposed: 'find', requests: 'find', introductions: 'find', appointments: 'find',
     preferences: 'me', reflections: 'me', intentions: 'me', persona: 'me', profile: 'me',
     insights: 'management', formation: 'management', counsel: 'management', continuity: 'management',
     parties: 'events',
@@ -6627,9 +6622,12 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
       var open = mark === root;
       sub.hidden = !open;
       cat.setAttribute('aria-expanded', open ? 'true' : 'false');
-      // One aria-current per page: on a child it belongs to the child, and the
-      // parent keeps only its open state and the rail's own marker.
-      if (open && name !== root) { cat.removeAttribute('aria-current'); cat.classList.add('is-branch'); }
+      // One aria-current per page: it moves to the child only when the child is
+      // itself in this list. A branch can also parent sections that are not
+      // listed here — the working sections of a search, say — and those must
+      // leave the mark on the category, or nothing in the rail is marked at all.
+      var listed = $('a[data-view="' + name + '"]', sub);
+      if (open && listed) { cat.removeAttribute('aria-current'); cat.classList.add('is-branch'); }
       else { cat.classList.remove('is-branch'); }
       $$('a', sub).forEach(function (a) {
         if (a.getAttribute('data-view') === name) { a.setAttribute('aria-current', 'page'); }

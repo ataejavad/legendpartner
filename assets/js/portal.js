@@ -15,7 +15,7 @@
     verified:        'Legend Verified',
     academy:         'Legend Academy',
     find:            'Find a partner',
-    occasions:              'Events',
+    occasions:              'Events & Companionship',
     'occasions-parties':    'Parties',
     'occasions-events':     'Events',
     'occasions-business':   'Business events',
@@ -108,11 +108,16 @@
   // once you have gone one level down.
   var PARENT = {
     'find-long': 'find', 'find-short': 'find',
-    'find-casual': 'find', 'find-companion': 'find',
+    'find-casual': 'find',
+    // Companionship moved under Events & Companionship; the page stays where it
+    // is and this is what gives it the right way back up.
+    'find-companion': 'occasions',
     'occasions-parties': 'occasions', 'occasions-events': 'occasions',
     'occasions-business': 'occasions', 'occasions-travel': 'occasions',
     'occasions-social': 'occasions',
-    proposed: 'long', requests: 'long', introductions: 'long', appointments: 'long',
+    // These four were the working sections of the retired Long partner category;
+    // Find a partner is what carries that ground now.
+    proposed: 'find', requests: 'find', introductions: 'find', appointments: 'find',
     preferences: 'me', reflections: 'me', intentions: 'me', persona: 'me', profile: 'me',
     insights: 'management', formation: 'management', counsel: 'management', continuity: 'management',
     parties: 'events',
@@ -174,9 +179,12 @@
       var open = mark === root;
       sub.hidden = !open;
       cat.setAttribute('aria-expanded', open ? 'true' : 'false');
-      // One aria-current per page: on a child it belongs to the child, and the
-      // parent keeps only its open state and the rail's own marker.
-      if (open && name !== root) { cat.removeAttribute('aria-current'); cat.classList.add('is-branch'); }
+      // One aria-current per page: it moves to the child only when the child is
+      // itself in this list. A branch can also parent sections that are not
+      // listed here — the working sections of a search, say — and those must
+      // leave the mark on the category, or nothing in the rail is marked at all.
+      var listed = $('a[data-view="' + name + '"]', sub);
+      if (open && listed) { cat.removeAttribute('aria-current'); cat.classList.add('is-branch'); }
       else { cat.classList.remove('is-branch'); }
       $$('a', sub).forEach(function (a) {
         if (a.getAttribute('data-view') === name) { a.setAttribute('aria-current', 'page'); }
