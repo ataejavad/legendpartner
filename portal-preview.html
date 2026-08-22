@@ -1117,6 +1117,21 @@ body.portal-body{
   font-family:var(--serif); font-weight:300; font-size:1.15rem; letter-spacing:-.01em;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
+
+/* The rail carries the member's name at every width — stacked across the top
+   below 900px, in the sidebar above it — so the bar showing it too put the same
+   name on screen twice. It also does not fit: the full greeting measures 221px
+   and the title only has that much room from about 1150px up, so under that it
+   was being cut mid-name. Below the threshold the bar keeps the greeting and
+   the rail keeps the name; the comma travels with the name so what is left
+   reads as a sentence. */
+@media (max-width:1150px){
+  .title__member{ display:none; }
+  /* The date is the least load-bearing thing in the bar, and at 901px — where
+     the rail becomes a sidebar and the column narrows — it was leaving the
+     title 69px to render a greeting in. It goes before the greeting does. */
+  .topbar .meta .date{ display:none; }
+}
 .topbar .meta{
   display:flex; align-items:center; gap:1.6rem;
   font-size:.6rem; letter-spacing:.2em; text-transform:uppercase; color:var(--fg-faint);
@@ -1359,9 +1374,6 @@ body.portal-body{
   .rail__foot{ display:none; }
   .topbar{ height:50px; }
   .topbar h1{ font-size:1rem; }
-  /* Not enough bar for "Good afternoon, A. Marchand." — the name is the half
-     worth keeping. */
-  .title__salutation{ display:none; }
   .topbar .meta .date{ display:none; }
   .figs div{ border-right:0; border-bottom:1px solid var(--line-soft); }
   .intro-row,.appt,.doc{ grid-template-columns:1fr; gap:.6rem; }
@@ -5776,9 +5788,12 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
       if (name === 'overview') {
         var sal = document.createElement('span');
         sal.className = 'title__salutation';
-        sal.textContent = SALUTATION + ', ';
-        title.appendChild(sal);
-        title.appendChild(document.createTextNode(MEMBER));
+        sal.textContent = SALUTATION;
+        var who = document.createElement('span');
+        who.className = 'title__member';
+        who.textContent = ', ' + MEMBER;      // the comma belongs to the name,
+        title.appendChild(sal);               // so dropping the name reads cleanly
+        title.appendChild(who);
       } else {
         title.textContent = TITLES[name];
       }

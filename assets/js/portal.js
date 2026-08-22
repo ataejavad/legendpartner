@@ -139,9 +139,12 @@
       if (name === 'overview') {
         var sal = document.createElement('span');
         sal.className = 'title__salutation';
-        sal.textContent = SALUTATION + ', ';
-        title.appendChild(sal);
-        title.appendChild(document.createTextNode(MEMBER));
+        sal.textContent = SALUTATION;
+        var who = document.createElement('span');
+        who.className = 'title__member';
+        who.textContent = ', ' + MEMBER;      // the comma belongs to the name,
+        title.appendChild(sal);               // so dropping the name reads cleanly
+        title.appendChild(who);
       } else {
         title.textContent = TITLES[name];
       }
