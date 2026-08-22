@@ -968,44 +968,102 @@
 
       <!-- ============================================= FIND — SHORT TERM -->
       <section class="view" id="view-find-short" tabindex="-1" aria-label="Short-term relationship">
-        <p class="lede">Short-term relationship</p>
+        <p class="lede">Short-Term Relationships</p>
         <p class="sub">
-          Companionship on terms both people state at the outset, for a period both people name.
-          Nothing about it is provisional except its length.
+          Discover verified people looking for short-term connections, companionship and shared
+          experiences. Three questions decide everything here — what, when, and where — so they are
+          asked first and answered before anyone is shown to you.
         </p>
 
-        <div class="cols cols--7-5" style="margin-top:2.6rem">
-          <div class="panel">
-            <div class="panel__head"><h2>Stated at the outset</h2></div>
-            <div class="panel__body">
-              <ul class="includes">
-                <li>How long, in months, and what happens at the end of it.</li>
-                <li>What each person is looking for, said plainly rather than discovered later.</li>
-                <li>Whether it is exclusive, and whether that is expected to change.</li>
-                <li>How it ends — by whom, with how much notice, and what is said afterwards.</li>
-              </ul>
-              <div class="note-inline">
-                We put these in writing before an introduction, not because they are binding, but
-                because a term nobody said aloud is the one that causes the injury.
-              </div>
+        <div class="ltr-stats" id="stm-stats" role="status">
+          <div><span class="n" id="stm-count">—</span><span class="l">Potential matches</span></div>
+          <div><span class="n" id="stm-where">—</span><span class="l">Location</span></div>
+          <div><span class="n" id="stm-when">—</span><span class="l">Your availability</span></div>
+          <div><span class="n" id="stm-verified">—</span><span class="l">Verification</span></div>
+        </div>
+
+        <!-- what, when, where — the three that decide the rest -------------- -->
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head">
+            <h2>My short-term preferences</h2>
+            <span class="pill pill--action" id="stm-intent-pill">Intent required</span>
+          </div>
+          <div class="panel__body">
+            <p class="ask__lbl">What are you looking for?</p>
+            <div class="chips" id="stm-intents" role="radiogroup" aria-label="Your short-term intent"></div>
+
+            <p class="ask__lbl" style="margin-top:1.6rem">How long?</p>
+            <div class="chips" id="stm-durations" role="radiogroup" aria-label="Duration"></div>
+
+            <p class="ask__lbl" style="margin-top:1.6rem">Relationship style, and what you expect</p>
+            <div class="chips" id="stm-styles" role="group" aria-label="Relationship style"></div>
+
+            <div class="ltr-filters" id="stm-when-fields" style="margin-top:1.8rem"></div>
+
+            <div class="stm-travel">
+              <label class="ltr-toggle">
+                <input type="checkbox" id="stm-travel-on">
+                <span><b>Travel mode</b> — I am going somewhere, and want matches there</span>
+              </label>
+              <div class="ltr-filters" id="stm-travel-fields" hidden></div>
+            </div>
+
+            <div class="note-inline">
+              Your exact address is never shown to anyone. A city is, and only while your
+              availability is open — it closes by itself on the end date rather than staying up
+              until you remember to take it down.
             </div>
           </div>
-          <div class="stack" style="gap:1.6rem">
-            <div class="panel">
-              <div class="panel__head"><h2>What to expect</h2></div>
-              <div class="panel__body">
-                <dl class="kv">
-                  <dt>Pace</dt><dd>Weeks to a first introduction</dd>
-                  <dt>Term</dt><dd>Named by both, reviewed at the end</dd>
-                  <dt>Verification</dt><dd>The same as every other track</dd>
-                  <dt>Renewal</dt><dd>Asked of each of you separately</dd>
-                </dl>
-              </div>
-              <div class="panel__foot">
-                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will ask you for the terms first and will not begin looking until they are written down.">Set my terms</button>
-              </div>
+        </div>
+
+        <!-- search and filters --------------------------------------------- -->
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head">
+            <h2>Search &amp; filters</h2>
+            <button type="button" class="btn btn--quiet" id="stm-clear">Clear all</button>
+          </div>
+          <div class="panel__body">
+            <div class="ltr-search">
+              <input type="search" id="stm-q" placeholder="Search a name, a city, an interest"
+                     aria-label="Search matches">
+            </div>
+            <div class="ltr-filters" id="stm-basic"></div>
+            <details class="ltr-adv">
+              <summary>Advanced filters</summary>
+              <div class="ltr-filters" id="stm-advanced"></div>
+            </details>
+            <div class="ltr-toggles">
+              <label class="ltr-toggle">
+                <input type="checkbox" id="stm-verified-only"><span>Legend Verified only</span>
+              </label>
+              <label class="ltr-toggle">
+                <input type="checkbox" id="stm-overlap-only"><span>Only where our dates overlap</span>
+              </label>
+              <label class="ltr-toggle">
+                <input type="checkbox" id="stm-saved-only"><span>Saved profiles only</span>
+              </label>
             </div>
           </div>
+        </div>
+
+        <div class="ltr-sections" id="stm-sections" role="tablist" aria-label="How matches are grouped"></div>
+
+        <p class="ltr-empty" id="stm-empty" hidden>
+          Nothing answers to those dates and filters. Widen the window, or clear them — on a
+          short-term search an empty result usually means the timing, not the person.
+        </p>
+
+        <div class="ltr-grid" id="stm-grid" aria-live="polite"></div>
+
+        <div class="ltr-more">
+          <button type="button" class="btn" id="stm-more" hidden><span>Show more</span><i class="arrow"></i></button>
+          <p class="quiet" id="stm-shown"></p>
+        </div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          <b>Design preview.</b> Everyone below is illustrative sample content. Overlap and
+          compatibility are computed here in the page from that sample — written rules, not a
+          language model, and nothing you do on this page leaves it.
         </div>
       </section>
 

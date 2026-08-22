@@ -2075,3 +2075,30 @@ a.tile:hover{ transform:translateY(-2px); }
   .ltr-sheet__panel{ animation:none; }
   .chip,.ltr-sections button,.ltr-heart{ transition:none; }
 }
+
+/* --- Short-term: dates lead ---------------------------------------------- */
+/* On a short-term card the availability window is the fact that decides
+   whether the rest is worth reading, so it sits above the score and gets the
+   only boxed treatment on the card. */
+.stm-when{
+  display:flex; flex-direction:column; gap:.2rem;
+  padding:.6rem .7rem; margin:.2rem 0;
+  border:1px solid rgba(207,196,176,.28); border-radius:var(--r-sm);
+  background:rgba(207,196,176,.06);
+}
+.stm-when--none{ border-color:var(--line-soft); background:none; opacity:.7; }
+.stm-when__d{ font-size:.8rem; color:#EDEAE3; font-variant-numeric:tabular-nums; }
+.stm-when__o{
+  font-size:.56rem; letter-spacing:.16em; text-transform:uppercase; color:var(--champagne);
+}
+.stm-when--none .stm-when__o{ color:var(--fg-faint); }
+
+.stm-travel{ margin-top:1.8rem; border-top:1px solid var(--line-soft); padding-top:1.2rem; }
+.stm-travel .ltr-toggle b{ color:#EDEAE3; font-weight:500; }
+.stm-travel .ltr-filters[hidden]{ display:none; }
+
+/* the date inputs need to read as the rest of the field set does */
+.ltr-field input[type="date"]{
+  color-scheme:dark;
+  font-variant-numeric:tabular-nums;
+}
