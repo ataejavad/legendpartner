@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A dark room with a warm light drifting across it">
+  <defs>
+    <linearGradient id="h-ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#141416"/><stop offset="1" stop-color="#08080A"/>
+    </linearGradient>
+    <radialGradient id="h-glow" cx=".5" cy=".44" r=".55">
+      <stop offset="0" stop-color="#E4D6B6" stop-opacity=".46"/>
+      <stop offset="1" stop-color="#E4D6B6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#h-ground)"/>
+  <rect width="640" height="360" fill="url(#h-glow)"/>
+  <g stroke="#E4D6B6" stroke-opacity=".055" fill="none">
+    <path d="M0 46h640"/><path d="M0 92h640"/><path d="M0 138h640"/><path d="M0 184h640"/>
+    <path d="M0 230h640"/><path d="M0 276h640"/><path d="M0 322h640"/>
+  </g>
+</svg>

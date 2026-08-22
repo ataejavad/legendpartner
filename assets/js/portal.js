@@ -1269,40 +1269,45 @@
      brings the tiles back as they were. The thread is kept, so returning to a
      question already asked does not lose the answer.                        */
   var dashView = $('#view-overview');
-  var aside = $('#dash-aside');
+  var mosaic = $('#tiles');
   var askInput = $('#ask-input');
-  if (dashView && aside && askInput) (function () {
+  if (dashView && mosaic && askInput) (function () {
     var asking = false;
     var sent = false;                      // has the member actually asked anything?
+    var foldTimer = null;
 
-    // The collapse animates between two measured heights rather than a guess.
-    function measure() { return aside.scrollHeight; }
-
+    // Two phases: the tiles fade, then they leave the grid so the bar can take
+    // the whole width. Reversed on the way back, so the bar never jumps before
+    // the tiles have somewhere to land.
     function setAsking(on) {
       if (asking === on) return;
       asking = on;
+      clearTimeout(foldTimer);
 
-      if (reduced) {
-        aside.style.maxHeight = on ? '0px' : '';
-        dashView.classList.toggle('is-asking', on);
-      } else if (on) {
-        aside.style.maxHeight = measure() + 'px';
-        void aside.offsetHeight;           // commit the start height
+      if (on) {
         dashView.classList.add('is-asking');
-        aside.style.maxHeight = '0px';
+        if (reduced) mosaic.classList.add('is-folded');
+        else foldTimer = setTimeout(function () {
+          if (asking) mosaic.classList.add('is-folded');
+        }, 320);
       } else {
+        mosaic.classList.remove('is-folded');
+        void mosaic.offsetHeight;          // let the grid settle before fading in
         dashView.classList.remove('is-asking');
-        aside.style.maxHeight = measure() + 'px';
-        // Let it settle back to auto, so a reorder or a resize is not capped.
-        setTimeout(function () { if (!asking) aside.style.maxHeight = ''; }, 500);
       }
 
       // Hidden means hidden: nothing in there should be reachable by tab or
       // readable by a screen reader while it is folded away.
-      if ('inert' in HTMLElement.prototype) aside.inert = on;
-      aside.setAttribute('aria-hidden', on ? 'true' : 'false');
+      $$('.mosaic > a.tile').forEach(function (t) {
+        if ('inert' in HTMLElement.prototype) t.inert = on;
+        t.setAttribute('aria-hidden', on ? 'true' : 'false');
+      });
 
-      if (!on) askThread && askThread.scrollTo && askThread.scrollTo(0, askThread.scrollHeight);
+      // A film nobody can see should not keep decoding.
+      $$('.tile__video', mosaic).forEach(function (v) {
+        if (on) { try { v.pause(); } catch (e) {} }
+        else if (!reduced) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+      });
     }
 
     askInput.addEventListener('input', function () {
@@ -1333,6 +1338,11 @@
     // Leaving the overview entirely puts the room back as it was.
     window.addEventListener('hashchange', function () {
       if (asking && location.hash.replace('#', '') !== 'overview') close();
+    });
+
+    // Under prefers-reduced-motion a film should not play on its own.
+    if (reduced) $$('.tile__video', mosaic).forEach(function (v) {
+      v.autoplay = false; try { v.pause(); } catch (e) {}
     });
   })();
 

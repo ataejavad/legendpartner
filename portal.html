@@ -175,11 +175,14 @@
           </div>
         </div>
 
-        <!-- the tile row and the assistant are one exchange: the tiles stand down
-             while a question is being asked, and come back when it is done -->
-        <div class="dash__aside" id="dash-aside">
-        <div class="tiles tiles--live" id="tiles" style="margin-top:2.2rem">
-          <a class="tile tile--xl" href="#proposed" data-go="proposed" data-tile="proposed" draggable="true" style="--i:0">
+        <!-- The mosaic. Eight tiles around the assistant, which sits in the
+             middle of the grid rather than beneath it. A tile carries a figure,
+             a photograph, a film, or any other markup: the face is a container,
+             not a fixed shape. DOM order is slot order, so a dragged tile takes
+             the geometry of the slot it lands in. -->
+        <div class="mosaic tiles tiles--live" id="tiles">
+
+          <a class="tile" href="#proposed" data-go="proposed" data-tile="proposed" draggable="true" style="--i:0">
             <span class="tile__act" aria-hidden="true"></span>
             <span class="tile__flip">
               <span class="tile__face">
@@ -192,7 +195,8 @@
               </span>
             </span>
           </a>
-          <a class="tile tile--sm" href="#requests" data-go="requests" data-tile="requests" draggable="true" style="--i:1">
+
+          <a class="tile" href="#requests" data-go="requests" data-tile="requests" draggable="true" style="--i:1">
             <span class="tile__act" aria-hidden="true"></span>
             <span class="tile__flip">
               <span class="tile__face">
@@ -205,19 +209,8 @@
               </span>
             </span>
           </a>
-          <a class="tile tile--wide" href="#introductions" data-go="introductions" data-tile="introductions" draggable="true" style="--i:2">
-            <span class="tile__flip">
-              <span class="tile__face">
-                <span class="tile__n"><span class="tile__num" data-count="1">1</span></span>
-                <span class="tile__l">Introduction<br>awaiting</span>
-              </span>
-              <span class="tile__face tile__face--b" aria-hidden="true">
-                <span class="tile__d">No. 07 — a founder in Zurich, met twice before the case was written.</span>
-                <span class="tile__l">Introduction awaiting</span>
-              </span>
-            </span>
-          </a>
-          <a class="tile tile--wide" href="#appointments" data-go="appointments" data-tile="appointments" draggable="true" style="--i:3">
+
+          <a class="tile" href="#appointments" data-go="appointments" data-tile="appointments" draggable="true" style="--i:2">
             <span class="tile__flip">
               <span class="tile__face">
                 <span class="tile__n"><span class="tile__num" data-count="28">28</span><span class="tile__suf"> Aug</span></span>
@@ -229,7 +222,96 @@
               </span>
             </span>
           </a>
-          <a class="tile tile--sm" href="#persona" data-go="persona" data-tile="persona" draggable="true" style="--i:4">
+
+          <!-- a photograph, filling the tile -->
+          <a class="tile tile--media" href="#parties" data-go="parties" data-tile="salon" draggable="true" style="--i:3">
+            <img class="tile__img" src="assets/img/salon.svg" alt="A room at dusk, lit from one side" loading="lazy">
+            <span class="tile__flip">
+              <span class="tile__face tile__face--over">
+                <span class="tile__l">The house<br>Marylebone</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">Members are invited by their advisor. The next dinner is in September.</span>
+                <span class="tile__l">Party &amp; event</span>
+              </span>
+            </span>
+          </a>
+
+          <!-- the assistant, in the middle of the mosaic -->
+          <div class="mosaic__ask" id="ask-slot">
+            <div class="panel ask ask--centre">
+              <div class="panel__head">
+                <h2>Ask the house</h2>
+                <span class="pill pill--rest">Assistant &middot; reads your file only</span>
+                <button type="button" class="ask__close" id="ask-close">Close<span class="ask__esc">Esc</span></button>
+              </div>
+
+              <div class="thread ask__thread" id="ask-thread">
+                <div class="msg msg--ai">
+                  <p class="who">Legend &middot; Assistant</p>
+                  <div class="bubble">
+                    Good afternoon. I can tell you where anything on your engagement stands &mdash;
+                    what is waiting on you, what has been arranged, what your advisor has written.
+                    What I cannot tell you is anything about another member that has not been
+                    disclosed to you yet.
+                  </div>
+                </div>
+              </div>
+
+              <div class="ask__chips" id="ask-chips" role="group" aria-label="Suggested questions">
+                <button type="button" data-ask="What is waiting on me?">What is waiting on me?</button>
+                <button type="button" data-ask="When is my next appointment?">Next appointment</button>
+                <button type="button" data-ask="Who is the person in Introduction No. 07?">Who is No. 07?</button>
+                <button type="button" data-ask="What has my advisor written since we last spoke?">From my advisor</button>
+                <button type="button" data-ask="What is my standing out of five?">My standing</button>
+              </div>
+
+              <form class="composer" id="ask-form">
+                <textarea id="ask-input" rows="1" placeholder="Ask about your engagement" aria-label="Ask the assistant"></textarea>
+                <button class="btn btn--quiet" type="submit">Send</button>
+              </form>
+
+              <div class="panel__foot">
+                <p class="quiet" style="margin:0">
+                  In this preview the replies are written rules rather than a language model, and
+                  nothing you type leaves this page. In service, what you ask sits on your file and
+                  your advisor can read it &mdash; we would rather tell you that than let you assume
+                  otherwise.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- a film, filling the tile -->
+          <a class="tile tile--media" href="#parties" data-go="parties" data-tile="film" draggable="true" style="--i:4">
+            <video class="tile__video" src="assets/video/house.webm" poster="assets/img/house-poster.svg"
+                   autoplay muted loop playsinline preload="metadata"
+                   aria-label="The last gathering, filmed at dusk"></video>
+            <span class="tile__flip">
+              <span class="tile__face tile__face--over">
+                <span class="tile__l">The last<br>gathering</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">Filmed at dusk, in the room it was held in. Fourteen members.</span>
+                <span class="tile__l">The last gathering</span>
+              </span>
+            </span>
+          </a>
+
+          <a class="tile" href="#introductions" data-go="introductions" data-tile="introductions" draggable="true" style="--i:5">
+            <span class="tile__flip">
+              <span class="tile__face">
+                <span class="tile__n"><span class="tile__num" data-count="1">1</span></span>
+                <span class="tile__l">Introduction<br>awaiting</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">No. 07 — a founder in Zurich, met twice before the case was written.</span>
+                <span class="tile__l">Introduction awaiting</span>
+              </span>
+            </span>
+          </a>
+
+          <a class="tile" href="#persona" data-go="persona" data-tile="persona" draggable="true" style="--i:6">
             <span class="tile__flip">
               <span class="tile__face">
                 <span class="tile__n"><span class="tile__num" data-count="72">72</span><span class="tile__suf">%</span></span>
@@ -241,7 +323,8 @@
               </span>
             </span>
           </a>
-          <a class="tile tile--wide" href="#reflections" data-go="reflections" data-tile="reflections" draggable="true" style="--i:5">
+
+          <a class="tile" href="#reflections" data-go="reflections" data-tile="reflections" draggable="true" style="--i:7">
             <span class="tile__flip">
               <span class="tile__face">
                 <span class="tile__n"><span class="tile__num" data-count="4.6" data-dec="1">4.6</span></span>
@@ -254,57 +337,12 @@
             </span>
           </a>
         </div>
+
         <p class="tiles__hint" id="tiles-hint">
           The tiles turn to show what sits behind each figure. Drag one to reorder them, or focus one
           and hold <kbd>Alt</kbd> with <kbd>←</kbd> / <kbd>→</kbd>. Your order is remembered on this device.
           <button type="button" class="tiles__reset" id="tiles-reset" hidden>Reset the order</button>
         </p>
-        </div>
-
-        <!-- the assistant, given the middle of the page -->
-        <div class="ask-centre">
-          <div class="panel ask ask--centre">
-            <div class="panel__head">
-              <h2>Ask the house</h2>
-              <span class="pill pill--rest">Assistant &middot; reads your file only</span>
-              <button type="button" class="ask__close" id="ask-close">Close<span class="ask__esc">Esc</span></button>
-            </div>
-
-            <div class="thread ask__thread" id="ask-thread">
-              <div class="msg msg--ai">
-                <p class="who">Legend &middot; Assistant</p>
-                <div class="bubble">
-                  Good afternoon. I can tell you where anything on your engagement stands &mdash;
-                  what is waiting on you, what has been arranged, what your advisor has written.
-                  What I cannot tell you is anything about another member that has not been
-                  disclosed to you yet.
-                </div>
-              </div>
-            </div>
-
-            <div class="ask__chips" id="ask-chips" role="group" aria-label="Suggested questions">
-              <button type="button" data-ask="What is waiting on me?">What is waiting on me?</button>
-              <button type="button" data-ask="When is my next appointment?">Next appointment</button>
-              <button type="button" data-ask="Who is the person in Introduction No. 07?">Who is No. 07?</button>
-              <button type="button" data-ask="What has my advisor written since we last spoke?">From my advisor</button>
-              <button type="button" data-ask="What is my standing out of five?">My standing</button>
-            </div>
-
-            <form class="composer" id="ask-form">
-              <textarea id="ask-input" rows="1" placeholder="Ask about your engagement" aria-label="Ask the assistant"></textarea>
-              <button class="btn btn--quiet" type="submit">Send</button>
-            </form>
-
-            <div class="panel__foot">
-              <p class="quiet" style="margin:0">
-                In this preview the replies are written rules rather than a language model, and
-                nothing you type leaves this page. In service, what you ask sits on your file and
-                your advisor can read it &mdash; we would rather tell you that than let you assume
-                otherwise.
-              </p>
-            </div>
-          </div>
-        </div>
 
       </section>
 

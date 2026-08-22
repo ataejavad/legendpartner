@@ -14,3 +14,5 @@
 *.jpg binary
 *.woff2 binary
 *.pdf binary
+*.webm binary
+*.mp4 binary
