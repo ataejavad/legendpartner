@@ -1,0 +1,16 @@
+# This repository is edited from Windows locally and from a Linux sandbox in
+# the browser. Without this, every file round-trips between CRLF and LF and
+# each session opens with a hundred files falsely marked as modified.
+# One line ending in the repository, one on checkout, on both platforms.
+* text=auto eol=lf
+
+# build.ps1 must keep its UTF-8 BOM — PowerShell 5.1 reads it as ANSI without
+# one and turns every em-dash to mojibake. Git preserves the BOM either way;
+# this line only pins the line endings PowerShell is happiest with.
+*.ps1 text eol=crlf
+
+# Never touched
+*.png binary
+*.jpg binary
+*.woff2 binary
+*.pdf binary
