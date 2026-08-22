@@ -1589,26 +1589,3 @@ a.tile:hover{ transform:translateY(-2px); }
   .tiles--live .tile{ animation:none; }
   .tile.is-settling{ animation:none; }
 }
-
-/* The assistant's terms belong with the assistant, not adrift in the card grid
-   where a tall list of prohibitions left a short neighbour stranded. Under the
-   chat, and side by side, it is wide and short instead of narrow and tall. */
-.ask-centre .ask-terms{
-  margin-top:clamp(.8rem,1.2vw,1.2rem);
-  background:var(--card); border-color:var(--card-line);
-  --fg-faint:rgba(237,234,227,.64);
-}
-.dash .ask-centre .ask-terms{ border-radius:var(--r); box-shadow:var(--shadow); }
-.ask-terms__body{
-  display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:1.6rem clamp(1.4rem,3vw,3rem);
-}
-/* .panel__body spaces its children with a top margin on every sibling, which
-   in a grid pushes the second column a row-gap out of line with the first.
-   The gap above does that job here. */
-.ask-terms__body > * + *{ margin-top:0; }
-.ask-terms__body > .note-inline{ grid-column:1 / -1; }
-.ask-terms__body .ask__lbl{ margin-top:0; }
-@media (max-width:760px){
-  .ask-terms__body{ grid-template-columns:minmax(0,1fr); }
-}
