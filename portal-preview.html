@@ -3121,6 +3121,90 @@ a.tile:hover{ transform:translateY(-2px); }
 }
 .cas-check--warn .cas-check__v{ color:#E8BC80; }
 
+/* --- Profile & Persona --------------------------------------------------- */
+.pp-head{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:2rem;
+  flex-wrap:wrap; margin-top:2rem; padding-bottom:1.6rem;
+  border-bottom:1px solid var(--line-soft);
+}
+.pp-head__who{ display:flex; gap:1.1rem; align-items:center; }
+.pp-head__plate{ width:5.4rem; aspect-ratio:1/1; object-fit:cover; border-radius:var(--r); flex:none; }
+.pp-head__name{ font-family:var(--serif); font-weight:300; font-size:1.6rem; margin:0; color:#EDEAE3; }
+.pp-head__where{ margin:.2rem 0 .5rem; font-size:.86rem; color:var(--fg-soft); }
+.pp-head__meter{ display:flex; flex-direction:column; gap:1rem; align-items:flex-end; }
+.pp-head__acts{ display:flex; gap:.6rem; flex-wrap:wrap; justify-content:flex-end; }
+
+.pp-meter{ display:grid; grid-template-columns:auto auto; gap:.2rem .7rem; align-items:baseline; min-width:13rem; }
+.pp-meter__n{ font-family:var(--serif); font-size:2rem; color:#EDEAE3; font-variant-numeric:tabular-nums; }
+.pp-meter__l{ font-size:.56rem; letter-spacing:.2em; text-transform:uppercase; color:var(--fg-faint); }
+.pp-meter__bar{ grid-column:1 / -1; height:2px; background:var(--line-soft); display:block; margin-top:.4rem; }
+.pp-meter__bar i{ display:block; height:100%; background:var(--champagne); }
+
+.pp-todo{ margin:1.2rem 0 0; max-width:70ch; font-size:.86rem; line-height:1.7; color:var(--fg-soft); }
+
+.pp-tabs{ display:flex; gap:.5rem; margin-top:1.6rem; flex-wrap:wrap; }
+.pp-tabs button{
+  background:none; cursor:pointer; font:inherit; font-size:.86rem;
+  border:1px solid var(--line-soft); border-radius:var(--r);
+  padding:.6rem 1.1rem; color:var(--fg-soft);
+  transition:border-color .25s var(--ease), color .25s var(--ease);
+}
+.pp-tabs button:hover{ color:#EDEAE3; border-color:var(--champagne); }
+.pp-tabs button[aria-selected="true"]{ color:#12131A; background:var(--champagne); border-color:var(--champagne); }
+.pp-pane{ margin-top:1.4rem; }
+.pp-pane[hidden]{ display:none; }
+.pp-grid{ margin-top:0; }
+.pp-what{ margin:0 0 .5rem; font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:var(--fg-faint); }
+.pp-val{ margin:0; font-size:.92rem; line-height:1.6; color:#EDEAE3; }
+.pp-todo-line{ margin:.8rem 0 0; font-size:.8rem; color:var(--champagne); }
+
+.pp-label{ font-family:var(--serif); font-size:1.9rem; line-height:1.15; margin:0; color:#EDEAE3; }
+.pp-summary{ margin:.7rem 0 0; max-width:64ch; font-size:.95rem; line-height:1.7; color:var(--fg-soft); }
+.pp-evo{ margin-top:1.6rem; }
+
+/* one row per thing the house believes, with its provenance beside it */
+.pp-trait{
+  display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) auto;
+  gap:.8rem 1.4rem; align-items:center;
+  padding:.85rem 0; border-bottom:1px solid var(--line-soft);
+}
+.pp-trait:last-child{ border-bottom:0; }
+.pp-trait.is-unused{ opacity:.55; }
+.pp-trait__main{ display:flex; flex-direction:column; gap:.15rem; min-width:0; }
+.pp-trait__k{ font-size:.6rem; letter-spacing:.18em; text-transform:uppercase; color:var(--fg-faint); }
+.pp-trait__v{ font-family:var(--serif); font-size:1.1rem; color:#EDEAE3; }
+.pp-trait__meta{ display:flex; flex-direction:column; gap:.25rem; min-width:0; }
+.pp-conf{ display:block; height:2px; background:var(--line-soft); }
+.pp-conf i{ display:block; height:100%; background:var(--champagne); }
+.pp-trait__c{ font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--champagne); }
+.pp-trait__s{ font-size:.72rem; color:var(--fg-faint); }
+.pp-trait__off{ font-size:.66rem; color:#D8A15E; }
+.pp-trait__acts{ display:flex; gap:.4rem; flex-wrap:wrap; justify-content:flex-end; }
+.pp-btn{
+  background:none; cursor:pointer; font:inherit; font-size:.7rem;
+  border:1px solid var(--line-soft); border-radius:var(--r-sm);
+  padding:.34rem .6rem; color:var(--fg-soft);
+  transition:border-color .25s var(--ease), color .25s var(--ease);
+}
+.pp-btn:hover{ color:#EDEAE3; border-color:var(--champagne); }
+.pp-btn.is-on{ color:var(--champagne); border-color:var(--champagne); }
+.pp-btn--rm:hover{ border-color:#D8A15E; color:#E8BC80; }
+
+.pp-perm{ display:flex; gap:.8rem; align-items:flex-start; padding:.8rem 0; border-bottom:1px solid var(--line-soft); cursor:pointer; }
+.pp-perm:last-child{ border-bottom:0; }
+.pp-perm input{ accent-color:var(--champagne); width:16px; height:16px; margin-top:.15rem; flex:none; }
+.pp-perm b{ display:block; font-weight:400; font-size:.92rem; color:#EDEAE3; }
+.pp-perm__n{ display:block; margin-top:.2rem; font-size:.72rem; color:var(--fg-faint); }
+.pp-data{ display:flex; flex-direction:column; gap:.6rem; align-items:flex-start; }
+
+@media (max-width:900px){
+  .pp-head{ flex-direction:column; }
+  .pp-head__meter{ align-items:flex-start; width:100%; }
+  .pp-head__acts{ justify-content:flex-start; }
+  .pp-trait{ grid-template-columns:minmax(0,1fr); }
+  .pp-trait__acts{ justify-content:flex-start; }
+}
+
 
 
 @media (max-width:720px){
@@ -6808,38 +6892,150 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
       </section>
 
       <!-- ================================================= PROFILE -->
-      <section class="view" id="view-me" tabindex="-1" aria-label="Profile">
+      <section class="view" id="view-me" tabindex="-1" aria-label="Profile and persona">
         <p class="lede">Profile &amp; Persona</p>
         <p class="sub">
-          Who you are, as this house holds it. Built from four directions — what you write, what a
-          conversation surfaces, what you tell us after a meeting, and what your advisor observes.
+          Two different things, kept apart on purpose. Your profile is what you tell us. Your
+          persona is what the house has understood from talking to you — every piece of it shown
+          with where it came from and how sure we are, and none of it beyond your reach.
         </p>
-        <div class="hub">
-          <a href="#profile" data-go="profile">
-            <span class="no">01</span>
-            <span><span class="nm">Private profile</span><span class="ds">Eighteen fields across four sections. Facts save directly; judgments are discussed before the search changes.</span></span>
-            <span class="go">72% complete</span>
-          </a>
-          <a href="#persona" data-go="persona">
-            <span class="no">02</span>
-            <span><span class="nm">Persona</span><span class="ds">Built from conversation, not a questionnaire. With your permission it speaks first, so you do not spend an evening finding an incompatibility.</span></span>
-            <span class="go">72% built</span>
-          </a>
-          <a href="#preferences" data-go="preferences">
-            <span class="no">03</span>
-            <span><span class="nm">The brief</span><span class="ds">What we search against, and how it has changed since March.</span></span>
-            <span class="go">4 revisions</span>
-          </a>
-          <a href="#intentions" data-go="intentions">
-            <span class="no">04</span>
-            <span><span class="nm">Intentions</span><span class="ds">What you are seeking, on the record. Matched only against members who stated the same.</span></span>
-            <span class="go">Set</span>
-          </a>
-          <a href="#reflections" data-go="reflections">
-            <span class="no">05</span>
-            <span><span class="nm">Reflections &amp; standing</span><span class="ds">Private to you and your advisor. Never shown to anyone you meet, never attributed.</span></span>
-            <span class="go">4.6 of 5</span>
-          </a>
+
+        <!-- header: completion, verification, preview ---------------------- -->
+        <div class="pp-head">
+          <div class="pp-head__who">
+            <img class="pp-head__plate" id="pp-plate" alt="" aria-hidden="true">
+            <div>
+              <h2 class="pp-head__name">A. Marchand, 41</h2>
+              <p class="pp-head__where">London, United Kingdom</p>
+              <span class="ltr-vfd"><i>✓</i><span>Legend Verified · 14 March 2026</span></span>
+            </div>
+          </div>
+          <div class="pp-head__meter">
+            <div class="pp-meter">
+              <span class="pp-meter__n" id="pp-pct">—</span>
+              <span class="pp-meter__l">Profile complete</span>
+              <span class="pp-meter__bar"><i id="pp-bar"></i></span>
+            </div>
+            <div class="pp-head__acts">
+              <button type="button" class="btn" id="pp-preview"><span>Preview as another member</span><i class="arrow"></i></button>
+              <a class="btn" href="#profile" data-go="profile"><span>Edit profile</span><i class="arrow"></i></a>
+              <a class="btn btn--quiet" href="#credential" data-go="credential">Verification</a>
+            </div>
+          </div>
+        </div>
+
+        <p class="pp-todo" id="pp-todo"></p>
+
+        <div class="pp-tabs" role="tablist" aria-label="Profile or persona">
+          <button type="button" role="tab" data-pp="profile" aria-selected="true">My profile</button>
+          <button type="button" role="tab" data-pp="persona" aria-selected="false">My persona</button>
+          <button type="button" role="tab" data-pp="settings" aria-selected="false">Settings &amp; permissions</button>
+        </div>
+
+        <!-- ============================ PROFILE ======================== -->
+        <div class="pp-pane" id="pp-pane-profile">
+          <div class="dash-grid pp-grid" id="pp-profile-grid"></div>
+          <div class="note-inline">
+            Everything above is yours: you wrote it, and nothing is inferred. Where a field is empty
+            it stays empty — the house does not guess at a profile and does not fill one in for you.
+          </div>
+        </div>
+
+        <!-- ============================ PERSONA ======================== -->
+        <div class="pp-pane" id="pp-pane-persona" hidden>
+          <div class="panel">
+            <div class="panel__head">
+              <h2>Your persona</h2>
+              <span class="pill pill--rest" id="pp-updated">—</span>
+            </div>
+            <div class="panel__body">
+              <p class="pp-label" id="pp-persona-label">—</p>
+              <p class="pp-summary" id="pp-persona-summary">—</p>
+              <div class="pp-evo" id="pp-evo"></div>
+            </div>
+            <div class="panel__foot">
+              <button type="button" class="btn btn--solid" id="pp-interview">Continue the interview</button>
+              <button type="button" class="btn btn--quiet" id="pp-ask">Ask about my persona</button>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:1.2rem">
+            <div class="panel__head">
+              <h2>What the house has understood</h2>
+              <span class="pill pill--rest"><span id="pp-confirmed">0</span> of <span id="pp-total">0</span> confirmed</span>
+            </div>
+            <div class="panel__body">
+              <p class="quiet" style="margin-top:0">
+                Every line says where it came from and how sure we are. Nothing here is treated as
+                true about you until you say it is, and anything you remove is removed — from
+                matching as well as from this page.
+              </p>
+              <div class="pp-traits" id="pp-traits"></div>
+            </div>
+          </div>
+
+          <div class="cols cols--7-5" style="margin-top:1.2rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Compatibility profile</h2><span class="pill pill--rest">Used for matching</span></div>
+              <div class="panel__body">
+                <div class="ltr-bars" id="pp-compat"></div>
+                <div class="note-inline">
+                  This is the part of your persona the matching engine reads. Only confirmed lines
+                  reach it; anything still marked as detected is excluded until you confirm it.
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Insights</h2></div>
+              <div class="panel__body">
+                <div id="pp-insights"></div>
+                <div class="ask__chips" id="pp-ask-chips"></div>
+                <div class="ltr-ai-thread" id="pp-ai-thread"></div>
+                <p class="quiet">Written rules over your own file, not a language model, and only over what you have permitted below.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================= SETTINGS ============================ -->
+        <div class="pp-pane" id="pp-pane-settings" hidden>
+          <div class="cols cols--7-5">
+            <div class="panel">
+              <div class="panel__head"><h2>What the assistant may read</h2><span class="pill pill--rest" id="pp-perm-count">—</span></div>
+              <div class="panel__body">
+                <div class="pp-perms" id="pp-perms"></div>
+                <div class="note-inline">
+                  Your persona is built only from what is ticked here. Untick something and the
+                  lines that came from it are marked as unsourced and stop being used for matching —
+                  immediately, not at the next review.
+                </div>
+              </div>
+            </div>
+            <div class="stack" style="gap:1.2rem">
+              <div class="panel">
+                <div class="panel__head"><h2>Who sees what</h2></div>
+                <div class="panel__body">
+                  <div class="ltr-filters" id="pp-visibility"></div>
+                </div>
+              </div>
+              <div class="panel">
+                <div class="panel__head"><h2>Your data</h2></div>
+                <div class="panel__body">
+                  <div class="pp-data" id="pp-data"></div>
+                  <p class="quiet" style="margin-top:1rem">
+                    Resetting the persona does not touch your profile. Deleting the conversation
+                    history removes what the persona was built from, and the persona with it.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          <b>Design preview.</b> The persona below is illustrative sample content and every figure is
+          computed here in the page — written rules, not a language model, and nothing you do on this
+          page leaves it.
         </div>
       </section>
 
@@ -10219,6 +10415,369 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
       $('#cas-filters').textContent = '';
       build(FILTERS, '#cas-filters', STATE.filters, 'cas');
       render(); announce('Filters cleared.');
+    });
+
+    render();
+  })();
+
+  /* --- Profile & Persona ---------------------------------------------------
+     Two entities, not one page with two headings. The profile is what the
+     member wrote. The persona is what the house inferred, and the governing
+     rule is that it is never a black box: every line carries where it came
+     from, how sure we are, and whether the member has confirmed it — and only
+     confirmed lines reach the matching engine. Removing a permission unsources
+     the lines that came from it, on the spot.                                */
+  var ppView = $('#view-me');
+  if (ppView && typeof MATCH !== 'undefined') (function () {
+    var el = MATCH.el, field = MATCH.field;
+
+    var SOURCES = {
+      user:        'You told us',
+      interview:   'Persona interview',
+      conversation:'Conversation with the assistant',
+      behaviour:   'How you have used the portal',
+      corrected:   'You corrected this'
+    };
+    // which permission each source depends on
+    var SOURCE_PERM = { user:'profile', interview:'interview', conversation:'conversation',
+                        behaviour:'activity', corrected:'profile' };
+
+    var PERMS = [
+      { k:'profile',      label:'My profile and preferences', on:true,  note:'What you have written yourself' },
+      { k:'interview',    label:'My persona interview',       on:true,  note:'The questions you have answered' },
+      { k:'conversation', label:'My conversations with the assistant', on:true, note:'What you have asked it' },
+      { k:'messages',     label:'My correspondence with members', on:false, note:'Never on by default' },
+      { k:'history',      label:'My relationship history',    on:false, note:'Formation, counsel and continuity notes' },
+      { k:'activity',     label:'How I use the portal',       on:false, note:'What you open, and how long you stay' }
+    ];
+    var PERM = {}; PERMS.forEach(function (p) { PERM[p.k] = p.on; });
+
+    /* -- the persona, as rows rather than prose ---------------------------- */
+    // trait · value · confidence · source · confirmed · updated
+    var TRAITS = [
+      { g:'Personality', k:'Independence',   v:'High',     c:.87, s:'conversation', ok:true,  d:'12 Aug' },
+      { g:'Personality', k:'Curiosity',      v:'High',     c:.81, s:'interview',    ok:true,  d:'2 Aug' },
+      { g:'Personality', k:'Social energy',  v:'Selective',c:.74, s:'conversation', ok:false, d:'19 Aug' },
+      { g:'Personality', k:'Ambition',       v:'High',     c:.69, s:'behaviour',    ok:false, d:'20 Aug' },
+      { g:'Communication', k:'Style',        v:'Direct',   c:.91, s:'interview',    ok:true,  d:'2 Aug' },
+      { g:'Communication', k:'Pace',         v:'Considered',c:.72,s:'conversation', ok:false, d:'18 Aug' },
+      { g:'Relationship', k:'Closeness',     v:'Independent, warm', c:.79, s:'interview', ok:true, d:'2 Aug' },
+      { g:'Relationship', k:'Structure',     v:'Spontaneous', c:.63, s:'behaviour',  ok:false, d:'21 Aug' },
+      { g:'Values', k:'Trust',               v:'Central',  c:.93, s:'interview',    ok:true,  d:'2 Aug' },
+      { g:'Values', k:'Privacy',             v:'Central',  c:.88, s:'user',         ok:true,  d:'14 Mar' },
+      { g:'Values', k:'Freedom',             v:'High',     c:.76, s:'conversation', ok:false, d:'12 Aug' },
+      { g:'Values', k:'Family',              v:'Open',     c:.58, s:'conversation', ok:false, d:'12 Aug' },
+      { g:'Interests', k:'Travel',           v:'Confirmed',c:.95, s:'user',         ok:true,  d:'14 Mar' },
+      { g:'Interests', k:'Art',              v:'Confirmed',c:.94, s:'user',         ok:true,  d:'14 Mar' },
+      { g:'Interests', k:'Architecture',     v:'Detected', c:.71, s:'conversation', ok:false, d:'18 Aug' },
+      { g:'Interests', k:'Sailing',          v:'Detected', c:.66, s:'behaviour',    ok:false, d:'20 Aug' }
+    ];
+    var GROUPS = ['Personality','Communication','Relationship','Values','Interests'];
+
+    // what the matching engine is allowed to read: confirmed, and sourced from
+    // something still permitted
+    function usable(t) { return t.ok && PERM[SOURCE_PERM[t.s]]; }
+
+    var COMPAT = [
+      { k:'Communication', from:['Style','Pace'] },
+      { k:'Lifestyle',     from:['Curiosity','Structure'] },
+      { k:'Social style',  from:['Social energy'] },
+      { k:'Adventure',     from:['Curiosity','Sailing','Travel'] },
+      { k:'Independence',  from:['Independence','Freedom'] },
+      { k:'Emotional style', from:['Closeness','Trust'] }
+    ];
+    function compatScore(row) {
+      var ts = TRAITS.filter(function (t) { return row.from.indexOf(t.k) > -1 && usable(t); });
+      if (!ts.length) return null;
+      return Math.round(ts.reduce(function (a, t) { return a + t.c; }, 0) / ts.length * 100);
+    }
+
+    /* -- profile completion, computed from real gaps ------------------------ */
+    var PROFILE = [
+      { k:'Identity',   done:true,  what:'Name, age, city, languages',
+        v:'A. Marchand · 41 · London · English, French' },
+      { k:'About me',   done:true,  what:'How you describe yourself',
+        v:'Reads more than he writes. Keeps two evenings a week for nothing in particular.' },
+      { k:'Photographs',done:false, what:'A portrait, and two more',
+        v:'One held on file, none released', todo:'Add two photographs' },
+      { k:'Lifestyle',  done:true,  what:'Occupation, education, how you live',
+        v:'Investor · Doctorate · Travels monthly' },
+      { k:'Interests',  done:false, what:'At least six',
+        v:'Travel, Art, Sailing, Wine', todo:'Add two more interests' },
+      { k:'Location',   done:true,  what:'City, and where you often are',
+        v:'London · often Geneva, New York' },
+      { k:'Relationship goals', done:true, what:'What you are looking for',
+        v:'Long-term partner' },
+      { k:'Preferences', done:false, what:'Age, place, family, lifestyle',
+        v:'Age and place set; family and lifestyle not', todo:'Complete relationship preferences' },
+      { k:'Verification', done:true, what:'Seen in person by an advisor',
+        v:'Legend Verified · 14 March 2026' },
+      { k:'Privacy',    done:true,  what:'Who sees what',
+        v:'City only · persona private' }
+    ];
+
+    var VIS = [
+      { k:'profile', label:'Profile visible to', type:'select',
+        options:['Members I am introduced to','Verified members','Nobody until I agree'] },
+      { k:'photos', label:'Photographs visible to', type:'select',
+        options:['Members I have accepted','Members I am introduced to','Nobody until I agree'] },
+      { k:'location', label:'Location shown as', type:'select', options:['City only','Country only','Hidden'] },
+      { k:'persona', label:'Persona visible to', type:'select',
+        options:['Nobody — the house only','Members I have accepted','Members I am introduced to'] },
+      { k:'online', label:'Online status', type:'select', options:['Hidden','Shown to accepted members'] }
+    ];
+    var VISV = {};
+
+    /* -- rendering ----------------------------------------------------------- */
+    var live = el('p', 'sr-only'); live.setAttribute('role','status'); live.setAttribute('aria-live','polite');
+    ppView.appendChild(live);
+    function announce(t) { live.textContent = t; }
+
+    $('#pp-plate').src = MATCH.plate('A. Marchand');
+
+    function completion() {
+      var done = PROFILE.filter(function (r) { return r.done; }).length;
+      return Math.round(done / PROFILE.length * 100);
+    }
+    function renderHead() {
+      var pct = completion();
+      $('#pp-pct').textContent = pct + '%';
+      $('#pp-bar').style.width = pct + '%';
+      var todo = PROFILE.filter(function (r) { return !r.done; }).map(function (r) { return r.todo; });
+      var unconfirmed = TRAITS.filter(function (t) { return !t.ok; }).length;
+      if (unconfirmed) todo.push('Confirm or remove ' + unconfirmed + ' persona line' + (unconfirmed === 1 ? '' : 's'));
+      $('#pp-todo').textContent = todo.length
+        ? 'To finish: ' + todo.join(' · ') + '.'
+        : 'Nothing outstanding. Your profile is complete and every persona line is confirmed.';
+    }
+
+    function renderProfile() {
+      var g = $('#pp-profile-grid'); g.textContent = '';
+      PROFILE.forEach(function (r) {
+        var p = el('div', 'panel');
+        var h = el('div', 'panel__head');
+        h.appendChild(el('h2', null, r.k));
+        h.appendChild(el('span', 'pill ' + (r.done ? 'pill--rest' : 'pill--action'), r.done ? 'Complete' : 'Outstanding'));
+        p.appendChild(h);
+        var b = el('div', 'panel__body');
+        b.appendChild(el('p', 'pp-what', r.what));
+        b.appendChild(el('p', 'pp-val', r.v));
+        if (r.todo) b.appendChild(el('p', 'pp-todo-line', r.todo));
+        p.appendChild(b);
+        g.appendChild(p);
+      });
+    }
+
+    function traitRow(t) {
+      var row = el('div', 'pp-trait' + (t.ok ? ' is-ok' : '') + (usable(t) ? '' : ' is-unused'));
+      var main = el('div', 'pp-trait__main');
+      main.appendChild(el('span', 'pp-trait__k', t.k));
+      main.appendChild(el('span', 'pp-trait__v', t.v));
+      row.appendChild(main);
+
+      var meta = el('div', 'pp-trait__meta');
+      var conf = el('span', 'pp-conf');
+      conf.appendChild(el('i', null, ''));
+      conf.lastChild.style.width = Math.round(t.c * 100) + '%';
+      meta.appendChild(conf);
+      // a word, not a decimal: a probability read as a verdict is the thing to avoid
+      var word = t.c >= .85 ? 'High confidence' : t.c >= .7 ? 'Moderate confidence' : 'Low confidence';
+      meta.appendChild(el('span', 'pp-trait__c', word));
+      meta.appendChild(el('span', 'pp-trait__s', SOURCES[t.s] + ' · ' + t.d));
+      if (!PERM[SOURCE_PERM[t.s]]) meta.appendChild(el('span', 'pp-trait__off', 'Source switched off — not used'));
+      row.appendChild(meta);
+
+      var acts = el('div', 'pp-trait__acts');
+      var ok = el('button', 'pp-btn' + (t.ok ? ' is-on' : '')); ok.type = 'button';
+      ok.textContent = t.ok ? '✓ Confirmed' : 'Confirm';
+      ok.setAttribute('aria-pressed', t.ok ? 'true' : 'false');
+      ok.addEventListener('click', function () {
+        t.ok = !t.ok; if (t.ok) { t.s = 'corrected'; t.c = Math.max(t.c, .95); }
+        render(); announce(t.k + (t.ok ? ' confirmed.' : ' unconfirmed.'));
+      });
+      var edit = el('button', 'pp-btn', 'Edit'); edit.type = 'button';
+      edit.addEventListener('click', function () {
+        var v = prompt('What should ' + t.k.toLowerCase() + ' say?', t.v);
+        if (v == null) return;
+        t.v = v.trim() || t.v; t.ok = true; t.s = 'corrected'; t.c = 1; t.d = 'today';
+        render(); announce(t.k + ' corrected.');
+      });
+      var del = el('button', 'pp-btn pp-btn--rm', 'Remove'); del.type = 'button';
+      del.addEventListener('click', function () {
+        TRAITS.splice(TRAITS.indexOf(t), 1);
+        render(); announce(t.k + ' removed from your persona.');
+      });
+      [ok, edit, del].forEach(function (b) { acts.appendChild(b); });
+      row.appendChild(acts);
+      return row;
+    }
+
+    function renderTraits() {
+      var host = $('#pp-traits'); host.textContent = '';
+      GROUPS.forEach(function (g) {
+        var rows = TRAITS.filter(function (t) { return t.g === g; });
+        if (!rows.length) return;
+        host.appendChild(el('p', 'ask__lbl', g));
+        rows.forEach(function (t) { host.appendChild(traitRow(t)); });
+      });
+      $('#pp-confirmed').textContent = TRAITS.filter(function (t) { return t.ok; }).length;
+      $('#pp-total').textContent = TRAITS.length;
+    }
+
+    function renderCompat() {
+      var host = $('#pp-compat'); host.textContent = '';
+      COMPAT.forEach(function (row) {
+        var v = compatScore(row);
+        var r = el('div', 'ltr-bars__row');
+        r.appendChild(el('span', 'k', row.k));
+        var b = el('span', 'b'); var f = el('i');
+        f.style.width = (v || 0) + '%'; b.appendChild(f); r.appendChild(b);
+        r.appendChild(el('span', 'v', v == null ? '—' : v + '%'));
+        host.appendChild(r);
+      });
+    }
+
+    function label() {
+      var ind = TRAITS.filter(function (t) { return t.k === 'Independence' && usable(t); })[0];
+      var cur = TRAITS.filter(function (t) { return t.k === 'Curiosity' && usable(t); })[0];
+      if (ind && cur) return 'The Independent Explorer';
+      if (ind) return 'The Independent';
+      if (cur) return 'The Explorer';
+      return 'Not yet drawn';
+    }
+    function summary() {
+      var used = TRAITS.filter(usable);
+      if (!used.length) return 'Nothing is confirmed yet, so there is no persona to show. Confirm a line below, or answer a few more questions, and it will draw itself.';
+      var vals = used.filter(function (t) { return t.g === 'Values'; }).map(function (t) { return t.k.toLowerCase(); });
+      var style = used.filter(function (t) { return t.k === 'Style'; })[0];
+      return 'Drawn from ' + used.length + ' confirmed line' + (used.length === 1 ? '' : 's') + '. ' +
+        (style ? style.v.toLowerCase() + ' in conversation' : 'Style not yet confirmed') +
+        (vals.length ? ', and holds ' + vals.slice(0, 3).join(', ') + ' at the centre' : '') + '.';
+    }
+    function renderPersona() {
+      $('#pp-persona-label').textContent = label();
+      $('#pp-persona-summary').textContent = summary();
+      var recent = TRAITS.filter(function (t) { return /Aug/.test(t.d); }).length;
+      $('#pp-updated').textContent = 'Last updated 21 Aug';
+      var evo = $('#pp-evo'); evo.textContent = '';
+      evo.appendChild(el('p', 'ask__lbl', 'What changed'));
+      var ul = el('ul', 'includes');
+      [recent + ' line' + (recent === 1 ? '' : 's') + ' added or revised this month',
+       'Communication pace detected from your last three conversations',
+       'Two interests detected that you have not yet confirmed']
+        .forEach(function (t) { ul.appendChild(el('li', null, t)); });
+      evo.appendChild(ul);
+    }
+
+    function renderInsights() {
+      var host = $('#pp-insights'); host.textContent = '';
+      var used = TRAITS.filter(usable);
+      var ind = used.filter(function (t) { return t.k === 'Independence'; })[0];
+      var soc = used.filter(function (t) { return t.k === 'Social energy'; })[0];
+      var lines = [];
+      if (ind) lines.push('You are likely to connect best with people who keep their own life running alongside yours.');
+      if (soc) lines.push('Small rooms suit you better than large ones, and the house weights introductions accordingly.');
+      if (!lines.length) lines.push('Too little is confirmed to say anything useful yet. That is the honest position rather than a placeholder.');
+      lines.forEach(function (t) { host.appendChild(el('p', 'ltr-insight', t)); });
+
+      var chips = $('#pp-ask-chips'); chips.textContent = '';
+      var thread = $('#pp-ai-thread');
+      [ { q:'What does the house think it knows?', a:function () {
+            return used.length + ' of ' + TRAITS.length + ' lines are confirmed and in use. ' +
+              (TRAITS.length - used.length) + ' are either unconfirmed or come from a source you have switched off, and none of those reach matching.'; } },
+        { q:'Where did this come from?', a:function () {
+            var by = {};
+            TRAITS.forEach(function (t) { by[t.s] = (by[t.s] || 0) + 1; });
+            return Object.keys(by).map(function (k) { return SOURCES[k] + ': ' + by[k]; }).join('. ') + '.'; } },
+        { q:'What is it least sure about?', a:function () {
+            var low = TRAITS.slice().sort(function (a, b) { return a.c - b.c; })[0];
+            return low ? low.k + ' — "' + low.v + '", at ' + Math.round(low.c * 100) + ' per cent, from ' +
+              SOURCES[low.s].toLowerCase() + '. Worth correcting or removing rather than leaving.' : 'Nothing is left.'; } },
+        { q:'What is used for matching?', a:function () {
+            return 'Only confirmed lines from permitted sources: ' + used.map(function (t) { return t.k.toLowerCase(); }).join(', ') + '. Nothing else.'; } }
+      ].forEach(function (item) {
+        var b = el('button', null, item.q); b.type = 'button';
+        b.addEventListener('click', function () {
+          thread.appendChild(el('p', 'ltr-ai-q', item.q));
+          thread.appendChild(el('p', 'ltr-ai-a', item.a()));
+          b.remove();
+        });
+        chips.appendChild(b);
+      });
+    }
+
+    function renderPerms() {
+      var host = $('#pp-perms'); host.textContent = '';
+      PERMS.forEach(function (p) {
+        var row = el('label', 'pp-perm');
+        var cb = el('input'); cb.type = 'checkbox'; cb.checked = PERM[p.k];
+        cb.addEventListener('change', function () {
+          PERM[p.k] = cb.checked; render();
+          announce(p.label + (cb.checked ? ' switched on.' : ' switched off; lines from it are no longer used.'));
+        });
+        row.appendChild(cb);
+        var t = el('span');
+        t.appendChild(el('b', null, p.label));
+        t.appendChild(el('span', 'pp-perm__n', p.note));
+        var n = TRAITS.filter(function (x) { return SOURCE_PERM[x.s] === p.k; }).length;
+        if (n) t.appendChild(el('span', 'pp-perm__n', n + ' persona line' + (n === 1 ? '' : 's') + ' come from this'));
+        row.appendChild(t);
+        host.appendChild(row);
+      });
+      $('#pp-perm-count').textContent = PERMS.filter(function (p) { return PERM[p.k]; }).length + ' of ' + PERMS.length + ' on';
+    }
+
+    function renderData() {
+      var host = $('#pp-data'); host.textContent = '';
+      [ ['Export my persona', 'A file of every line, its source and its confidence.'],
+        ['Reset my persona', 'Clears every inferred line. Your profile is untouched.'],
+        ['Delete conversation history', 'Removes what the persona was built from, and the persona with it.'] ]
+        .forEach(function (r) {
+          var b = el('button', 'btn btn--quiet', r[0]); b.type = 'button';
+          b.addEventListener('click', function () {
+            if (r[0] === 'Reset my persona') {
+              TRAITS.length = 0; render();
+              note(b, 'Persona cleared. Your profile is untouched, and nothing is used for matching until you build it again.');
+            } else {
+              note(b, r[1] + ' In service this is done the same day, by a person, and you are told when it is finished.');
+            }
+          });
+          host.appendChild(b);
+        });
+    }
+
+    function render() {
+      renderHead(); renderProfile(); renderTraits(); renderCompat();
+      renderPersona(); renderInsights(); renderPerms();
+    }
+
+    /* -- tabs, and the rest ---------------------------------------------------- */
+    $$('.pp-tabs button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var which = b.getAttribute('data-pp');
+        $$('.pp-tabs button').forEach(function (o) {
+          o.setAttribute('aria-selected', o === b ? 'true' : 'false');
+        });
+        ['profile','persona','settings'].forEach(function (p) {
+          $('#pp-pane-' + p).hidden = p !== which;
+        });
+      });
+    });
+    VIS.forEach(function (def) { $('#pp-visibility').appendChild(field(def, VISV, function () {}, 'pp-v')); });
+    renderData();
+
+    $('#pp-preview').addEventListener('click', function (e) {
+      note(e.target, 'Opens your profile exactly as a member you have been introduced to would see it — ' +
+        'city only, no surname, and your persona withheld unless you have said otherwise.');
+    });
+    $('#pp-interview').addEventListener('click', function (e) {
+      note(e.target, 'Six questions, about twenty minutes, and you can stop at any of them. ' +
+        'Every answer becomes a line you can see, correct or remove — never a score you cannot.');
+    });
+    $('#pp-ask').addEventListener('click', function () {
+      $$('.pp-tabs button').forEach(function (o) { o.setAttribute('aria-selected', o.getAttribute('data-pp') === 'persona' ? 'true' : 'false'); });
+      ['profile','persona','settings'].forEach(function (p) { $('#pp-pane-' + p).hidden = p !== 'persona'; });
+      var c = $('#pp-ask-chips'); if (c.firstChild) c.firstChild.focus();
     });
 
     render();

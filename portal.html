@@ -3680,38 +3680,150 @@
       </section>
 
       <!-- ================================================= PROFILE -->
-      <section class="view" id="view-me" tabindex="-1" aria-label="Profile">
+      <section class="view" id="view-me" tabindex="-1" aria-label="Profile and persona">
         <p class="lede">Profile &amp; Persona</p>
         <p class="sub">
-          Who you are, as this house holds it. Built from four directions — what you write, what a
-          conversation surfaces, what you tell us after a meeting, and what your advisor observes.
+          Two different things, kept apart on purpose. Your profile is what you tell us. Your
+          persona is what the house has understood from talking to you — every piece of it shown
+          with where it came from and how sure we are, and none of it beyond your reach.
         </p>
-        <div class="hub">
-          <a href="#profile" data-go="profile">
-            <span class="no">01</span>
-            <span><span class="nm">Private profile</span><span class="ds">Eighteen fields across four sections. Facts save directly; judgments are discussed before the search changes.</span></span>
-            <span class="go">72% complete</span>
-          </a>
-          <a href="#persona" data-go="persona">
-            <span class="no">02</span>
-            <span><span class="nm">Persona</span><span class="ds">Built from conversation, not a questionnaire. With your permission it speaks first, so you do not spend an evening finding an incompatibility.</span></span>
-            <span class="go">72% built</span>
-          </a>
-          <a href="#preferences" data-go="preferences">
-            <span class="no">03</span>
-            <span><span class="nm">The brief</span><span class="ds">What we search against, and how it has changed since March.</span></span>
-            <span class="go">4 revisions</span>
-          </a>
-          <a href="#intentions" data-go="intentions">
-            <span class="no">04</span>
-            <span><span class="nm">Intentions</span><span class="ds">What you are seeking, on the record. Matched only against members who stated the same.</span></span>
-            <span class="go">Set</span>
-          </a>
-          <a href="#reflections" data-go="reflections">
-            <span class="no">05</span>
-            <span><span class="nm">Reflections &amp; standing</span><span class="ds">Private to you and your advisor. Never shown to anyone you meet, never attributed.</span></span>
-            <span class="go">4.6 of 5</span>
-          </a>
+
+        <!-- header: completion, verification, preview ---------------------- -->
+        <div class="pp-head">
+          <div class="pp-head__who">
+            <img class="pp-head__plate" id="pp-plate" alt="" aria-hidden="true">
+            <div>
+              <h2 class="pp-head__name">A. Marchand, 41</h2>
+              <p class="pp-head__where">London, United Kingdom</p>
+              <span class="ltr-vfd"><i>✓</i><span>Legend Verified · 14 March 2026</span></span>
+            </div>
+          </div>
+          <div class="pp-head__meter">
+            <div class="pp-meter">
+              <span class="pp-meter__n" id="pp-pct">—</span>
+              <span class="pp-meter__l">Profile complete</span>
+              <span class="pp-meter__bar"><i id="pp-bar"></i></span>
+            </div>
+            <div class="pp-head__acts">
+              <button type="button" class="btn" id="pp-preview"><span>Preview as another member</span><i class="arrow"></i></button>
+              <a class="btn" href="#profile" data-go="profile"><span>Edit profile</span><i class="arrow"></i></a>
+              <a class="btn btn--quiet" href="#credential" data-go="credential">Verification</a>
+            </div>
+          </div>
+        </div>
+
+        <p class="pp-todo" id="pp-todo"></p>
+
+        <div class="pp-tabs" role="tablist" aria-label="Profile or persona">
+          <button type="button" role="tab" data-pp="profile" aria-selected="true">My profile</button>
+          <button type="button" role="tab" data-pp="persona" aria-selected="false">My persona</button>
+          <button type="button" role="tab" data-pp="settings" aria-selected="false">Settings &amp; permissions</button>
+        </div>
+
+        <!-- ============================ PROFILE ======================== -->
+        <div class="pp-pane" id="pp-pane-profile">
+          <div class="dash-grid pp-grid" id="pp-profile-grid"></div>
+          <div class="note-inline">
+            Everything above is yours: you wrote it, and nothing is inferred. Where a field is empty
+            it stays empty — the house does not guess at a profile and does not fill one in for you.
+          </div>
+        </div>
+
+        <!-- ============================ PERSONA ======================== -->
+        <div class="pp-pane" id="pp-pane-persona" hidden>
+          <div class="panel">
+            <div class="panel__head">
+              <h2>Your persona</h2>
+              <span class="pill pill--rest" id="pp-updated">—</span>
+            </div>
+            <div class="panel__body">
+              <p class="pp-label" id="pp-persona-label">—</p>
+              <p class="pp-summary" id="pp-persona-summary">—</p>
+              <div class="pp-evo" id="pp-evo"></div>
+            </div>
+            <div class="panel__foot">
+              <button type="button" class="btn btn--solid" id="pp-interview">Continue the interview</button>
+              <button type="button" class="btn btn--quiet" id="pp-ask">Ask about my persona</button>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:1.2rem">
+            <div class="panel__head">
+              <h2>What the house has understood</h2>
+              <span class="pill pill--rest"><span id="pp-confirmed">0</span> of <span id="pp-total">0</span> confirmed</span>
+            </div>
+            <div class="panel__body">
+              <p class="quiet" style="margin-top:0">
+                Every line says where it came from and how sure we are. Nothing here is treated as
+                true about you until you say it is, and anything you remove is removed — from
+                matching as well as from this page.
+              </p>
+              <div class="pp-traits" id="pp-traits"></div>
+            </div>
+          </div>
+
+          <div class="cols cols--7-5" style="margin-top:1.2rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Compatibility profile</h2><span class="pill pill--rest">Used for matching</span></div>
+              <div class="panel__body">
+                <div class="ltr-bars" id="pp-compat"></div>
+                <div class="note-inline">
+                  This is the part of your persona the matching engine reads. Only confirmed lines
+                  reach it; anything still marked as detected is excluded until you confirm it.
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Insights</h2></div>
+              <div class="panel__body">
+                <div id="pp-insights"></div>
+                <div class="ask__chips" id="pp-ask-chips"></div>
+                <div class="ltr-ai-thread" id="pp-ai-thread"></div>
+                <p class="quiet">Written rules over your own file, not a language model, and only over what you have permitted below.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================= SETTINGS ============================ -->
+        <div class="pp-pane" id="pp-pane-settings" hidden>
+          <div class="cols cols--7-5">
+            <div class="panel">
+              <div class="panel__head"><h2>What the assistant may read</h2><span class="pill pill--rest" id="pp-perm-count">—</span></div>
+              <div class="panel__body">
+                <div class="pp-perms" id="pp-perms"></div>
+                <div class="note-inline">
+                  Your persona is built only from what is ticked here. Untick something and the
+                  lines that came from it are marked as unsourced and stop being used for matching —
+                  immediately, not at the next review.
+                </div>
+              </div>
+            </div>
+            <div class="stack" style="gap:1.2rem">
+              <div class="panel">
+                <div class="panel__head"><h2>Who sees what</h2></div>
+                <div class="panel__body">
+                  <div class="ltr-filters" id="pp-visibility"></div>
+                </div>
+              </div>
+              <div class="panel">
+                <div class="panel__head"><h2>Your data</h2></div>
+                <div class="panel__body">
+                  <div class="pp-data" id="pp-data"></div>
+                  <p class="quiet" style="margin-top:1rem">
+                    Resetting the persona does not touch your profile. Deleting the conversation
+                    history removes what the persona was built from, and the persona with it.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          <b>Design preview.</b> The persona below is illustrative sample content and every figure is
+          computed here in the page — written rules, not a language model, and nothing you do on this
+          page leaves it.
         </div>
       </section>
 

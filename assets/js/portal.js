@@ -3331,5 +3331,368 @@
     render();
   })();
 
+  /* --- Profile & Persona ---------------------------------------------------
+     Two entities, not one page with two headings. The profile is what the
+     member wrote. The persona is what the house inferred, and the governing
+     rule is that it is never a black box: every line carries where it came
+     from, how sure we are, and whether the member has confirmed it — and only
+     confirmed lines reach the matching engine. Removing a permission unsources
+     the lines that came from it, on the spot.                                */
+  var ppView = $('#view-me');
+  if (ppView && typeof MATCH !== 'undefined') (function () {
+    var el = MATCH.el, field = MATCH.field;
+
+    var SOURCES = {
+      user:        'You told us',
+      interview:   'Persona interview',
+      conversation:'Conversation with the assistant',
+      behaviour:   'How you have used the portal',
+      corrected:   'You corrected this'
+    };
+    // which permission each source depends on
+    var SOURCE_PERM = { user:'profile', interview:'interview', conversation:'conversation',
+                        behaviour:'activity', corrected:'profile' };
+
+    var PERMS = [
+      { k:'profile',      label:'My profile and preferences', on:true,  note:'What you have written yourself' },
+      { k:'interview',    label:'My persona interview',       on:true,  note:'The questions you have answered' },
+      { k:'conversation', label:'My conversations with the assistant', on:true, note:'What you have asked it' },
+      { k:'messages',     label:'My correspondence with members', on:false, note:'Never on by default' },
+      { k:'history',      label:'My relationship history',    on:false, note:'Formation, counsel and continuity notes' },
+      { k:'activity',     label:'How I use the portal',       on:false, note:'What you open, and how long you stay' }
+    ];
+    var PERM = {}; PERMS.forEach(function (p) { PERM[p.k] = p.on; });
+
+    /* -- the persona, as rows rather than prose ---------------------------- */
+    // trait · value · confidence · source · confirmed · updated
+    var TRAITS = [
+      { g:'Personality', k:'Independence',   v:'High',     c:.87, s:'conversation', ok:true,  d:'12 Aug' },
+      { g:'Personality', k:'Curiosity',      v:'High',     c:.81, s:'interview',    ok:true,  d:'2 Aug' },
+      { g:'Personality', k:'Social energy',  v:'Selective',c:.74, s:'conversation', ok:false, d:'19 Aug' },
+      { g:'Personality', k:'Ambition',       v:'High',     c:.69, s:'behaviour',    ok:false, d:'20 Aug' },
+      { g:'Communication', k:'Style',        v:'Direct',   c:.91, s:'interview',    ok:true,  d:'2 Aug' },
+      { g:'Communication', k:'Pace',         v:'Considered',c:.72,s:'conversation', ok:false, d:'18 Aug' },
+      { g:'Relationship', k:'Closeness',     v:'Independent, warm', c:.79, s:'interview', ok:true, d:'2 Aug' },
+      { g:'Relationship', k:'Structure',     v:'Spontaneous', c:.63, s:'behaviour',  ok:false, d:'21 Aug' },
+      { g:'Values', k:'Trust',               v:'Central',  c:.93, s:'interview',    ok:true,  d:'2 Aug' },
+      { g:'Values', k:'Privacy',             v:'Central',  c:.88, s:'user',         ok:true,  d:'14 Mar' },
+      { g:'Values', k:'Freedom',             v:'High',     c:.76, s:'conversation', ok:false, d:'12 Aug' },
+      { g:'Values', k:'Family',              v:'Open',     c:.58, s:'conversation', ok:false, d:'12 Aug' },
+      { g:'Interests', k:'Travel',           v:'Confirmed',c:.95, s:'user',         ok:true,  d:'14 Mar' },
+      { g:'Interests', k:'Art',              v:'Confirmed',c:.94, s:'user',         ok:true,  d:'14 Mar' },
+      { g:'Interests', k:'Architecture',     v:'Detected', c:.71, s:'conversation', ok:false, d:'18 Aug' },
+      { g:'Interests', k:'Sailing',          v:'Detected', c:.66, s:'behaviour',    ok:false, d:'20 Aug' }
+    ];
+    var GROUPS = ['Personality','Communication','Relationship','Values','Interests'];
+
+    // what the matching engine is allowed to read: confirmed, and sourced from
+    // something still permitted
+    function usable(t) { return t.ok && PERM[SOURCE_PERM[t.s]]; }
+
+    var COMPAT = [
+      { k:'Communication', from:['Style','Pace'] },
+      { k:'Lifestyle',     from:['Curiosity','Structure'] },
+      { k:'Social style',  from:['Social energy'] },
+      { k:'Adventure',     from:['Curiosity','Sailing','Travel'] },
+      { k:'Independence',  from:['Independence','Freedom'] },
+      { k:'Emotional style', from:['Closeness','Trust'] }
+    ];
+    function compatScore(row) {
+      var ts = TRAITS.filter(function (t) { return row.from.indexOf(t.k) > -1 && usable(t); });
+      if (!ts.length) return null;
+      return Math.round(ts.reduce(function (a, t) { return a + t.c; }, 0) / ts.length * 100);
+    }
+
+    /* -- profile completion, computed from real gaps ------------------------ */
+    var PROFILE = [
+      { k:'Identity',   done:true,  what:'Name, age, city, languages',
+        v:'A. Marchand · 41 · London · English, French' },
+      { k:'About me',   done:true,  what:'How you describe yourself',
+        v:'Reads more than he writes. Keeps two evenings a week for nothing in particular.' },
+      { k:'Photographs',done:false, what:'A portrait, and two more',
+        v:'One held on file, none released', todo:'Add two photographs' },
+      { k:'Lifestyle',  done:true,  what:'Occupation, education, how you live',
+        v:'Investor · Doctorate · Travels monthly' },
+      { k:'Interests',  done:false, what:'At least six',
+        v:'Travel, Art, Sailing, Wine', todo:'Add two more interests' },
+      { k:'Location',   done:true,  what:'City, and where you often are',
+        v:'London · often Geneva, New York' },
+      { k:'Relationship goals', done:true, what:'What you are looking for',
+        v:'Long-term partner' },
+      { k:'Preferences', done:false, what:'Age, place, family, lifestyle',
+        v:'Age and place set; family and lifestyle not', todo:'Complete relationship preferences' },
+      { k:'Verification', done:true, what:'Seen in person by an advisor',
+        v:'Legend Verified · 14 March 2026' },
+      { k:'Privacy',    done:true,  what:'Who sees what',
+        v:'City only · persona private' }
+    ];
+
+    var VIS = [
+      { k:'profile', label:'Profile visible to', type:'select',
+        options:['Members I am introduced to','Verified members','Nobody until I agree'] },
+      { k:'photos', label:'Photographs visible to', type:'select',
+        options:['Members I have accepted','Members I am introduced to','Nobody until I agree'] },
+      { k:'location', label:'Location shown as', type:'select', options:['City only','Country only','Hidden'] },
+      { k:'persona', label:'Persona visible to', type:'select',
+        options:['Nobody — the house only','Members I have accepted','Members I am introduced to'] },
+      { k:'online', label:'Online status', type:'select', options:['Hidden','Shown to accepted members'] }
+    ];
+    var VISV = {};
+
+    /* -- rendering ----------------------------------------------------------- */
+    var live = el('p', 'sr-only'); live.setAttribute('role','status'); live.setAttribute('aria-live','polite');
+    ppView.appendChild(live);
+    function announce(t) { live.textContent = t; }
+
+    $('#pp-plate').src = MATCH.plate('A. Marchand');
+
+    function completion() {
+      var done = PROFILE.filter(function (r) { return r.done; }).length;
+      return Math.round(done / PROFILE.length * 100);
+    }
+    function renderHead() {
+      var pct = completion();
+      $('#pp-pct').textContent = pct + '%';
+      $('#pp-bar').style.width = pct + '%';
+      var todo = PROFILE.filter(function (r) { return !r.done; }).map(function (r) { return r.todo; });
+      var unconfirmed = TRAITS.filter(function (t) { return !t.ok; }).length;
+      if (unconfirmed) todo.push('Confirm or remove ' + unconfirmed + ' persona line' + (unconfirmed === 1 ? '' : 's'));
+      $('#pp-todo').textContent = todo.length
+        ? 'To finish: ' + todo.join(' · ') + '.'
+        : 'Nothing outstanding. Your profile is complete and every persona line is confirmed.';
+    }
+
+    function renderProfile() {
+      var g = $('#pp-profile-grid'); g.textContent = '';
+      PROFILE.forEach(function (r) {
+        var p = el('div', 'panel');
+        var h = el('div', 'panel__head');
+        h.appendChild(el('h2', null, r.k));
+        h.appendChild(el('span', 'pill ' + (r.done ? 'pill--rest' : 'pill--action'), r.done ? 'Complete' : 'Outstanding'));
+        p.appendChild(h);
+        var b = el('div', 'panel__body');
+        b.appendChild(el('p', 'pp-what', r.what));
+        b.appendChild(el('p', 'pp-val', r.v));
+        if (r.todo) b.appendChild(el('p', 'pp-todo-line', r.todo));
+        p.appendChild(b);
+        g.appendChild(p);
+      });
+    }
+
+    function traitRow(t) {
+      var row = el('div', 'pp-trait' + (t.ok ? ' is-ok' : '') + (usable(t) ? '' : ' is-unused'));
+      var main = el('div', 'pp-trait__main');
+      main.appendChild(el('span', 'pp-trait__k', t.k));
+      main.appendChild(el('span', 'pp-trait__v', t.v));
+      row.appendChild(main);
+
+      var meta = el('div', 'pp-trait__meta');
+      var conf = el('span', 'pp-conf');
+      conf.appendChild(el('i', null, ''));
+      conf.lastChild.style.width = Math.round(t.c * 100) + '%';
+      meta.appendChild(conf);
+      // a word, not a decimal: a probability read as a verdict is the thing to avoid
+      var word = t.c >= .85 ? 'High confidence' : t.c >= .7 ? 'Moderate confidence' : 'Low confidence';
+      meta.appendChild(el('span', 'pp-trait__c', word));
+      meta.appendChild(el('span', 'pp-trait__s', SOURCES[t.s] + ' · ' + t.d));
+      if (!PERM[SOURCE_PERM[t.s]]) meta.appendChild(el('span', 'pp-trait__off', 'Source switched off — not used'));
+      row.appendChild(meta);
+
+      var acts = el('div', 'pp-trait__acts');
+      var ok = el('button', 'pp-btn' + (t.ok ? ' is-on' : '')); ok.type = 'button';
+      ok.textContent = t.ok ? '✓ Confirmed' : 'Confirm';
+      ok.setAttribute('aria-pressed', t.ok ? 'true' : 'false');
+      ok.addEventListener('click', function () {
+        t.ok = !t.ok; if (t.ok) { t.s = 'corrected'; t.c = Math.max(t.c, .95); }
+        render(); announce(t.k + (t.ok ? ' confirmed.' : ' unconfirmed.'));
+      });
+      var edit = el('button', 'pp-btn', 'Edit'); edit.type = 'button';
+      edit.addEventListener('click', function () {
+        var v = prompt('What should ' + t.k.toLowerCase() + ' say?', t.v);
+        if (v == null) return;
+        t.v = v.trim() || t.v; t.ok = true; t.s = 'corrected'; t.c = 1; t.d = 'today';
+        render(); announce(t.k + ' corrected.');
+      });
+      var del = el('button', 'pp-btn pp-btn--rm', 'Remove'); del.type = 'button';
+      del.addEventListener('click', function () {
+        TRAITS.splice(TRAITS.indexOf(t), 1);
+        render(); announce(t.k + ' removed from your persona.');
+      });
+      [ok, edit, del].forEach(function (b) { acts.appendChild(b); });
+      row.appendChild(acts);
+      return row;
+    }
+
+    function renderTraits() {
+      var host = $('#pp-traits'); host.textContent = '';
+      GROUPS.forEach(function (g) {
+        var rows = TRAITS.filter(function (t) { return t.g === g; });
+        if (!rows.length) return;
+        host.appendChild(el('p', 'ask__lbl', g));
+        rows.forEach(function (t) { host.appendChild(traitRow(t)); });
+      });
+      $('#pp-confirmed').textContent = TRAITS.filter(function (t) { return t.ok; }).length;
+      $('#pp-total').textContent = TRAITS.length;
+    }
+
+    function renderCompat() {
+      var host = $('#pp-compat'); host.textContent = '';
+      COMPAT.forEach(function (row) {
+        var v = compatScore(row);
+        var r = el('div', 'ltr-bars__row');
+        r.appendChild(el('span', 'k', row.k));
+        var b = el('span', 'b'); var f = el('i');
+        f.style.width = (v || 0) + '%'; b.appendChild(f); r.appendChild(b);
+        r.appendChild(el('span', 'v', v == null ? '—' : v + '%'));
+        host.appendChild(r);
+      });
+    }
+
+    function label() {
+      var ind = TRAITS.filter(function (t) { return t.k === 'Independence' && usable(t); })[0];
+      var cur = TRAITS.filter(function (t) { return t.k === 'Curiosity' && usable(t); })[0];
+      if (ind && cur) return 'The Independent Explorer';
+      if (ind) return 'The Independent';
+      if (cur) return 'The Explorer';
+      return 'Not yet drawn';
+    }
+    function summary() {
+      var used = TRAITS.filter(usable);
+      if (!used.length) return 'Nothing is confirmed yet, so there is no persona to show. Confirm a line below, or answer a few more questions, and it will draw itself.';
+      var vals = used.filter(function (t) { return t.g === 'Values'; }).map(function (t) { return t.k.toLowerCase(); });
+      var style = used.filter(function (t) { return t.k === 'Style'; })[0];
+      return 'Drawn from ' + used.length + ' confirmed line' + (used.length === 1 ? '' : 's') + '. ' +
+        (style ? style.v.toLowerCase() + ' in conversation' : 'Style not yet confirmed') +
+        (vals.length ? ', and holds ' + vals.slice(0, 3).join(', ') + ' at the centre' : '') + '.';
+    }
+    function renderPersona() {
+      $('#pp-persona-label').textContent = label();
+      $('#pp-persona-summary').textContent = summary();
+      var recent = TRAITS.filter(function (t) { return /Aug/.test(t.d); }).length;
+      $('#pp-updated').textContent = 'Last updated 21 Aug';
+      var evo = $('#pp-evo'); evo.textContent = '';
+      evo.appendChild(el('p', 'ask__lbl', 'What changed'));
+      var ul = el('ul', 'includes');
+      [recent + ' line' + (recent === 1 ? '' : 's') + ' added or revised this month',
+       'Communication pace detected from your last three conversations',
+       'Two interests detected that you have not yet confirmed']
+        .forEach(function (t) { ul.appendChild(el('li', null, t)); });
+      evo.appendChild(ul);
+    }
+
+    function renderInsights() {
+      var host = $('#pp-insights'); host.textContent = '';
+      var used = TRAITS.filter(usable);
+      var ind = used.filter(function (t) { return t.k === 'Independence'; })[0];
+      var soc = used.filter(function (t) { return t.k === 'Social energy'; })[0];
+      var lines = [];
+      if (ind) lines.push('You are likely to connect best with people who keep their own life running alongside yours.');
+      if (soc) lines.push('Small rooms suit you better than large ones, and the house weights introductions accordingly.');
+      if (!lines.length) lines.push('Too little is confirmed to say anything useful yet. That is the honest position rather than a placeholder.');
+      lines.forEach(function (t) { host.appendChild(el('p', 'ltr-insight', t)); });
+
+      var chips = $('#pp-ask-chips'); chips.textContent = '';
+      var thread = $('#pp-ai-thread');
+      [ { q:'What does the house think it knows?', a:function () {
+            return used.length + ' of ' + TRAITS.length + ' lines are confirmed and in use. ' +
+              (TRAITS.length - used.length) + ' are either unconfirmed or come from a source you have switched off, and none of those reach matching.'; } },
+        { q:'Where did this come from?', a:function () {
+            var by = {};
+            TRAITS.forEach(function (t) { by[t.s] = (by[t.s] || 0) + 1; });
+            return Object.keys(by).map(function (k) { return SOURCES[k] + ': ' + by[k]; }).join('. ') + '.'; } },
+        { q:'What is it least sure about?', a:function () {
+            var low = TRAITS.slice().sort(function (a, b) { return a.c - b.c; })[0];
+            return low ? low.k + ' — "' + low.v + '", at ' + Math.round(low.c * 100) + ' per cent, from ' +
+              SOURCES[low.s].toLowerCase() + '. Worth correcting or removing rather than leaving.' : 'Nothing is left.'; } },
+        { q:'What is used for matching?', a:function () {
+            return 'Only confirmed lines from permitted sources: ' + used.map(function (t) { return t.k.toLowerCase(); }).join(', ') + '. Nothing else.'; } }
+      ].forEach(function (item) {
+        var b = el('button', null, item.q); b.type = 'button';
+        b.addEventListener('click', function () {
+          thread.appendChild(el('p', 'ltr-ai-q', item.q));
+          thread.appendChild(el('p', 'ltr-ai-a', item.a()));
+          b.remove();
+        });
+        chips.appendChild(b);
+      });
+    }
+
+    function renderPerms() {
+      var host = $('#pp-perms'); host.textContent = '';
+      PERMS.forEach(function (p) {
+        var row = el('label', 'pp-perm');
+        var cb = el('input'); cb.type = 'checkbox'; cb.checked = PERM[p.k];
+        cb.addEventListener('change', function () {
+          PERM[p.k] = cb.checked; render();
+          announce(p.label + (cb.checked ? ' switched on.' : ' switched off; lines from it are no longer used.'));
+        });
+        row.appendChild(cb);
+        var t = el('span');
+        t.appendChild(el('b', null, p.label));
+        t.appendChild(el('span', 'pp-perm__n', p.note));
+        var n = TRAITS.filter(function (x) { return SOURCE_PERM[x.s] === p.k; }).length;
+        if (n) t.appendChild(el('span', 'pp-perm__n', n + ' persona line' + (n === 1 ? '' : 's') + ' come from this'));
+        row.appendChild(t);
+        host.appendChild(row);
+      });
+      $('#pp-perm-count').textContent = PERMS.filter(function (p) { return PERM[p.k]; }).length + ' of ' + PERMS.length + ' on';
+    }
+
+    function renderData() {
+      var host = $('#pp-data'); host.textContent = '';
+      [ ['Export my persona', 'A file of every line, its source and its confidence.'],
+        ['Reset my persona', 'Clears every inferred line. Your profile is untouched.'],
+        ['Delete conversation history', 'Removes what the persona was built from, and the persona with it.'] ]
+        .forEach(function (r) {
+          var b = el('button', 'btn btn--quiet', r[0]); b.type = 'button';
+          b.addEventListener('click', function () {
+            if (r[0] === 'Reset my persona') {
+              TRAITS.length = 0; render();
+              note(b, 'Persona cleared. Your profile is untouched, and nothing is used for matching until you build it again.');
+            } else {
+              note(b, r[1] + ' In service this is done the same day, by a person, and you are told when it is finished.');
+            }
+          });
+          host.appendChild(b);
+        });
+    }
+
+    function render() {
+      renderHead(); renderProfile(); renderTraits(); renderCompat();
+      renderPersona(); renderInsights(); renderPerms();
+    }
+
+    /* -- tabs, and the rest ---------------------------------------------------- */
+    $$('.pp-tabs button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var which = b.getAttribute('data-pp');
+        $$('.pp-tabs button').forEach(function (o) {
+          o.setAttribute('aria-selected', o === b ? 'true' : 'false');
+        });
+        ['profile','persona','settings'].forEach(function (p) {
+          $('#pp-pane-' + p).hidden = p !== which;
+        });
+      });
+    });
+    VIS.forEach(function (def) { $('#pp-visibility').appendChild(field(def, VISV, function () {}, 'pp-v')); });
+    renderData();
+
+    $('#pp-preview').addEventListener('click', function (e) {
+      note(e.target, 'Opens your profile exactly as a member you have been introduced to would see it — ' +
+        'city only, no surname, and your persona withheld unless you have said otherwise.');
+    });
+    $('#pp-interview').addEventListener('click', function (e) {
+      note(e.target, 'Six questions, about twenty minutes, and you can stop at any of them. ' +
+        'Every answer becomes a line you can see, correct or remove — never a score you cannot.');
+    });
+    $('#pp-ask').addEventListener('click', function () {
+      $$('.pp-tabs button').forEach(function (o) { o.setAttribute('aria-selected', o.getAttribute('data-pp') === 'persona' ? 'true' : 'false'); });
+      ['profile','persona','settings'].forEach(function (p) { $('#pp-pane-' + p).hidden = p !== 'persona'; });
+      var c = $('#pp-ask-chips'); if (c.firstChild) c.firstChild.focus();
+    });
+
+    render();
+  })();
+
   route();
 })();
