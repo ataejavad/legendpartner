@@ -2224,3 +2224,68 @@ a.tile:hover{ transform:translateY(-2px); }
   .pp-trait{ grid-template-columns:minmax(0,1fr); }
   .pp-trait__acts{ justify-content:flex-start; }
 }
+
+/* --- Events & Companionship ---------------------------------------------- */
+/* The order of the thing, stated once at the top: the page is built so it
+   cannot be short-circuited into search-and-book. */
+.ev-flow{
+  display:flex; flex-wrap:wrap; gap:.5rem 1.5rem; margin-top:1.8rem;
+  padding:.9rem 0; border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft);
+  font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--fg-faint);
+}
+.ev-flow span{ position:relative; }
+.ev-flow span + span::before{ content:"→"; margin-right:1.5rem; opacity:.5; }
+
+.ev-tabs{ display:flex; gap:.5rem; margin-top:1.8rem; flex-wrap:wrap; }
+.ev-tabs button{
+  background:none; cursor:pointer; font:inherit; font-size:.86rem;
+  border:1px solid var(--line-soft); border-radius:var(--r);
+  padding:.6rem 1.1rem; color:var(--fg-soft);
+  transition:border-color .25s var(--ease), color .25s var(--ease);
+}
+.ev-tabs button:hover{ color:#EDEAE3; border-color:var(--champagne); }
+.ev-tabs button[aria-selected="true"]{ color:#12131A; background:var(--champagne); border-color:var(--champagne); }
+.ev-pane{ margin-top:1.4rem; }
+.ev-pane[hidden]{ display:none; }
+
+/* what is already arranged, with its state on a track rather than in a word */
+.ev-up{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:1.6rem;
+  flex-wrap:wrap; padding:1rem 0; border-bottom:1px solid var(--line-soft);
+}
+.ev-up:last-child{ border-bottom:0; }
+.ev-up__n{ margin:0; font-family:var(--serif); font-size:1.3rem; color:#EDEAE3; }
+.ev-up__d{ margin:.3rem 0 0; font-size:.82rem; color:var(--fg-soft); }
+.ev-up__c{ margin:.3rem 0 0; font-size:.6rem; letter-spacing:.18em; text-transform:uppercase; color:var(--champagne); }
+.ev-up__r{ display:flex; flex-direction:column; gap:.8rem; align-items:flex-end; }
+.ev-up__acts{ display:flex; gap:.5rem; flex-wrap:wrap; justify-content:flex-end; }
+.ev-track{ display:flex; gap:.4rem; flex-wrap:wrap; }
+.ev-track__s{
+  font-size:.54rem; letter-spacing:.16em; text-transform:uppercase;
+  padding:.28rem .55rem; border:1px solid var(--line-soft); border-radius:var(--r-sm);
+  color:var(--fg-faint);
+}
+.ev-track__s.is-done{ color:var(--champagne); border-color:var(--champagne); }
+
+/* the evenings themselves */
+.ev-grid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));
+  gap:clamp(1rem,1.8vw,1.6rem); margin-top:1.4rem;
+}
+.ev-card{
+  display:flex; flex-direction:column; min-width:0; overflow:hidden;
+  background:var(--card); border:1px solid var(--card-line); border-radius:var(--r);
+  box-shadow:var(--shadow);
+}
+.ev-card__img{ width:100%; aspect-ratio:3/2; object-fit:cover; display:block; }
+.ev-card__body{ display:flex; flex-direction:column; gap:.5rem; padding:1.2rem 1.3rem 1.3rem; }
+.ev-card__cat{ margin:0; font-size:.54rem; letter-spacing:.2em; text-transform:uppercase; color:var(--champagne); }
+.ev-card__n{ margin:0; font-family:var(--serif); font-weight:300; font-size:1.3rem; line-height:1.2; color:#EDEAE3; }
+.ev-card__d{ margin:0; font-size:.82rem; color:var(--fg-soft); font-variant-numeric:tabular-nums; }
+.ev-card__g{ margin:0; font-size:.72rem; color:var(--fg-faint); }
+.ev-card__body .btn{ margin-top:.4rem; }
+
+@media (max-width:900px){
+  .ev-up__r{ align-items:flex-start; width:100%; }
+  .ev-up__acts{ justify-content:flex-start; }
+}

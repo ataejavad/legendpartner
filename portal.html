@@ -352,76 +352,142 @@
 
 
       <!-- ============================================= EVENTS -->
-      <section class="view" id="view-occasions" tabindex="-1" aria-label="Events">
-        <p class="lede">Events</p>
+      <section class="view" id="view-occasions" tabindex="-1" aria-label="Events and companionship">
+        <p class="lede">Events &amp; Companionship</p>
         <p class="sub">
-          Where you are seen, and with whom. Five kinds of occasion, each arranged on terms agreed
-          in advance by both people — so nobody improvises an answer in front of a room.
+          Curated events and private companionship for meaningful social experiences. The house
+          finds the evening, and the person for it — you are not searching a marketplace.
         </p>
 
-        <div class="cols cols--7-5" style="margin-top:2.6rem">
+        <div class="ev-flow" aria-label="How this works">
+          <span>Discover</span><span>Curate</span><span>Match</span><span>Request</span>
+          <span>Confirm</span><span>Experience</span><span>Concierge</span>
+        </div>
+
+        <!-- 1. what is already arranged -------------------------------------- -->
+        <div class="panel" style="margin-top:1.8rem">
+          <div class="panel__head">
+            <h2>My upcoming experiences</h2>
+            <span class="pill pill--rest" id="ev-upcoming-n">—</span>
+          </div>
+          <div class="panel__body">
+            <div id="ev-upcoming"></div>
+          </div>
+        </div>
+
+        <div class="ev-tabs" role="tablist" aria-label="Events or companionship">
+          <button type="button" role="tab" data-ev="discover" aria-selected="true">Discover events</button>
+          <button type="button" role="tab" data-ev="companion" aria-selected="false">Find a companion</button>
+          <button type="button" role="tab" data-ev="prefs" aria-selected="false">Preferences &amp; privacy</button>
+          <button type="button" role="tab" data-ev="concierge" aria-selected="false">Concierge</button>
+        </div>
+
+        <!-- ========================= DISCOVER ============================ -->
+        <div class="ev-pane" id="ev-pane-discover">
+          <div class="ltr-sections" id="ev-cats" role="tablist" aria-label="Event categories"></div>
+          <p class="cas-curated" id="ev-note"></p>
+          <p class="ltr-empty" id="ev-empty" hidden>
+            Nothing in this category answers to your preferences just now. The house curates rather
+            than lists, so a quiet category is ordinary — the concierge will find something if you ask.
+          </p>
+          <div class="ev-grid" id="ev-grid" aria-live="polite"></div>
+        </div>
+
+        <!-- ======================== COMPANION ============================ -->
+        <div class="ev-pane" id="ev-pane-companion" hidden>
           <div class="panel">
-            <div class="panel__head"><h2>The five</h2></div>
+            <div class="panel__head">
+              <h2>Find your companion</h2>
+              <span class="pill pill--action" id="ev-for-pill">Choose an evening</span>
+            </div>
             <div class="panel__body">
-              <div class="convo">
-                <div class="convo__item"><span class="no">01</span><div>
-                  <p class="nm">Parties</p>
-                  <p class="ds">The house's own gatherings, and private ones you are invited to. Small, unpublished, and never photographed.</p>
-                  <a class="btn" href="#occasions-parties" data-go="occasions-parties"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
-                <div class="convo__item"><span class="no">02</span><div>
-                  <p class="nm">Events</p>
-                  <p class="ds">Openings, dinners, benefits, a box at something. An evening with a host, a guest list and an hour it ends.</p>
-                  <a class="btn" href="#occasions-events" data-go="occasions-events"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
-                <div class="convo__item"><span class="no">03</span><div>
-                  <p class="nm">Business events</p>
-                  <p class="ds">Where the evening is work. Someone briefed on the room, who will be useful in it and will not become the subject of it.</p>
-                  <a class="btn" href="#occasions-business" data-go="occasions-business"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
-                <div class="convo__item"><span class="no">04</span><div>
-                  <p class="nm">Travel companionship</p>
-                  <p class="ds">Days rather than hours, and a different set of questions. Arranged only where both people have met beforehand.</p>
-                  <a class="btn" href="#occasions-travel" data-go="occasions-travel"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
-                <div class="convo__item"><span class="no">05</span><div>
-                  <p class="nm">Social occasions</p>
-                  <p class="ds">A wedding, a family lunch, a reunion. The rooms where the questions are personal and the answers should be settled in advance.</p>
-                  <a class="btn" href="#occasions-social" data-go="occasions-social"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
+              <p class="ask__lbl">Which evening?</p>
+              <div class="chips" id="ev-for" role="radiogroup" aria-label="The occasion"></div>
+
+              <p class="ask__lbl" style="margin-top:1.6rem">What kind of company</p>
+              <div class="chips" id="ev-kind" role="radiogroup" aria-label="Companion type"></div>
+
+              <div class="ltr-filters" id="ev-cprefs" style="margin-top:1.8rem"></div>
+
+              <div class="ltr-toggles">
+                <label class="ltr-toggle">
+                  <input type="checkbox" id="ev-verified-only" checked><span>Legend Verified companions only</span>
+                </label>
               </div>
             </div>
           </div>
 
-          <div class="stack" style="gap:1.6rem">
+          <p class="cas-curated" id="ev-cnote"></p>
+          <p class="ltr-empty" id="ev-cempty" hidden>
+            Nobody the house would put forward for that evening is free on those terms. Change one
+            of them, or ask the concierge — that is what it is for.
+          </p>
+          <div class="ltr-grid cas-grid" id="ev-companions" aria-live="polite"></div>
+        </div>
+
+        <!-- ========================= PREFERENCES ========================= -->
+        <div class="ev-pane" id="ev-pane-prefs" hidden>
+          <div class="cols cols--7-5">
             <div class="panel">
-              <div class="panel__head"><h2>True of all five</h2></div>
+              <div class="panel__head"><h2>My event preferences</h2></div>
               <div class="panel__body">
-                <ul class="includes">
-                  <li>The terms of the occasion are written and agreed by both people before it, not during it.</li>
-                  <li>What is said about how you know each other is decided by you, and both are told the same words.</li>
-                  <li>No photographs, by standing agreement, unless you ask for them.</li>
-                  <li>An occasion ends the moment either person says it does, and nothing is asked afterwards.</li>
-                </ul>
+                <div class="ltr-filters" id="ev-prefs"></div>
                 <div class="note-inline">
-                  Company for an occasion is company for an occasion. Both people are told so in the
-                  same sentence, and neither is led to expect anything else.
+                  These weight what is curated to you. An evening that fails one of them is not
+                  hidden — it is shown lower, and told you why.
                 </div>
               </div>
             </div>
             <div class="panel">
-              <div class="panel__head"><h2>Also here</h2></div>
+              <div class="panel__head"><h2>Who sees what</h2></div>
               <div class="panel__body">
-                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
-                  The five above are arrangements for an occasion already in your diary. If what you
-                  want is the companion rather than the occasion, that is here too.
-                </p>
-              </div>
-              <div class="panel__foot">
-                <a class="btn" href="#find-companion" data-go="find-companion"><span>Event &amp; party companion</span><i class="arrow"></i></a>
+                <div class="ltr-filters" id="ev-privacy"></div>
+                <div class="note-inline">
+                  Attendance is never shown on your profile, to anyone, at any setting. Who you
+                  attended with is shown to nobody but the two of you and your advisor.
+                </div>
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- ========================== CONCIERGE ========================== -->
+        <div class="ev-pane" id="ev-pane-concierge" hidden>
+          <div class="cols cols--7-5">
+            <div class="panel">
+              <div class="panel__head"><h2>Contact the concierge</h2><span class="pill pill--live">Answers today</span></div>
+              <div class="panel__body">
+                <p class="ask__lbl">What do you need?</p>
+                <div class="chips" id="ev-conc-kinds" role="radiogroup" aria-label="Kind of request"></div>
+                <div class="p-field" style="margin-top:1.4rem">
+                  <label for="ev-conc-text">In your own words</label>
+                  <textarea id="ev-conc-text" rows="4" placeholder="A sentence is enough. The concierge telephones rather than writes, unless you ask otherwise."></textarea>
+                </div>
+                <button class="btn btn--solid" type="button" id="ev-conc-send">Send to the concierge</button>
+                <div id="ev-conc-out"></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>What the concierge does</h2></div>
+              <div class="panel__body">
+                <ul class="includes">
+                  <li>Finds a companion for an evening already in your diary.</li>
+                  <li>Changes or cancels an arrangement, on either side, without a reason being given.</li>
+                  <li>Arranges the table, the car and the hour, and tells the venue nothing about why.</li>
+                  <li>Creates a private experience of your own and invites whom you name.</li>
+                </ul>
+                <div class="note-inline">
+                  A person, by name, in your own time zone. Not a queue, not a form that disappears.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          <b>Design preview.</b> Every evening and every companion below is illustrative sample
+          content, and the compatibility figures are computed here in the page — written rules, not a
+          language model, and nothing you do on this page leaves it.
         </div>
       </section>
 

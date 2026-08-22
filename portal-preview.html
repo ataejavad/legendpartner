@@ -3205,6 +3205,71 @@ a.tile:hover{ transform:translateY(-2px); }
   .pp-trait__acts{ justify-content:flex-start; }
 }
 
+/* --- Events & Companionship ---------------------------------------------- */
+/* The order of the thing, stated once at the top: the page is built so it
+   cannot be short-circuited into search-and-book. */
+.ev-flow{
+  display:flex; flex-wrap:wrap; gap:.5rem 1.5rem; margin-top:1.8rem;
+  padding:.9rem 0; border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft);
+  font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--fg-faint);
+}
+.ev-flow span{ position:relative; }
+.ev-flow span + span::before{ content:"→"; margin-right:1.5rem; opacity:.5; }
+
+.ev-tabs{ display:flex; gap:.5rem; margin-top:1.8rem; flex-wrap:wrap; }
+.ev-tabs button{
+  background:none; cursor:pointer; font:inherit; font-size:.86rem;
+  border:1px solid var(--line-soft); border-radius:var(--r);
+  padding:.6rem 1.1rem; color:var(--fg-soft);
+  transition:border-color .25s var(--ease), color .25s var(--ease);
+}
+.ev-tabs button:hover{ color:#EDEAE3; border-color:var(--champagne); }
+.ev-tabs button[aria-selected="true"]{ color:#12131A; background:var(--champagne); border-color:var(--champagne); }
+.ev-pane{ margin-top:1.4rem; }
+.ev-pane[hidden]{ display:none; }
+
+/* what is already arranged, with its state on a track rather than in a word */
+.ev-up{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:1.6rem;
+  flex-wrap:wrap; padding:1rem 0; border-bottom:1px solid var(--line-soft);
+}
+.ev-up:last-child{ border-bottom:0; }
+.ev-up__n{ margin:0; font-family:var(--serif); font-size:1.3rem; color:#EDEAE3; }
+.ev-up__d{ margin:.3rem 0 0; font-size:.82rem; color:var(--fg-soft); }
+.ev-up__c{ margin:.3rem 0 0; font-size:.6rem; letter-spacing:.18em; text-transform:uppercase; color:var(--champagne); }
+.ev-up__r{ display:flex; flex-direction:column; gap:.8rem; align-items:flex-end; }
+.ev-up__acts{ display:flex; gap:.5rem; flex-wrap:wrap; justify-content:flex-end; }
+.ev-track{ display:flex; gap:.4rem; flex-wrap:wrap; }
+.ev-track__s{
+  font-size:.54rem; letter-spacing:.16em; text-transform:uppercase;
+  padding:.28rem .55rem; border:1px solid var(--line-soft); border-radius:var(--r-sm);
+  color:var(--fg-faint);
+}
+.ev-track__s.is-done{ color:var(--champagne); border-color:var(--champagne); }
+
+/* the evenings themselves */
+.ev-grid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));
+  gap:clamp(1rem,1.8vw,1.6rem); margin-top:1.4rem;
+}
+.ev-card{
+  display:flex; flex-direction:column; min-width:0; overflow:hidden;
+  background:var(--card); border:1px solid var(--card-line); border-radius:var(--r);
+  box-shadow:var(--shadow);
+}
+.ev-card__img{ width:100%; aspect-ratio:3/2; object-fit:cover; display:block; }
+.ev-card__body{ display:flex; flex-direction:column; gap:.5rem; padding:1.2rem 1.3rem 1.3rem; }
+.ev-card__cat{ margin:0; font-size:.54rem; letter-spacing:.2em; text-transform:uppercase; color:var(--champagne); }
+.ev-card__n{ margin:0; font-family:var(--serif); font-weight:300; font-size:1.3rem; line-height:1.2; color:#EDEAE3; }
+.ev-card__d{ margin:0; font-size:.82rem; color:var(--fg-soft); font-variant-numeric:tabular-nums; }
+.ev-card__g{ margin:0; font-size:.72rem; color:var(--fg-faint); }
+.ev-card__body .btn{ margin-top:.4rem; }
+
+@media (max-width:900px){
+  .ev-up__r{ align-items:flex-start; width:100%; }
+  .ev-up__acts{ justify-content:flex-start; }
+}
+
 
 
 @media (max-width:720px){
@@ -3564,76 +3629,142 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
 
 
       <!-- ============================================= EVENTS -->
-      <section class="view" id="view-occasions" tabindex="-1" aria-label="Events">
-        <p class="lede">Events</p>
+      <section class="view" id="view-occasions" tabindex="-1" aria-label="Events and companionship">
+        <p class="lede">Events &amp; Companionship</p>
         <p class="sub">
-          Where you are seen, and with whom. Five kinds of occasion, each arranged on terms agreed
-          in advance by both people — so nobody improvises an answer in front of a room.
+          Curated events and private companionship for meaningful social experiences. The house
+          finds the evening, and the person for it — you are not searching a marketplace.
         </p>
 
-        <div class="cols cols--7-5" style="margin-top:2.6rem">
+        <div class="ev-flow" aria-label="How this works">
+          <span>Discover</span><span>Curate</span><span>Match</span><span>Request</span>
+          <span>Confirm</span><span>Experience</span><span>Concierge</span>
+        </div>
+
+        <!-- 1. what is already arranged -------------------------------------- -->
+        <div class="panel" style="margin-top:1.8rem">
+          <div class="panel__head">
+            <h2>My upcoming experiences</h2>
+            <span class="pill pill--rest" id="ev-upcoming-n">—</span>
+          </div>
+          <div class="panel__body">
+            <div id="ev-upcoming"></div>
+          </div>
+        </div>
+
+        <div class="ev-tabs" role="tablist" aria-label="Events or companionship">
+          <button type="button" role="tab" data-ev="discover" aria-selected="true">Discover events</button>
+          <button type="button" role="tab" data-ev="companion" aria-selected="false">Find a companion</button>
+          <button type="button" role="tab" data-ev="prefs" aria-selected="false">Preferences &amp; privacy</button>
+          <button type="button" role="tab" data-ev="concierge" aria-selected="false">Concierge</button>
+        </div>
+
+        <!-- ========================= DISCOVER ============================ -->
+        <div class="ev-pane" id="ev-pane-discover">
+          <div class="ltr-sections" id="ev-cats" role="tablist" aria-label="Event categories"></div>
+          <p class="cas-curated" id="ev-note"></p>
+          <p class="ltr-empty" id="ev-empty" hidden>
+            Nothing in this category answers to your preferences just now. The house curates rather
+            than lists, so a quiet category is ordinary — the concierge will find something if you ask.
+          </p>
+          <div class="ev-grid" id="ev-grid" aria-live="polite"></div>
+        </div>
+
+        <!-- ======================== COMPANION ============================ -->
+        <div class="ev-pane" id="ev-pane-companion" hidden>
           <div class="panel">
-            <div class="panel__head"><h2>The five</h2></div>
+            <div class="panel__head">
+              <h2>Find your companion</h2>
+              <span class="pill pill--action" id="ev-for-pill">Choose an evening</span>
+            </div>
             <div class="panel__body">
-              <div class="convo">
-                <div class="convo__item"><span class="no">01</span><div>
-                  <p class="nm">Parties</p>
-                  <p class="ds">The house's own gatherings, and private ones you are invited to. Small, unpublished, and never photographed.</p>
-                  <a class="btn" href="#occasions-parties" data-go="occasions-parties"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
-                <div class="convo__item"><span class="no">02</span><div>
-                  <p class="nm">Events</p>
-                  <p class="ds">Openings, dinners, benefits, a box at something. An evening with a host, a guest list and an hour it ends.</p>
-                  <a class="btn" href="#occasions-events" data-go="occasions-events"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
-                <div class="convo__item"><span class="no">03</span><div>
-                  <p class="nm">Business events</p>
-                  <p class="ds">Where the evening is work. Someone briefed on the room, who will be useful in it and will not become the subject of it.</p>
-                  <a class="btn" href="#occasions-business" data-go="occasions-business"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
-                <div class="convo__item"><span class="no">04</span><div>
-                  <p class="nm">Travel companionship</p>
-                  <p class="ds">Days rather than hours, and a different set of questions. Arranged only where both people have met beforehand.</p>
-                  <a class="btn" href="#occasions-travel" data-go="occasions-travel"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
-                <div class="convo__item"><span class="no">05</span><div>
-                  <p class="nm">Social occasions</p>
-                  <p class="ds">A wedding, a family lunch, a reunion. The rooms where the questions are personal and the answers should be settled in advance.</p>
-                  <a class="btn" href="#occasions-social" data-go="occasions-social"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
+              <p class="ask__lbl">Which evening?</p>
+              <div class="chips" id="ev-for" role="radiogroup" aria-label="The occasion"></div>
+
+              <p class="ask__lbl" style="margin-top:1.6rem">What kind of company</p>
+              <div class="chips" id="ev-kind" role="radiogroup" aria-label="Companion type"></div>
+
+              <div class="ltr-filters" id="ev-cprefs" style="margin-top:1.8rem"></div>
+
+              <div class="ltr-toggles">
+                <label class="ltr-toggle">
+                  <input type="checkbox" id="ev-verified-only" checked><span>Legend Verified companions only</span>
+                </label>
               </div>
             </div>
           </div>
 
-          <div class="stack" style="gap:1.6rem">
+          <p class="cas-curated" id="ev-cnote"></p>
+          <p class="ltr-empty" id="ev-cempty" hidden>
+            Nobody the house would put forward for that evening is free on those terms. Change one
+            of them, or ask the concierge — that is what it is for.
+          </p>
+          <div class="ltr-grid cas-grid" id="ev-companions" aria-live="polite"></div>
+        </div>
+
+        <!-- ========================= PREFERENCES ========================= -->
+        <div class="ev-pane" id="ev-pane-prefs" hidden>
+          <div class="cols cols--7-5">
             <div class="panel">
-              <div class="panel__head"><h2>True of all five</h2></div>
+              <div class="panel__head"><h2>My event preferences</h2></div>
               <div class="panel__body">
-                <ul class="includes">
-                  <li>The terms of the occasion are written and agreed by both people before it, not during it.</li>
-                  <li>What is said about how you know each other is decided by you, and both are told the same words.</li>
-                  <li>No photographs, by standing agreement, unless you ask for them.</li>
-                  <li>An occasion ends the moment either person says it does, and nothing is asked afterwards.</li>
-                </ul>
+                <div class="ltr-filters" id="ev-prefs"></div>
                 <div class="note-inline">
-                  Company for an occasion is company for an occasion. Both people are told so in the
-                  same sentence, and neither is led to expect anything else.
+                  These weight what is curated to you. An evening that fails one of them is not
+                  hidden — it is shown lower, and told you why.
                 </div>
               </div>
             </div>
             <div class="panel">
-              <div class="panel__head"><h2>Also here</h2></div>
+              <div class="panel__head"><h2>Who sees what</h2></div>
               <div class="panel__body">
-                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
-                  The five above are arrangements for an occasion already in your diary. If what you
-                  want is the companion rather than the occasion, that is here too.
-                </p>
-              </div>
-              <div class="panel__foot">
-                <a class="btn" href="#find-companion" data-go="find-companion"><span>Event &amp; party companion</span><i class="arrow"></i></a>
+                <div class="ltr-filters" id="ev-privacy"></div>
+                <div class="note-inline">
+                  Attendance is never shown on your profile, to anyone, at any setting. Who you
+                  attended with is shown to nobody but the two of you and your advisor.
+                </div>
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- ========================== CONCIERGE ========================== -->
+        <div class="ev-pane" id="ev-pane-concierge" hidden>
+          <div class="cols cols--7-5">
+            <div class="panel">
+              <div class="panel__head"><h2>Contact the concierge</h2><span class="pill pill--live">Answers today</span></div>
+              <div class="panel__body">
+                <p class="ask__lbl">What do you need?</p>
+                <div class="chips" id="ev-conc-kinds" role="radiogroup" aria-label="Kind of request"></div>
+                <div class="p-field" style="margin-top:1.4rem">
+                  <label for="ev-conc-text">In your own words</label>
+                  <textarea id="ev-conc-text" rows="4" placeholder="A sentence is enough. The concierge telephones rather than writes, unless you ask otherwise."></textarea>
+                </div>
+                <button class="btn btn--solid" type="button" id="ev-conc-send">Send to the concierge</button>
+                <div id="ev-conc-out"></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>What the concierge does</h2></div>
+              <div class="panel__body">
+                <ul class="includes">
+                  <li>Finds a companion for an evening already in your diary.</li>
+                  <li>Changes or cancels an arrangement, on either side, without a reason being given.</li>
+                  <li>Arranges the table, the car and the hour, and tells the venue nothing about why.</li>
+                  <li>Creates a private experience of your own and invites whom you name.</li>
+                </ul>
+                <div class="note-inline">
+                  A person, by name, in your own time zone. Not a queue, not a form that disappears.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          <b>Design preview.</b> Every evening and every companion below is illustrative sample
+          content, and the compatibility figures are computed here in the page — written rules, not a
+          language model, and nothing you do on this page leaves it.
         </div>
       </section>
 
@@ -10781,6 +10912,552 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
     });
 
     render();
+  })();
+
+  /* --- Events & Companionship ----------------------------------------------
+     Discover, curate, match, request, confirm — in that order, and the page is
+     built so it cannot be short-circuited into search-and-book. A companion is
+     requested against a named evening, never in the abstract; the request has
+     real states rather than a boolean; and the concierge is a person on the
+     page rather than a support link at the bottom.                           */
+  var evView = $('#view-occasions');
+  if (evView && typeof MATCH !== 'undefined') (function () {
+    var el = MATCH.el, field = MATCH.field;
+
+    var WEIGHTS = { event:25, availability:20, location:15, social:15,
+                    interests:10, communication:5, lifestyle:5, persona:5 };
+    var LABELS = { event:'Event fit', availability:'Availability', location:'Location',
+                   social:'Social style', interests:'Interests',
+                   communication:'Communication', lifestyle:'Lifestyle', persona:'Persona' };
+
+    var DAY = 86400000, t0 = new Date(); t0.setHours(0,0,0,0);
+    function iso(d) { return d.toISOString().slice(0,10); }
+    function plus(n) { return iso(new Date(t0.getTime() + n*DAY)); }
+    function fmt(s) {
+      return new Date(s + 'T00:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+    }
+
+    var ME = { city:'Munich', social:'Confident, selective', comms:'Direct',
+               lifestyle:'Arts & Culture', interests:['Art','Fine Dining','Travel','Culture'] };
+
+    /* -- the evenings the house is holding --------------------------------- */
+    var CATS = [
+      { id:'curated',  label:'Curated for you', note:'Weighted to your preferences' },
+      { id:'private',  label:'Private',   note:'Dinners, gatherings, celebrations' },
+      { id:'social',   label:'Social',    note:'Cocktails, dinners, gatherings' },
+      { id:'business', label:'Business',  note:'Dinners, conferences, networking' },
+      { id:'culture',  label:'Culture & lifestyle', note:'Art, music, theatre, dining' },
+      { id:'travel',   label:'Travel',    note:'Weekends and city experiences' }
+    ];
+    var EVENTS = [
+      { id:'e1', cat:'private', name:'Private dinner', city:'Munich', date:plus(23), time:'19:30',
+        venue:'A private room, Lehel', guests:8, privacy:'Invitation only', dress:'Black tie optional',
+        host:'The house', curated:true, interests:['Fine Dining','Art'],
+        about:'Eight people, one table, and a house rule that nobody discusses what they do until the second course.' },
+      { id:'e2', cat:'culture', name:'Private view — Blaue Reiter', city:'Munich', date:plus(9), time:'18:00',
+        venue:'Lenbachhaus, after hours', guests:24, privacy:'Members only', dress:'Informal',
+        host:'The house', curated:true, interests:['Art','Culture'],
+        about:'The rooms to ourselves for two hours, with the curator who hung them.' },
+      { id:'e3', cat:'business', name:'Business dinner — technology', city:'Munich', date:plus(15), time:'20:00',
+        venue:'Restaurant, Maxvorstadt', guests:12, privacy:'Members only', dress:'Business',
+        host:'A member', curated:false, interests:['Business','Fine Dining'],
+        about:'Twelve people who build things, and a companion briefed on the room rather than scripted for it.' },
+      { id:'e4', cat:'social', name:'Autumn cocktails', city:'Munich', date:plus(5), time:'19:00',
+        venue:'A private bar, Altstadt', guests:30, privacy:'Members only', dress:'Cocktail',
+        host:'The house', curated:true, interests:['Culture','Fine Dining'],
+        about:'The largest room the house uses, which is still only thirty people.' },
+      { id:'e5', cat:'travel', name:'A weekend in Salzburg', city:'Salzburg', date:plus(31), time:'—',
+        venue:'Two nights, arranged', guests:6, privacy:'Invitation only', dress:'As you like',
+        host:'The house', curated:true, interests:['Culture','Travel','Art'],
+        about:'Six people, two nights, one concert, and no obligation to be sociable at breakfast.' },
+      { id:'e6', cat:'private', name:'A celebration', city:'Vienna', date:plus(44), time:'20:00',
+        venue:'A private house', guests:16, privacy:'Invitation only', dress:'Black tie',
+        host:'A member', curated:false, interests:['Fine Dining','Culture'],
+        about:'A member marking something, and asking the house to fill four of the sixteen chairs.' },
+      { id:'e7', cat:'culture', name:'Opera, and dinner after', city:'Munich', date:plus(12), time:'17:30',
+        venue:'Nationaltheater, then Schwabing', guests:4, privacy:'Invitation only', dress:'Formal',
+        host:'The house', curated:true, interests:['Culture','Art','Fine Dining'],
+        about:'Four seats the house keeps, and a table held for afterwards whether or not it is wanted.' },
+      { id:'e8', cat:'business', name:'Founders, off the record', city:'Zurich', date:plus(27), time:'19:00',
+        venue:'A private room', guests:10, privacy:'Invitation only', dress:'Business',
+        host:'The house', curated:false, interests:['Business'],
+        about:'No press, no notes, no attribution. That is the whole proposition.' }
+    ];
+
+    var KINDS = ['Social companion','Dinner companion','Event companion',
+                 'Business event companion','Travel companion'];
+    var COMPANIONS = [
+      { id:'k1', name:'Sophia', age:34, city:'Munich', verified:true,
+        social:'Confident, selective', comms:'Direct', lifestyle:'Arts & Culture',
+        interests:['Art','Travel','Fine Dining','Culture'], langs:['German','English','French'],
+        kinds:['Event companion','Dinner companion','Social companion'],
+        free:[plus(3), plus(30)], attended:14,
+        about:'At ease in a room of strangers and uninterested in being the reason anyone remembers it.' },
+      { id:'k2', name:'Katharina', age:37, city:'Munich', verified:true,
+        social:'Warm, sociable', comms:'Warm', lifestyle:'Social',
+        interests:['Fine Dining','Music','Fashion','Culture'], langs:['German','English'],
+        kinds:['Social companion','Dinner companion'],
+        free:[plus(0), plus(20)], attended:31,
+        about:'Talks to everyone, remembers all of it, and repeats none of it.' },
+      { id:'k3', name:'Elisa', age:32, city:'Munich', verified:true,
+        social:'Quiet, observant', comms:'Considered', lifestyle:'Arts & Culture',
+        interests:['Art','Culture','Travel','Photography'], langs:['Italian','German','English'],
+        kinds:['Event companion','Travel companion'],
+        free:[plus(6), plus(40)], attended:9,
+        about:'Reads a room before she speaks in it, which is rarer than it should be.' },
+      { id:'k4', name:'Johanna', age:39, city:'Munich', verified:true,
+        social:'Confident, selective', comms:'Direct', lifestyle:'Business',
+        interests:['Business','Fine Dining','Travel','Technology'], langs:['German','English','Mandarin'],
+        kinds:['Business event companion','Event companion','Dinner companion'],
+        free:[plus(10), plus(35)], attended:22,
+        about:'Briefed rather than scripted. Will not claim an expertise she does not have.' },
+      { id:'k5', name:'Marta', age:30, city:'Vienna', verified:false,
+        social:'Warm, sociable', comms:'Warm', lifestyle:'Social',
+        interests:['Music','Fashion','Culture','Nightlife'], langs:['German','English'],
+        kinds:['Social companion'],
+        free:[plus(20), plus(60)], attended:3,
+        about:'New to the house, and verification is not yet finished.' },
+      { id:'k6', name:'Ines', age:35, city:'Salzburg', verified:true,
+        social:'Quiet, observant', comms:'Considered', lifestyle:'Arts & Culture',
+        interests:['Culture','Art','Travel','Wellness'], langs:['German','English'],
+        kinds:['Travel companion','Event companion'],
+        free:[plus(25), plus(50)], attended:11,
+        about:'Comfortable with two days of somebody else’s company, and honest when she is not.' }
+    ];
+
+    /* -- states, per the brief --------------------------------------------- */
+    var FLOW = ['Requested','Accepted','Confirmed','Completed'];
+    var REQ = {};                                     // eventId+companionId -> state
+    var BOOKED = [
+      { ev:'e2', comp:'k1', state:'Confirmed' }
+    ];
+    BOOKED.forEach(function (b) { REQ[b.ev + '|' + b.comp] = b.state; });
+
+    /* -- matching ------------------------------------------------------------ */
+    var STATE = { cat:'curated', forEvent:null, kind:'Event companion',
+                  verifiedOnly:true, cprefs:{}, prefs:{}, priv:{} };
+
+    function ev(id) { return EVENTS.filter(function (e) { return e.id === id; })[0]; }
+    function freeFor(c, e) {
+      return e && c.free[0] <= e.date && c.free[1] >= e.date;
+    }
+    function factors(c, e) {
+      var shared = c.interests.filter(function (i) { return (e ? e.interests : ME.interests).indexOf(i) > -1; });
+      return {
+        event: e ? (c.kinds.indexOf(STATE.kind) > -1 ? 100 : 62) : 70,
+        availability: e ? (freeFor(c, e) ? 100 : 35) : 80,
+        location: e ? (c.city === e.city ? 100 : 62) : (c.city === ME.city ? 100 : 62),
+        social: c.social === ME.social ? 100 : 74,
+        interests: Math.round(shared.length / 4 * 100),
+        communication: c.comms === ME.comms ? 100 : 78,
+        lifestyle: c.lifestyle === ME.lifestyle ? 100 : 76,
+        persona: Math.min(100, 60 + c.attended * 2)
+      };
+    }
+    function score(f) {
+      var t = 0, s = 0;
+      Object.keys(WEIGHTS).forEach(function (k) { t += WEIGHTS[k]; s += WEIGHTS[k] * f[k]; });
+      return Math.round(s / t);
+    }
+    function eventFit(e) {
+      var shared = e.interests.filter(function (i) { return ME.interests.indexOf(i) > -1; });
+      var here = e.city === ME.city ? 1 : .78;
+      return Math.round((60 + shared.length * 12) * here);
+    }
+
+    /* -- rendering ----------------------------------------------------------- */
+    var live = el('p', 'sr-only'); live.setAttribute('role','status'); live.setAttribute('aria-live','polite');
+    evView.appendChild(live);
+    function announce(t) { live.textContent = t; }
+
+    function renderUpcoming() {
+      var host = $('#ev-upcoming'); host.textContent = '';
+      var mine = Object.keys(REQ).map(function (k) {
+        var p = k.split('|');
+        return { e: ev(p[0]), c: COMPANIONS.filter(function (x) { return x.id === p[1]; })[0], s: REQ[k] };
+      }).filter(function (r) { return r.e && r.c && r.s !== 'Declined'; });
+      $('#ev-upcoming-n').textContent = mine.length + (mine.length === 1 ? ' arrangement' : ' arrangements');
+      if (!mine.length) {
+        host.appendChild(el('p', 'quiet', 'Nothing arranged. Choose an evening below, or ask the concierge to find one.'));
+        return;
+      }
+      mine.forEach(function (r) {
+        var row = el('div', 'ev-up');
+        var l = el('div');
+        l.appendChild(el('p', 'ev-up__n', r.e.name));
+        l.appendChild(el('p', 'ev-up__d', fmt(r.e.date) + ' · ' + r.e.time + ' · ' + r.e.city + ' · ' + r.e.venue));
+        l.appendChild(el('p', 'ev-up__c', 'Companion: ' + r.c.name + (r.s === 'Confirmed' || r.s === 'Completed' ? ' ✓' : '')));
+        row.appendChild(l);
+        var right = el('div', 'ev-up__r');
+        // the state machine, shown as a track rather than a word
+        var track = el('div', 'ev-track');
+        FLOW.forEach(function (st) {
+          var done = FLOW.indexOf(st) <= FLOW.indexOf(r.s);
+          track.appendChild(el('span', 'ev-track__s' + (done ? ' is-done' : ''), st));
+        });
+        right.appendChild(track);
+        var acts = el('div', 'ev-up__acts');
+        var det = el('button', 'btn'); det.type = 'button';
+        det.appendChild(el('span', null, 'Details')); det.appendChild(el('i', 'arrow'));
+        det.addEventListener('click', function () { openEvent(r.e, r.c); });
+        var conc = el('button', 'btn btn--quiet', 'Contact concierge'); conc.type = 'button';
+        conc.addEventListener('click', function () { showPane('concierge'); });
+        var canc = el('button', 'btn btn--quiet', 'Cancel'); canc.type = 'button';
+        canc.addEventListener('click', function () {
+          delete REQ[r.e.id + '|' + r.c.id];
+          renderUpcoming(); renderCompanions();
+          note(canc, 'Cancelled. ' + r.c.name + ' is told the evening is off and nothing else; the venue is released by the concierge today.');
+        });
+        [det, conc, canc].forEach(function (b) { acts.appendChild(b); });
+        right.appendChild(acts);
+        row.appendChild(right);
+        host.appendChild(row);
+      });
+    }
+
+    function eventCard(e) {
+      var a = el('article', 'ev-card');
+      var img = el('img', 'ev-card__img');
+      img.src = MATCH.plate(e.id + e.name); img.alt = ''; img.setAttribute('aria-hidden','true'); img.loading = 'lazy';
+      a.appendChild(img);
+      var b = el('div', 'ev-card__body');
+      b.appendChild(el('p', 'ev-card__cat', e.privacy));
+      b.appendChild(el('h3', 'ev-card__n', e.name));
+      b.appendChild(el('p', 'ev-card__d', e.city + ' · ' + fmt(e.date) + (e.time !== '—' ? ' · ' + e.time : '')));
+      b.appendChild(el('p', 'ev-card__g', e.guests + ' guests · ' + e.dress));
+      if (e.curated) {
+        var v = el('span', 'ltr-vfd'); v.appendChild(el('i', null, '✓'));
+        v.appendChild(el('span', null, 'Legend curated')); b.appendChild(v);
+      }
+      var open = el('button', 'btn'); open.type = 'button';
+      open.appendChild(el('span', null, 'View experience')); open.appendChild(el('i', 'arrow'));
+      open.addEventListener('click', function () { openEvent(e); });
+      b.appendChild(open);
+      a.appendChild(b);
+      return a;
+    }
+
+    function renderEvents() {
+      var list = EVENTS.filter(function (e) {
+        return STATE.cat === 'curated' ? e.curated : e.cat === STATE.cat;
+      }).sort(function (x, y) { return eventFit(y) - eventFit(x); });
+      var g = $('#ev-grid'); g.textContent = '';
+      list.forEach(function (e) { g.appendChild(eventCard(e)); });
+      $('#ev-empty').hidden = list.length > 0;
+      var cat = CATS.filter(function (c) { return c.id === STATE.cat; })[0];
+      $('#ev-note').textContent = list.length
+        ? cat.label + ' — ' + list.length + ' held. ' + cat.note + '.' : '';
+      $$('#ev-cats button').forEach(function (b) {
+        b.setAttribute('aria-selected', b.getAttribute('data-cat') === STATE.cat ? 'true' : 'false');
+      });
+    }
+
+    function companionCard(c, e) {
+      var f = factors(c, e), s = score(f);
+      var a = el('article', 'ltr-card cas-card');
+      var img = el('img', 'ltr-card__plate');
+      img.src = MATCH.plate(c.id + c.name); img.alt = ''; img.setAttribute('aria-hidden','true'); img.loading = 'lazy';
+      a.appendChild(img);
+      var b = el('div', 'ltr-card__body');
+      b.appendChild(MATCH.badge(c.verified));
+      b.appendChild(el('h3', 'ltr-card__name', c.name + ', ' + c.age));
+      b.appendChild(el('p', 'ltr-card__where', c.city));
+      var sc = el('div', 'ltr-score');
+      sc.appendChild(el('span', 'ltr-score__n', s + '%'));
+      sc.appendChild(el('span', 'ltr-score__l', 'Event compatibility'));
+      var bar = el('span', 'ltr-score__bar'); var fill = el('span');
+      fill.style.width = s + '%'; bar.appendChild(fill); sc.appendChild(bar);
+      b.appendChild(sc);
+      var shared = c.interests.filter(function (i) { return (e ? e.interests : ME.interests).indexOf(i) > -1; });
+      b.appendChild(el('p', 'ltr-card__tags', shared.length ? 'Shared: ' + shared.join(' · ') : 'No shared interest on file'));
+      b.appendChild(el('p', 'cas-avail' + (e && !freeFor(c, e) ? ' cas-avail--warn' : ''),
+        e ? (freeFor(c, e) ? 'Free on ' + fmt(e.date) : 'Not free on ' + fmt(e.date)) : 'Free ' + fmt(c.free[0]) + '–' + fmt(c.free[1])));
+      b.appendChild(el('p', 'ltr-card__goal', c.social));
+
+      var acts = el('div', 'cas-acts');
+      var view = el('button', 'btn'); view.type = 'button';
+      view.appendChild(el('span', null, 'View profile')); view.appendChild(el('i', 'arrow'));
+      view.addEventListener('click', function () { openCompanion(c, e); });
+      var req = el('button', 'btn btn--solid'); req.type = 'button';
+      var key = e ? e.id + '|' + c.id : null;
+      req.textContent = key && REQ[key] ? REQ[key] : 'Request companion';
+      req.disabled = !e || !!(key && REQ[key]);
+      if (!e) req.title = 'Choose an evening first';
+      req.addEventListener('click', function () { openCompanion(c, e, true); });
+      acts.appendChild(view); acts.appendChild(req);
+      b.appendChild(acts);
+      a.appendChild(b);
+      return a;
+    }
+
+    function renderCompanions() {
+      var e = STATE.forEvent ? ev(STATE.forEvent) : null;
+      var list = COMPANIONS.filter(function (c) {
+        if (STATE.verifiedOnly && !c.verified) return false;
+        var p = STATE.cprefs;
+        if (p.ageMin && c.age < +p.ageMin) return false;
+        if (p.ageMax && c.age > +p.ageMax) return false;
+        if (p.language && p.language !== 'Any' && c.langs.indexOf(p.language) < 0) return false;
+        if (p.social && p.social !== 'Any' && c.social !== p.social) return false;
+        if (p.comms && p.comms !== 'Any' && c.comms !== p.comms) return false;
+        return true;
+      }).sort(function (x, y) { return score(factors(y, e)) - score(factors(x, e)); }).slice(0, 6);
+      var g = $('#ev-companions'); g.textContent = '';
+      list.forEach(function (c) { g.appendChild(companionCard(c, e)); });
+      $('#ev-cempty').hidden = list.length > 0;
+      $('#ev-cnote').textContent = list.length
+        ? (e ? 'The house selected ' + list.length + ' members who may suit ' + e.name.toLowerCase() +
+               ' on ' + fmt(e.date) + '.' : 'Choose an evening above and these are re-scored against it.')
+        : '';
+      var pill = $('#ev-for-pill');
+      pill.textContent = e ? e.name + ' · ' + fmt(e.date) : 'Choose an evening';
+      pill.className = 'pill ' + (e ? 'pill--rest' : 'pill--action');
+    }
+
+    /* -- the sheet ------------------------------------------------------------ */
+    var sheet = $('#ltr-sheet'), sheetBody = $('#ltr-sheet-body');
+    function openEvent(e, withCompanion) {
+      sheetBody.textContent = '';
+      var head = el('div', 'ltr-sheet__head');
+      var img = el('img', 'ltr-sheet__plate'); img.src = MATCH.plate(e.id + e.name);
+      img.alt=''; img.setAttribute('aria-hidden','true'); head.appendChild(img);
+      var hb = el('div');
+      var h = el('h2', null, e.name); h.id = 'ltr-sheet-name'; hb.appendChild(h);
+      hb.appendChild(el('p', 'ltr-sheet__where', e.city + ' · ' + fmt(e.date) + (e.time !== '—' ? ' · ' + e.time : '')));
+      hb.appendChild(el('p', 'ltr-sheet__score', e.privacy + ' · ' + e.guests + ' guests'));
+      head.appendChild(hb); sheetBody.appendChild(head);
+
+      var p = el('div', 'panel');
+      p.appendChild(MATCH.head('The evening'));
+      var pb = el('div', 'panel__body');
+      pb.appendChild(el('p', 'ltr-about', e.about));
+      var dl = el('dl', 'kv');
+      [['Venue', e.venue], ['Dress', e.dress], ['Guests', String(e.guests)],
+       ['Host', e.host], ['Privacy', e.privacy],
+       ['Curated', e.curated ? 'By the house' : 'By a member, vetted by the house']]
+        .forEach(function (r) { dl.appendChild(el('dt',null,r[0])); dl.appendChild(el('dd',null,r[1])); });
+      pb.appendChild(dl);
+      if (withCompanion) {
+        pb.appendChild(el('p', 'ask__lbl', 'Your companion'));
+        pb.appendChild(el('p', 'pp-val', withCompanion.name + ' · ' + withCompanion.city +
+          ' · ' + (REQ[e.id + '|' + withCompanion.id] || 'Requested')));
+      }
+      pb.appendChild(el('div', 'note-inline',
+        'Your attendance is not shown on your profile, to anyone, at any setting. The venue is told a number and a name for the table, and nothing else.'));
+      p.appendChild(pb); sheetBody.appendChild(p);
+
+      var foot = el('div', 'ltr-sheet__acts');
+      var find = el('button', 'btn btn--solid', 'Find a companion for this'); find.type = 'button';
+      find.addEventListener('click', function () {
+        STATE.forEvent = e.id; closeSheet(); showPane('companion');
+        $$('#ev-for button').forEach(function (o) {
+          var on = o.getAttribute('data-ev-id') === e.id;
+          o.classList.toggle('is-on', on); o.setAttribute('aria-checked', on ? 'true':'false');
+        });
+        renderCompanions(); announce('Companions re-scored for ' + e.name + '.');
+      });
+      var conc = el('button', 'btn', 'Ask the concierge'); conc.type = 'button';
+      conc.addEventListener('click', function () { closeSheet(); showPane('concierge'); });
+      foot.appendChild(find); foot.appendChild(conc);
+      sheetBody.appendChild(foot);
+
+      sheet.hidden = false; document.body.style.overflow = 'hidden';
+      $('.ltr-sheet__close', sheet).focus();
+    }
+
+    function openCompanion(c, e, straightToRequest) {
+      sheetBody.textContent = '';
+      var f = factors(c, e), s = score(f);
+      var head = el('div', 'ltr-sheet__head');
+      var img = el('img', 'ltr-sheet__plate'); img.src = MATCH.plate(c.id + c.name);
+      img.alt=''; img.setAttribute('aria-hidden','true'); head.appendChild(img);
+      var hb = el('div');
+      if (c.verified) hb.appendChild(MATCH.badge(true));
+      var h = el('h2', null, c.name + ', ' + c.age); h.id = 'ltr-sheet-name'; hb.appendChild(h);
+      hb.appendChild(el('p', 'ltr-sheet__where', c.city + ' · ' + c.langs.join(', ')));
+      hb.appendChild(el('p', 'ltr-sheet__score', s + '% event compatibility' + (e ? ' for ' + e.name.toLowerCase() : '')));
+      head.appendChild(hb); sheetBody.appendChild(head);
+
+      var acts = el('div', 'ltr-sheet__acts');
+      var req = el('button', 'btn btn--solid'); req.type = 'button';
+      var report = el('button', 'btn btn--quiet', 'Report'); report.type = 'button';
+      var block = el('button', 'btn btn--quiet', 'Block'); block.type = 'button';
+      var box = el('div', 'ltr-connect'); box.hidden = true;
+      var key = e ? e.id + '|' + c.id : null;
+      function paint() {
+        req.textContent = !e ? 'Choose an evening first' : (REQ[key] || 'Request companion');
+        req.disabled = !e || !!REQ[key];
+      }
+      function openReq() {
+        if (!e) return;
+        box.hidden = false; box.textContent = '';
+        box.appendChild(el('p','ask__lbl','Request ' + c.name + ' for this evening'));
+        var dl = el('dl','kv');
+        [['Event', e.name], ['Date', fmt(e.date) + ' · ' + e.time], ['Location', e.city + ' · ' + e.venue],
+         ['Dress', e.dress], ['She is', freeFor(c, e) ? 'free that evening' : 'not free that evening']]
+          .forEach(function (r) { dl.appendChild(el('dt',null,r[0])); dl.appendChild(el('dd',null,r[1])); });
+        box.appendChild(dl);
+        var ta = el('textarea'); ta.rows = 3; ta.placeholder = 'Optional message';
+        ta.setAttribute('aria-label','Optional message to ' + c.name);
+        box.appendChild(ta);
+        var send = el('button','btn btn--solid','Send private request'); send.type='button';
+        send.addEventListener('click', function () {
+          REQ[key] = 'Requested';
+          box.textContent = '';
+          box.appendChild(el('p','ltr-sent',
+            'Requested. She sees the evening, the hour and the dress — not your surname, and nothing about why you are going. ' +
+            'If she accepts, the concierge confirms the table and writes to you both.'));
+          paint(); renderUpcoming(); renderCompanions();
+          announce('Companion requested for ' + e.name + '.');
+        });
+        box.appendChild(send); ta.focus();
+      }
+      req.addEventListener('click', openReq);
+      report.addEventListener('click', function () { note(report, 'Read by a person today, not a queue. She is never told who reported her.'); });
+      block.addEventListener('click', function () { note(block, c.name + ' is blocked and will not be curated to you again.'); });
+      [req, report, block].forEach(function (b) { acts.appendChild(b); });
+      paint(); sheetBody.appendChild(acts); sheetBody.appendChild(box);
+
+      var about = el('div','panel');
+      about.appendChild(MATCH.head('About ' + c.name));
+      var ab = el('div','panel__body');
+      ab.appendChild(el('p','ltr-about', c.about));
+      var dl2 = el('dl','kv');
+      [['Social style', c.social], ['Communication', c.comms], ['Lifestyle', c.lifestyle],
+       ['Interests', c.interests.join(', ')], ['Languages', c.langs.join(', ')],
+       ['Evenings attended', String(c.attended)], ['Available for', c.kinds.join(', ')]]
+        .forEach(function (r) { dl2.appendChild(el('dt',null,r[0])); dl2.appendChild(el('dd',null,r[1])); });
+      ab.appendChild(dl2);
+      ab.appendChild(el('div','note-inline',
+        'Which evenings she has attended, and with whom, is not shown here and is not shown to anyone. The count is all the house will say.'));
+      about.appendChild(ab); sheetBody.appendChild(about);
+
+      var why = el('div','panel');
+      why.appendChild(MATCH.head('Event compatibility', s + '%'));
+      var wb = el('div','panel__body');
+      var bars = el('div','ltr-bars');
+      Object.keys(f).forEach(function (k) {
+        var r = el('div','ltr-bars__row');
+        r.appendChild(el('span','k',LABELS[k]));
+        var bb = el('span','b'); var fi = el('i'); fi.style.width = f[k] + '%'; bb.appendChild(fi);
+        r.appendChild(bb); r.appendChild(el('span','v',f[k] + '%'));
+        bars.appendChild(r);
+      });
+      wb.appendChild(bars);
+      wb.appendChild(el('p','ltr-insight', e
+        ? 'For ' + e.name.toLowerCase() + ' on ' + fmt(e.date) + ': ' +
+          (freeFor(c,e) ? 'she is free' : 'she is not free that evening, which is the first thing to fix') +
+          ', ' + (c.city === e.city ? 'already in ' + e.city : 'she would travel from ' + c.city) +
+          (c.kinds.indexOf(STATE.kind) > -1 ? ', and she takes this kind of evening.' : ', though this is not a kind of evening she usually takes.')
+        : 'Choose an evening and this is recomputed against its date, its city and its kind — the three that move the figure most.'));
+      why.appendChild(wb); sheetBody.appendChild(why);
+
+      sheet.hidden = false; document.body.style.overflow = 'hidden';
+      $('.ltr-sheet__close', sheet).focus();
+      if (straightToRequest) openReq();
+    }
+    function closeSheet() { sheet.hidden = true; document.body.style.overflow = ''; }
+
+    /* -- controls -------------------------------------------------------------- */
+    function showPane(which) {
+      $$('.ev-tabs button').forEach(function (b) {
+        b.setAttribute('aria-selected', b.getAttribute('data-ev') === which ? 'true' : 'false');
+      });
+      ['discover','companion','prefs','concierge'].forEach(function (p) {
+        $('#ev-pane-' + p).hidden = p !== which;
+      });
+    }
+    $$('.ev-tabs button').forEach(function (b) {
+      b.addEventListener('click', function () { showPane(b.getAttribute('data-ev')); });
+    });
+
+    var catsWrap = $('#ev-cats');
+    CATS.forEach(function (c) {
+      var b = el('button'); b.type='button'; b.setAttribute('data-cat', c.id); b.setAttribute('role','tab');
+      b.setAttribute('aria-selected', c.id === STATE.cat ? 'true':'false');
+      b.appendChild(el('span','ltr-tab__l', c.label));
+      b.appendChild(el('span','ltr-tab__n', c.note));
+      b.addEventListener('click', function () { STATE.cat = c.id; renderEvents(); });
+      catsWrap.appendChild(b);
+    });
+
+    var forWrap = $('#ev-for');
+    EVENTS.forEach(function (e) {
+      var b = el('button','chip', e.name + ' · ' + fmt(e.date));
+      b.type='button'; b.setAttribute('role','radio'); b.setAttribute('aria-checked','false');
+      b.setAttribute('data-ev-id', e.id);
+      b.addEventListener('click', function () {
+        STATE.forEvent = e.id;
+        $$('button', forWrap).forEach(function (o) {
+          o.classList.toggle('is-on', o === b); o.setAttribute('aria-checked', o === b ? 'true':'false');
+        });
+        renderCompanions(); announce('Companions re-scored for ' + e.name + '.');
+      });
+      forWrap.appendChild(b);
+    });
+    var kindWrap = $('#ev-kind');
+    KINDS.forEach(function (k) {
+      var b = el('button', 'chip' + (k === STATE.kind ? ' is-on' : ''), k);
+      b.type='button'; b.setAttribute('role','radio');
+      b.setAttribute('aria-checked', k === STATE.kind ? 'true':'false');
+      b.addEventListener('click', function () {
+        STATE.kind = k;
+        $$('button', kindWrap).forEach(function (o) {
+          o.classList.toggle('is-on', o === b); o.setAttribute('aria-checked', o === b ? 'true':'false');
+        });
+        renderCompanions();
+      });
+      kindWrap.appendChild(b);
+    });
+
+    var langs = ['Any'].concat(COMPANIONS.reduce(function (a,c) { return a.concat(c.langs); }, [])
+      .filter(function (v,i,a) { return a.indexOf(v) === i; }).sort());
+    [ { k:'ageMin', label:'Minimum age', type:'number', value:28 },
+      { k:'ageMax', label:'Maximum age', type:'number', value:44 },
+      { k:'language', label:'Speaks', type:'select', options:langs },
+      { k:'social', label:'Social style', type:'select', options:['Any','Confident, selective','Warm, sociable','Quiet, observant'] },
+      { k:'comms', label:'Communication', type:'select', options:['Any','Direct','Warm','Considered'] }
+    ].forEach(function (d) { $('#ev-cprefs').appendChild(field(d, STATE.cprefs, renderCompanions, 'ev-c')); });
+
+    [ { k:'city', label:'Preferred city', type:'select', options:['Munich','Vienna','Zurich','Salzburg'], value:'Munich' },
+      { k:'size', label:'Group size', type:'select', options:['Any','Four to eight','Eight to sixteen','Sixteen or more'] },
+      { k:'time', label:'Preferred time', type:'select', options:['Any','Evening','Afternoon','Weekend'] },
+      { k:'dress', label:'Dress', type:'select', options:['Any','Informal','Business','Cocktail','Black tie'] }
+    ].forEach(function (d) { $('#ev-prefs').appendChild(field(d, STATE.prefs, renderEvents, 'ev-p')); });
+
+    [ { k:'activity', label:'My event activity visible to', type:'select', options:['Nobody','My advisor only','Members I have accepted'] },
+      { k:'travel', label:'My travel plans visible to', type:'select', options:['Nobody','My advisor only','Members I am introduced to'] },
+      { k:'companion', label:'Who I attended with', type:'select', options:['Nobody — the two of us and my advisor'] },
+      { k:'contact', label:'Who may request me as a companion', type:'select', options:['Verified members','Members I am introduced to','Nobody'] }
+    ].forEach(function (d) { $('#ev-privacy').appendChild(field(d, STATE.priv, function () {}, 'ev-pv')); });
+
+    var conciergeKinds = ['Find a companion','Change an arrangement','Arrange transport',
+                          'Recommend a restaurant','A private venue','A special request'];
+    var concPick = conciergeKinds[0];
+    conciergeKinds.forEach(function (k) {
+      var b = el('button','chip' + (k === concPick ? ' is-on' : ''), k);
+      b.type='button'; b.setAttribute('role','radio');
+      b.setAttribute('aria-checked', k === concPick ? 'true':'false');
+      b.addEventListener('click', function () {
+        concPick = k;
+        $$('#ev-conc-kinds button').forEach(function (o) {
+          o.classList.toggle('is-on', o === b); o.setAttribute('aria-checked', o === b ? 'true':'false');
+        });
+      });
+      $('#ev-conc-kinds').appendChild(b);
+    });
+    $('#ev-conc-send').addEventListener('click', function () {
+      var out = $('#ev-conc-out'); out.textContent = '';
+      out.appendChild(el('p','ltr-sent',
+        '"' + concPick + '" is with the concierge. A person, by name, in your own hours — they will telephone rather than write unless you have said otherwise, and you will hear today.'));
+      $('#ev-conc-text').value = '';
+      announce('Sent to the concierge.');
+    });
+    $('#ev-verified-only').addEventListener('change', function () {
+      STATE.verifiedOnly = this.checked; renderCompanions();
+    });
+
+    renderUpcoming(); renderEvents(); renderCompanions();
   })();
 
   route();
