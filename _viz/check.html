@@ -1,0 +1,11 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>palette check</title></head>
+<body data-palette="#D38340,#89809B,#5B8BDA,#62C3E7,#66C2AD,#5EAD7E" data-mode="dark" data-surface="#2B2B38">
+<pre id="out">running…</pre>
+<script type="module">
+import { validate } from './validate_palette.js';
+const pal = document.body.dataset.palette.split(',');
+const res = validate(pal, { mode:'dark', surface:'#2B2B38' });
+window.__res = res;
+document.getElementById('out').textContent = JSON.stringify(res.report, null, 1);
+</script>
+</body></html>

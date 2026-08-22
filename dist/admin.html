@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The House — Legend</title>
+<meta name="description" content="Legend principal panel. Partners only.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0B0B0C">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+<link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body class="portal-body">
+<div class="grain" aria-hidden="true"></div>
+
+<!-- ====================================================== PRINCIPAL ENTRY -->
+<section class="lock" id="lock">
+  <div class="lock__art" aria-hidden="true">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="pr1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#131416"/><stop offset="1" stop-color="#08080A"/></linearGradient>
+        <radialGradient id="pr2" cx=".5" cy=".42" r=".5"><stop offset="0" stop-color="#D9C9A8" stop-opacity=".13"/><stop offset="1" stop-color="#D9C9A8" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="1600" height="900" fill="url(#pr1)"/>
+      <rect width="1600" height="900" fill="url(#pr2)"/>
+      <g fill="none" stroke="#E4D6B6" stroke-opacity=".09">
+        <circle cx="800" cy="420" r="170"/><circle cx="800" cy="420" r="280" stroke-opacity=".05"/>
+      </g>
+      <g stroke="#E4D6B6" stroke-opacity=".06"><path d="M0 700h1600"/></g>
+    </svg>
+  </div>
+
+  <div class="lock__inner">
+    <svg class="lock__mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <circle cx="20" cy="20" r="18.4" stroke="currentColor" stroke-width=".9" opacity=".5"/>
+      <path d="M11.6 25.4h16.8" stroke="currentColor" stroke-width="1.15" stroke-linecap="square"/>
+      <path d="M20 10.2v15.2" stroke="currentColor" stroke-width="1.15" stroke-linecap="square"/>
+    </svg>
+
+    <h1>The house</h1>
+    <p class="intro">Principal access. Everything you open here is written to the same audit trail as everyone else's — including yours.</p>
+
+    <form id="lock-form" novalidate>
+      <div class="p-field">
+        <label for="pr-email">Partner address</label>
+        <input id="pr-email" type="email" autocomplete="off" placeholder="you@legendpartner.com">
+      </div>
+      <div class="p-field">
+        <label for="pr-code">Second step</label>
+        <input id="pr-code" type="text" autocomplete="off" placeholder="Required — not optional at this level">
+      </div>
+      <button class="btn btn--solid" type="submit" style="width:100%;justify-content:center">Enter</button>
+    </form>
+
+    <p class="disclaimer">
+      <strong style="color:var(--champagne)">Design preview.</strong> No authentication is performed
+      and nothing is transmitted or stored. Every figure and name below is illustrative.
+      <a class="link" href="advisor.html">The advisor console</a>
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ THE PANEL -->
+<div class="portal" id="portal" hidden>
+
+  <aside class="rail rail--principal">
+    <div>
+      <a class="rail__brand" href="#house">
+        <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <circle cx="20" cy="20" r="18.4" stroke="currentColor" stroke-width=".9" opacity=".5"/>
+          <path d="M11.6 25.4h16.8" stroke="currentColor" stroke-width="1.15" stroke-linecap="square"/>
+          <path d="M20 10.2v15.2" stroke="currentColor" stroke-width="1.15" stroke-linecap="square"/>
+        </svg>
+        <span><b>Legend</b><span>The House</span></span>
+      </a>
+
+      <div class="rail__member">
+        <p class="name">M. Aumont</p>
+        <span class="ref">Principal · London</span>
+      </div>
+
+      <nav class="rail__nav" id="rail-nav" aria-label="Principal panel">
+        <a href="#house" data-view="house"><i class="mk"></i><span>The house</span></a>
+        <p class="group">Decisions</p>
+        <a href="#admissions" data-view="admissions"><i class="mk"></i><span>Admissions</span><span class="count">3</span></a>
+        <a href="#conduct" data-view="conduct"><i class="mk"></i><span>Conduct</span><span class="count">1</span></a>
+        <p class="group">The practice</p>
+        <a href="#members" data-view="members"><i class="mk"></i><span>Members</span></a>
+        <a href="#people" data-view="people"><i class="mk"></i><span>Advisors</span></a>
+        <a href="#fees" data-view="fees"><i class="mk"></i><span>Fees &amp; renewals</span><span class="count">2</span></a>
+        <a href="#identity" data-view="identity"><i class="mk"></i><span>Identity service</span></a>
+        <p class="group">Accountability</p>
+        <a href="#audit" data-view="audit"><i class="mk"></i><span>Audit trail</span></a>
+        <a href="#settings" data-view="settings"><i class="mk"></i><span>Standards &amp; terms</span></a>
+      </nav>
+    </div>
+
+    <div class="rail__foot">
+      <div class="advisor">
+        <span class="seal" aria-hidden="true">L</span>
+        <span class="who">Legend<span class="role">Nine advisors · five cities</span></span>
+      </div>
+      <a class="out" href="#" id="sign-out">Sign out</a>
+    </div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <h1 id="view-title">The house</h1>
+      <div class="meta">
+        <span class="date" id="today"></span>
+        <span class="confidential">Access logged</span>
+      </div>
+    </header>
+
+    <p class="preview-note">
+      <span><b>Preview</b> &nbsp;Illustrative figures. No member, advisor or sum below is real.</span>
+    </p>
+
+    <main class="canvas" id="canvas">
+
+      <!-- ============================================= THE HOUSE -->
+      <section class="view is-active" id="view-house" tabindex="-1" aria-label="The house">
+        <p class="lede" id="greeting">Good afternoon.</p>
+        <p class="sub">
+          Four things want a principal today. Everything else is running, and the people running it
+          do not need you to look at it.
+        </p>
+
+        <div class="panel panel--plain" style="margin-top:2.6rem">
+          <div class="figs">
+            <div><span class="n">47</span><span class="l">Active mandates</span></div>
+            <div><span class="n">09</span><span class="l">Advisors, five cities</span></div>
+            <div><span class="n">3.2</span><span class="l">Members per advisor above target</span></div>
+            <div><span class="n">31%</span><span class="l">Applications accepted this year</span></div>
+          </div>
+        </div>
+
+        <div class="cols cols--2" style="margin-top:1.6rem">
+          <div class="panel panel--accent">
+            <div class="panel__head"><h2>Wants your decision</h2><span class="pill pill--action">4 open</span></div>
+            <div class="panel__body">
+              <dl class="kv kv--stack">
+                <dt>Conduct — a removal from the network</dt>
+                <dd>Reported 19 August. An advisor has acted; the removal itself is not theirs to take. <a class="link" href="#conduct" data-go="conduct">Open</a></dd>
+                <dt>Three admissions above the usual threshold</dt>
+                <dd>Two Private Mandates and one referral from a member. <a class="link" href="#admissions" data-go="admissions">Open</a></dd>
+              </dl>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Where the house is under strain</h2></div>
+            <div class="panel__body">
+              <div class="convo">
+                <div class="convo__item">
+                  <span class="no">01</span>
+                  <div>
+                    <p class="nm">Geneva is over capacity</p>
+                    <p class="ds">One advisor, eleven mandates. The target is eight. Either she stops taking members or we hire.</p>
+                  </div>
+                  <span class="pill pill--action">Decide</span>
+                </div>
+                <div class="convo__item">
+                  <span class="no">02</span>
+                  <div>
+                    <p class="nm">Two members unwritten-to for over three weeks</p>
+                    <p class="ds">Both on D. Okonjo's caseload. Silence is the failure mode of this work.</p>
+                  </div>
+                  <span class="pill pill--action">Raise it</span>
+                </div>
+                <div class="convo__item done">
+                  <span class="no">03</span>
+                  <div>
+                    <p class="nm">Formation counsel is thin</p>
+                    <p class="ds">Two people qualified to run it, four relationships in it. Not urgent this month.</p>
+                  </div>
+                  <span class="pill pill--rest">Watching</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols cols--3" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Engaged this year</h2></div>
+            <div class="panel__body">
+              <p class="trend"><span style="font-family:var(--serif);font-size:2.4rem;line-height:1">$1.34m</span><small class="up">Agreed, not collected</small></p>
+              <dl class="kv" style="margin-top:1.2rem">
+                <dt>Reserve</dt><dd class="num">14 · $118k</dd>
+                <dt>Signature</dt><dd class="num">26 · $1.01m</dd>
+                <dt>Private Mandate</dt><dd class="num">7 · $210k*</dd>
+              </dl>
+              <p class="quiet" style="margin-top:.9rem">*Two mandates are open-ended and billed by stage.</p>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>The work itself</h2></div>
+            <div class="panel__body">
+              <dl class="kv">
+                <dt>Introductions made</dt><dd class="num">61</dd>
+                <dt>Candidates assessed</dt><dd class="num">438</dd>
+                <dt>Ratio brought to members</dt><dd class="num">1 in 7.2</dd>
+                <dt>In Formation or Counsel</dt><dd class="num">12</dd>
+              </dl>
+              <div class="note-inline">
+                The ratio is the number to watch. If it rises, we are getting lazy about who reaches
+                a member.
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Identity service</h2></div>
+            <div class="panel__body">
+              <dl class="kv">
+                <dt>Marks in force</dt><dd class="num">212</dd>
+                <dt>Issued this month</dt><dd class="num">19</dd>
+                <dt>Withdrawn</dt><dd class="num">4</dd>
+                <dt>Holders who are members</dt><dd class="num">23 of 212</dd>
+              </dl>
+              <p class="quiet" style="margin-top:.9rem">
+                Most holders have nothing to do with the practice. That is the design.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================ ADMISSIONS -->
+      <section class="view" id="view-admissions" tabindex="-1" aria-label="Admissions">
+        <p class="lede">Admissions</p>
+        <p class="sub">
+          Advisors accept most applications themselves. These three are here because they are
+          Private Mandates, or because an advisor was not certain — and a principal takes the
+          uncertain ones.
+        </p>
+
+        <div class="panel panel--plain" style="margin-top:2.2rem">
+          <div class="figs">
+            <div><span class="n">148</span><span class="l">Applications this year</span></div>
+            <div><span class="n">46</span><span class="l">Accepted</span></div>
+            <div><span class="n">102</span><span class="l">Declined, with a reason given</span></div>
+            <div><span class="n">31%</span><span class="l">Acceptance rate</span></div>
+          </div>
+        </div>
+
+        <div style="margin-top:1.6rem" id="admissions">
+          <article class="decision decision--open" data-adm="a">
+            <div class="decision__head">
+              <div>
+                <p class="quiet" style="margin:0">Application 2608-14 · reviewed by C. Vasseur · Private Mandate</p>
+                <p class="decision__ttl" style="margin-top:.5rem">Publicly recognised. Wants a search nobody can know is happening.</p>
+              </div>
+              <span class="pill pill--action">Your decision</span>
+            </div>
+            <p class="decision__body">
+              C. Vasseur recommends acceptance and says she can run it. The complication is not the
+              member — it is that a search this quiet needs two advisors who never discuss it with
+              anyone, and we have three mandates already running on that footing.
+              <strong style="color:#EDEAE3">Her question is whether the house has the capacity to
+              keep a fourth genuinely silent.</strong>
+            </p>
+            <div class="decision__acts">
+              <button class="btn btn--solid" type="button" data-adm-act="accept">Accept</button>
+              <button class="btn btn--quiet" type="button" data-adm-act="defer">Defer — speak to her first</button>
+              <button class="btn btn--quiet" type="button" data-adm-act="decline">Decline</button>
+            </div>
+          </article>
+
+          <article class="decision decision--open" data-adm="b">
+            <div class="decision__head">
+              <div>
+                <p class="quiet" style="margin:0">Application 2608-09 · reviewed by R. Sole · Signature</p>
+                <p class="decision__ttl" style="margin-top:.5rem">Referred by a member. The advisor would decline.</p>
+              </div>
+              <span class="pill pill--action">Your decision</span>
+            </div>
+            <p class="decision__body">
+              R. Sole's note: <em>"He describes what he wants entirely in terms of what she should
+              look like and where she should have studied. I asked twice about temperament and got
+              nothing back. I do not think we can serve him and I do not think he would take our
+              answer well."</em> The complication is who referred him — a member of nine years.
+              <strong style="color:#EDEAE3">Declining is right; it should come from a principal, not
+              from R. Sole.</strong>
+            </p>
+            <div class="decision__acts">
+              <button class="btn btn--solid" type="button" data-adm-act="decline">Decline, and write to him myself</button>
+              <button class="btn btn--quiet" type="button" data-adm-act="accept">Accept anyway</button>
+            </div>
+          </article>
+
+          <article class="decision decision--open" data-adm="c">
+            <div class="decision__head">
+              <div>
+                <p class="quiet" style="margin:0">Application 2608-11 · reviewed by K. Marsh · Reserve</p>
+                <p class="decision__ttl" style="margin-top:.5rem">Straightforward, except the city.</p>
+              </div>
+              <span class="pill pill--action">Your decision</span>
+            </div>
+            <p class="decision__body">
+              Milan. We have no advisor there and no correspondent yet. K. Marsh can run the
+              assessment and would need a correspondent for the search itself, or the member should
+              be told plainly that we are not the right house for a Milan-only brief.
+            </p>
+            <div class="decision__acts">
+              <button class="btn btn--solid" type="button" data-adm-act="accept">Accept — find a correspondent</button>
+              <button class="btn btn--quiet" type="button" data-adm-act="decline">Decline, and say why</button>
+            </div>
+          </article>
+        </div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          Every decline is written to the applicant by a person, with a reason. We do not send
+          form letters and we have never charged for an application.
+        </div>
+      </section>
+
+      <!-- =============================================== CONDUCT -->
+      <section class="view" id="view-conduct" tabindex="-1" aria-label="Conduct">
+        <p class="lede">Conduct</p>
+        <p class="sub">
+          An advisor can end a contact, arrange transport, and record a report the same day. What
+          they cannot do is remove someone from the network. That decision is a principal's, and it
+          is written down with your name on it.
+        </p>
+
+        <div style="margin-top:2.6rem">
+          <article class="decision decision--grave" data-cond="a">
+            <div class="decision__head">
+              <div>
+                <p class="quiet" style="margin:0">Escalated 19 August by C. Vasseur · reported by S. Lindqvist</p>
+                <p class="decision__ttl" style="margin-top:.5rem">Removal from the network</p>
+              </div>
+              <span class="pill pill--action">Unanswered · 14 hours</span>
+            </div>
+            <p class="decision__body">
+              She reported that he pressed about money in a way she found calculated, and did not
+              stop when she twice changed the subject. Contact was ended the same day and she was
+              told so. This is the second report about him — the first, in March, was a different
+              member and was recorded but not acted on.
+            </p>
+            <dl class="tier__spec" style="margin-top:1.2rem">
+              <div><dt>Reports</dt><dd>Two, from unconnected members</dd></div>
+              <div><dt>She asked for</dt><dd>End all contact · not to be named</dd></div>
+              <div><dt>His engagement</dt><dd>Reserve, commenced February</dd></div>
+              <div><dt>Fee</dt><dd>Settled. Not returned on removal</dd></div>
+            </dl>
+            <div class="decision__acts">
+              <button class="btn btn--solid" type="button" data-cond-act="remove">Remove from the network</button>
+              <button class="btn btn--quiet" type="button" data-cond-act="warn">Speak to him first, on the record</button>
+              <button class="btn btn--quiet" type="button" data-cond-act="review">Read both reports in full</button>
+            </div>
+          </article>
+
+          <article class="decision">
+            <div class="decision__head">
+              <div>
+                <p class="quiet" style="margin:0">March · recorded, not acted on</p>
+                <p class="decision__ttl" style="margin-top:.5rem">The earlier report about the same member</p>
+              </div>
+              <span class="pill pill--rest">Closed at the time</span>
+            </div>
+            <p class="decision__body">
+              A single account, no pattern, and the member did not want anything done. The house
+              recorded it and left it. With a second report from an unconnected member, that judgment
+              looks different — which is the reason we record the ones we do not act on.
+            </p>
+          </article>
+        </div>
+
+        <div class="cols cols--2" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>This year</h2></div>
+            <div class="panel__body">
+              <dl class="kv">
+                <dt>Reports received</dt><dd class="num">7</dd>
+                <dt>Contact ended by an advisor</dt><dd class="num">5</dd>
+                <dt>Removed from the network</dt><dd class="num">2</dd>
+                <dt>Found to be a misunderstanding</dt><dd class="num">2</dd>
+              </dl>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>What a removal means</h2></div>
+            <div class="panel__body">
+              <ul class="includes">
+                <li>The engagement ends. The fee is not returned.</li>
+                <li>The other party is told what the house has done, and why.</li>
+                <li>The reporting member is never named to anyone.</li>
+                <li>The decision is recorded against a principal's name, permanently.</li>
+                <li>Readmission requires two principals, and has never been granted.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =============================================== MEMBERS -->
+      <section class="view" id="view-members" tabindex="-1" aria-label="Members">
+        <p class="lede">Members</p>
+        <p class="sub">
+          Forty-seven active mandates across five cities. You can see that a member exists, which
+          advisor holds them, and what they are paying — not their file. A principal reads a file
+          when there is a reason, and the reading is logged.
+        </p>
+
+        <div class="panel" style="margin-top:2.6rem">
+          <div class="panel__head"><h2>Active mandates</h2><span class="pill pill--rest">Showing 8 of 47</span></div>
+          <div class="panel__body">
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr><th>Member</th><th>Mandate</th><th>Advisor</th><th>City</th><th>Stage</th><th>Commenced</th><th>Attention</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><span class="who">A. Marchand</span><span class="sub">SG-2411</span></td><td>Signature</td><td>C. Vasseur</td><td>London</td><td>Introduction</td><td class="num">14 Mar 26</td><td><span class="stripe stripe--soon">Case owed</span></td></tr>
+                  <tr><td><span class="who">D. Okonjo</span><span class="sub">PM-2208</span></td><td>Private Mandate</td><td>C. Vasseur</td><td>Geneva</td><td>Search</td><td class="num">02 Nov 25</td><td><span class="stripe stripe--now">23 days silent</span></td></tr>
+                  <tr><td><span class="who">K. Reinhardt</span><span class="sub">SG-2503</span></td><td>Signature</td><td>R. Sole</td><td>Geneva</td><td>Assessment</td><td class="num">19 May 26</td><td><span class="stripe stripe--rest">—</span></td></tr>
+                  <tr><td><span class="who">B. Voss</span><span class="sub">SG-2314</span></td><td>Signature</td><td>K. Marsh</td><td>London</td><td>Formation</td><td class="num">07 Aug 25</td><td><span class="stripe stripe--rest">—</span></td></tr>
+                  <tr><td><span class="who">J. Albright</span><span class="sub">PM-2102</span></td><td>Private Mandate</td><td>M. Aumont</td><td>New York</td><td>Continuity</td><td class="num">11 Jan 24</td><td><span class="stripe stripe--soon">Review Nov</span></td></tr>
+                  <tr><td><span class="who">R. Tanaka</span><span class="sub">SG-2506</span></td><td>Signature</td><td>H. Lim</td><td>Singapore</td><td>Search</td><td class="num">03 Jun 26</td><td><span class="stripe stripe--rest">—</span></td></tr>
+                  <tr><td><span class="who">N. Haddad</span><span class="sub">SG-2419</span></td><td>Signature</td><td>C. Vasseur</td><td>Dubai</td><td>Introduction</td><td class="num">28 Apr 26</td><td><span class="stripe stripe--rest">—</span></td></tr>
+                  <tr><td><span class="who">L. Ferreira</span><span class="sub">RE-2521</span></td><td>Reserve</td><td>K. Marsh</td><td>London</td><td>Search</td><td class="num">14 Jul 26</td><td><span class="stripe stripe--rest">—</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel__foot">
+            <p class="quiet" style="margin:0">
+              Opening any member's file from here writes a line to the audit trail naming you, the
+              file, and the time. Members can ask to see that line.
+            </p>
+          </div>
+        </div>
+
+        <div class="cols cols--3" style="margin-top:1.6rem">
+          <div class="panel"><div class="panel__head"><h2>By mandate</h2></div><div class="panel__body">
+            <dl class="kv"><dt>Reserve</dt><dd class="num">14</dd><dt>Signature</dt><dd class="num">26</dd><dt>Private Mandate</dt><dd class="num">7</dd></dl>
+          </div></div>
+          <div class="panel"><div class="panel__head"><h2>By city</h2></div><div class="panel__body">
+            <dl class="kv"><dt>London</dt><dd class="num">18</dd><dt>New York</dt><dd class="num">11</dd><dt>Geneva</dt><dd class="num">9</dd><dt>Dubai</dt><dd class="num">5</dd><dt>Singapore</dt><dd class="num">4</dd></dl>
+          </div></div>
+          <div class="panel"><div class="panel__head"><h2>By stage</h2></div><div class="panel__body">
+            <dl class="kv"><dt>Assessment</dt><dd class="num">6</dd><dt>Search</dt><dd class="num">21</dd><dt>Introduction</dt><dd class="num">8</dd><dt>Formation or Counsel</dt><dd class="num">12</dd></dl>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- ================================================ PEOPLE -->
+      <section class="view" id="view-people" tabindex="-1" aria-label="Advisors">
+        <p class="lede">Advisors</p>
+        <p class="sub">
+          Nine people, five cities. The number that matters is the second column — a caseload above
+          eight is how members start hearing nothing for three weeks.
+        </p>
+
+        <div class="panel" style="margin-top:2.6rem">
+          <div class="panel__head"><h2>The bench</h2><span class="pill pill--action">One over capacity</span></div>
+          <div class="panel__body">
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Advisor</th><th>Caseload</th><th>City</th><th>Role</th><th>Areas</th><th>Joined</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td><span class="who">M. Aumont</span><span class="sub">Principal</span></td><td class="num">4</td><td>London</td><td>Principal</td><td>All</td><td class="num">2019</td><td><button class="btn btn--quiet" type="button" data-note="A principal's permissions cannot be edited by a single principal. Two are required.">Permissions</button></td></tr>
+                  <tr><td><span class="who">C. Vasseur</span><span class="sub">Senior advisor</span></td><td class="num"><span class="stripe stripe--now">11</span></td><td>Geneva</td><td>Senior</td><td>All five</td><td class="num">2021</td><td><button class="btn btn--quiet" type="button" data-note="Caseload capped at 11. She takes no new members until two conclude — she asked for this herself in June.">Permissions</button></td></tr>
+                  <tr><td><span class="who">R. Sole</span><span class="sub">Advisor</span></td><td class="num">7</td><td>Geneva</td><td>Advisor</td><td>I, II, III</td><td class="num">2023</td><td><button class="btn btn--quiet" type="button" data-note="Not yet cleared for Counsel or Continuity. Cleared for Formation in April.">Permissions</button></td></tr>
+                  <tr><td><span class="who">K. Marsh</span><span class="sub">Advisor</span></td><td class="num">8</td><td>London</td><td>Advisor</td><td>I, II, III, IV</td><td class="num">2022</td><td><button class="btn btn--quiet" type="button" data-note="Cleared for Counsel in January after supervised practice.">Permissions</button></td></tr>
+                  <tr><td><span class="who">H. Lim</span><span class="sub">Advisor</span></td><td class="num">6</td><td>Singapore</td><td>Advisor</td><td>I, II</td><td class="num">2024</td><td><button class="btn btn--quiet" type="button" data-note="Search and assessment only. Relationship work is referred to K. Marsh.">Permissions</button></td></tr>
+                  <tr><td><span class="who">T. Bahri</span><span class="sub">Researcher</span></td><td class="num">—</td><td>Dubai</td><td>Researcher</td><td>II only</td><td class="num">2024</td><td><button class="btn btn--quiet" type="button" data-note="Dedicated search and verification. No access to member files beyond the brief.">Permissions</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel__foot">
+            <button class="btn btn--quiet" type="button" data-note="Adding an advisor requires a second principal to approve, and the new advisor sees no member file until a mandate is assigned to them.">Add an advisor</button>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head"><h2>What each role may do</h2><span class="pill pill--rest">Two principals required to change</span></div>
+          <div class="panel__body">
+            <div class="table-wrap">
+              <div class="perms">
+                <span class="hd">Permission</span><span class="hd">Researcher</span><span class="hd">Advisor</span><span class="hd">Senior</span><span class="hd">Principal</span>
+                <span class="rowname">Read a brief</span><span class="cell on"><i></i></span><span class="cell on"><i></i></span><span class="cell on"><i></i></span><span class="cell on"><i></i></span>
+                <span class="rowname">Read a member's full file</span><span class="cell"><i></i></span><span class="cell on"><i></i></span><span class="cell on"><i></i></span><span class="cell on"><i></i></span>
+                <span class="rowname">Write and send a case</span><span class="cell"><i></i></span><span class="cell on"><i></i></span><span class="cell on"><i></i></span><span class="cell on"><i></i></span>
+                <span class="rowname">Read persona transcripts</span><span class="cell"><i></i></span><span class="cell on"><i></i></span><span class="cell on"><i></i></span><span class="cell on"><i></i></span>
+                <span class="rowname">Run Counsel or Continuity</span><span class="cell"><i></i></span><span class="cell"><i></i></span><span class="cell on"><i></i></span><span class="cell on"><i></i></span>
+                <span class="rowname">Issue a verification mark</span><span class="cell on"><i></i></span><span class="cell on"><i></i></span><span class="cell on"><i></i></span><span class="cell on"><i></i></span>
+                <span class="rowname">Accept an application</span><span class="cell"><i></i></span><span class="cell on"><i></i></span><span class="cell on"><i></i></span><span class="cell on"><i></i></span>
+                <span class="rowname">Remove someone from the network</span><span class="cell"><i></i></span><span class="cell"><i></i></span><span class="cell"><i></i></span><span class="cell on"><i></i></span>
+                <span class="rowname">Read the audit trail</span><span class="cell"><i></i></span><span class="cell"><i></i></span><span class="cell"><i></i></span><span class="cell on"><i></i></span>
+              </div>
+            </div>
+            <div class="note-inline">
+              No role can read a file it is not working on, and no role can edit the audit trail —
+              including a principal. That is the point of it.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================== FEES -->
+      <section class="view" id="view-fees" tabindex="-1" aria-label="Fees and renewals">
+        <p class="lede">Fees &amp; renewals</p>
+        <p class="sub">
+          Agreed before work begins, settled afterwards, and never contingent on an outcome. Two
+          things want attention: one fee unsettled past terms, and one renewal that should be a
+          conversation rather than an invoice.
+        </p>
+
+        <div class="panel panel--plain" style="margin-top:2.2rem">
+          <div class="figs">
+            <div><span class="n">$1.34m</span><span class="l">Engaged this year</span></div>
+            <div><span class="n">$1.28m</span><span class="l">Settled</span></div>
+            <div><span class="n">$62k</span><span class="l">Outstanding</span></div>
+            <div><span class="n">11</span><span class="l">Renewals in the next quarter</span></div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head"><h2>Wants attention</h2><span class="pill pill--action">2</span></div>
+          <div class="panel__body">
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Member</th><th>Matter</th><th>Amount</th><th>Raised</th><th>State</th><th></th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><span class="who">D. Okonjo</span><span class="sub">PM-2208</span></td>
+                    <td>Second stage of an open-ended mandate</td>
+                    <td class="num">$45,000</td><td class="num">02 Jul 26</td>
+                    <td><span class="stripe stripe--now">48 days</span></td>
+                    <td><button class="btn btn--quiet" type="button" data-note="The office has written twice. A principal should telephone rather than send a third notice — and should ask whether the silence is about the fee or about the search.">Handle</button></td>
+                  </tr>
+                  <tr>
+                    <td><span class="who">J. Albright</span><span class="sub">PM-2102</span></td>
+                    <td>Continuity renewal, third year</td>
+                    <td class="num">$38,000</td><td class="num">—</td>
+                    <td><span class="stripe stripe--soon">Due Nov</span></td>
+                    <td><button class="btn btn--quiet" type="button" data-note="Two years of Continuity with two calls in the last twelve months. The honest conversation is whether he still needs it — we have told members before that they do not.">Handle</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols cols--2" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>By mandate this year</h2></div>
+            <div class="panel__body">
+              <div class="table-wrap">
+                <table class="table">
+                  <thead><tr><th>Level</th><th>Engagements</th><th>Engaged</th><th>Average</th></tr></thead>
+                  <tbody>
+                    <tr><td>Reserve</td><td class="num">14</td><td class="num">$118,000</td><td class="num">$8,400</td></tr>
+                    <tr><td>Signature</td><td class="num">26</td><td class="num">$1,012,000</td><td class="num">$38,900</td></tr>
+                    <tr><td>Private Mandate</td><td class="num">7</td><td class="num">$210,000</td><td class="num">by stage</td></tr>
+                    <tr><td>Identity service</td><td class="num">231</td><td class="num">—</td><td class="num">single fee</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>What we do not do</h2></div>
+            <div class="panel__body">
+              <ul class="includes">
+                <li>No fee contingent on an introduction, a meeting, or a marriage.</li>
+                <li>No monthly billing and no automatic renewal — a renewal is a conversation.</li>
+                <li>No charge for an application, ever.</li>
+                <li>No commission paid to or taken from a correspondent for introducing a person.</li>
+                <li>No fee returned on removal for conduct.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== IDENTITY -->
+      <section class="view" id="view-identity" tabindex="-1" aria-label="Identity service">
+        <p class="lede">Identity service</p>
+        <p class="sub">
+          A separate service with its own economics. Most holders have no relationship with the
+          practice, and the two must not be allowed to leak into one another.
+        </p>
+
+        <div class="panel panel--plain" style="margin-top:2.2rem">
+          <div class="figs">
+            <div><span class="n">212</span><span class="l">Marks in force</span></div>
+            <div><span class="n">19</span><span class="l">Issued this month</span></div>
+            <div><span class="n">04</span><span class="l">Withdrawn</span></div>
+            <div><span class="n">1,840</span><span class="l">Lookups this month</span></div>
+          </div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Issued by</h2><span class="pill pill--rest">Each mark carries a name</span></div>
+            <div class="panel__body">
+              <div class="table-wrap">
+                <table class="table">
+                  <thead><tr><th>Advisor</th><th>Issued</th><th>Withdrawn</th><th>Re-confirmed</th><th>City</th></tr></thead>
+                  <tbody>
+                    <tr><td><span class="who">T. Bahri</span></td><td class="num">78</td><td class="num">1</td><td class="num">22</td><td>Dubai</td></tr>
+                    <tr><td><span class="who">H. Lim</span></td><td class="num">54</td><td class="num">2</td><td class="num">14</td><td>Singapore</td></tr>
+                    <tr><td><span class="who">K. Marsh</span></td><td class="num">41</td><td class="num">0</td><td class="num">18</td><td>London</td></tr>
+                    <tr><td><span class="who">R. Sole</span></td><td class="num">39</td><td class="num">1</td><td class="num">9</td><td>Geneva</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="note-inline">
+                An advisor who issues marks quickly and re-confirms few of them is worth a
+                conversation. The service works only because the appointment is real.
+              </div>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Withdrawals this year</h2></div>
+              <div class="panel__body">
+                <dl class="kv kv--stack">
+                  <dt>By the holder — 9</dt>
+                  <dd>Usually because they stopped using the account they placed it on.</dd>
+                  <dt>By the house — 4</dt>
+                  <dd>Two lapsed without re-confirmation. Two withdrawn after a report.</dd>
+                </dl>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>The wall between services</h2></div>
+              <div class="panel__body">
+                <ul class="includes">
+                  <li>A lookup never reveals whether the holder is a member.</li>
+                  <li>Identity holders are not approached about the practice. Not once.</li>
+                  <li>Member files and mark records are held separately.</li>
+                  <li>23 of 212 holders are members — and no one checking a code can tell which.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================= AUDIT -->
+      <section class="view" id="view-audit" tabindex="-1" aria-label="Audit trail">
+        <p class="lede">Audit trail</p>
+        <p class="sub">
+          We give members a ledger of every disclosure. This is the same instrument turned on
+          ourselves: who opened which file, and when. It cannot be edited by anyone, including you,
+          and a member may ask to see every line that concerns them.
+        </p>
+
+        <div class="cols cols--3" style="margin-top:2.2rem">
+          <div class="panel panel--plain"><div class="figs"><div><span class="n">2,914</span><span class="l">File openings this month</span></div></div></div>
+          <div class="panel panel--plain"><div class="figs"><div><span class="n">02</span><span class="l">Flagged for review</span></div></div></div>
+          <div class="panel panel--plain"><div class="figs"><div><span class="n">00</span><span class="l">Entries ever altered</span></div></div></div>
+        </div>
+
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head"><h2>Recent</h2><span class="pill pill--rest">Append-only · newest first</span></div>
+          <div class="panel__body">
+            <div class="audit">
+              <div class="audit__row audit__row--flag">
+                <span class="audit__when">Today 09:12</span>
+                <span class="audit__who">R. Sole</span>
+                <span class="audit__what">Opened A. Marchand's file — not an advisor on this mandate</span>
+                <span class="audit__tag">Flagged</span>
+              </div>
+              <div class="audit__row">
+                <span class="audit__when">Today 08:47</span>
+                <span class="audit__who">C. Vasseur</span>
+                <span class="audit__what">Read persona transcript — K. Reinhardt × Candidate No. 04</span>
+                <span class="audit__tag">In scope</span>
+              </div>
+              <div class="audit__row">
+                <span class="audit__when">Yesterday 17:30</span>
+                <span class="audit__who">M. Aumont</span>
+                <span class="audit__what">Opened conduct report 2608-03 — escalated for removal</span>
+                <span class="audit__tag">Principal</span>
+              </div>
+              <div class="audit__row">
+                <span class="audit__when">Yesterday 14:02</span>
+                <span class="audit__who">T. Bahri</span>
+                <span class="audit__what">Issued verification mark to a non-member — Dubai</span>
+                <span class="audit__tag">Identity</span>
+              </div>
+              <div class="audit__row audit__row--flag">
+                <span class="audit__when">18 Aug 22:41</span>
+                <span class="audit__who">H. Lim</span>
+                <span class="audit__what">Exported a candidate list — outside working hours</span>
+                <span class="audit__tag">Flagged</span>
+              </div>
+              <div class="audit__row">
+                <span class="audit__when">18 Aug 11:15</span>
+                <span class="audit__who">K. Marsh</span>
+                <span class="audit__what">Sent written case No. 07 to A. Marchand</span>
+                <span class="audit__tag">In scope</span>
+              </div>
+              <div class="audit__row">
+                <span class="audit__when">17 Aug 16:08</span>
+                <span class="audit__who">C. Vasseur</span>
+                <span class="audit__what">Recorded a brief revision — D. Okonjo, geography</span>
+                <span class="audit__tag">In scope</span>
+              </div>
+            </div>
+          </div>
+          <div class="panel__foot">
+            <div class="stack gap-s">
+              <button class="btn btn--quiet" type="button" data-note="R. Sole opened a file on a mandate he does not hold. There may be a good reason — cover during leave is the usual one — but he is asked, and his answer is recorded beside the entry.">Ask R. Sole about the flagged entry</button>
+              <p class="quiet" style="margin:0">
+                Flags are questions, not accusations. Most have an ordinary answer, and the answer is
+                recorded whether or not it is satisfactory.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== SETTINGS -->
+      <section class="view" id="view-settings" tabindex="-1" aria-label="Standards and terms">
+        <p class="lede">Standards &amp; terms</p>
+        <p class="sub">
+          The parameters the whole house runs on. Changing any of them changes what members were
+          promised, so each one records who changed it and when.
+        </p>
+
+        <div class="cols cols--2" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Mandates</h2></div>
+            <div class="panel__body">
+              <div class="table-wrap">
+                <table class="table">
+                  <thead><tr><th>Level</th><th>Commences at</th><th>Areas</th><th>Term</th></tr></thead>
+                  <tbody>
+                    <tr><td><span class="who">Reserve</span></td><td class="num">$8,000</td><td>Assessment + one</td><td>Fixed</td></tr>
+                    <tr><td><span class="who">Signature</span></td><td class="num">$38,000</td><td>All five</td><td>Open</td></tr>
+                    <tr><td><span class="who">Private Mandate</span></td><td class="num">$120,000</td><td>All five</td><td>Open</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <button class="btn btn--quiet" type="button" data-note="A fee change never applies to a mandate already agreed. Existing members continue on the terms they signed, for the life of that mandate." style="margin-top:1.2rem">Amend a level</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Where we work</h2></div>
+            <div class="panel__body">
+              <dl class="kv">
+                <dt>Cities with an advisor</dt><dd>London · New York · Geneva · Dubai · Singapore</dd>
+                <dt>Covered by correspondents</dt><dd>Paris · Vienna · Zurich</dd>
+                <dt>Requested, not covered</dt><dd>Milan · São Paulo</dd>
+              </dl>
+              <button class="btn btn--quiet" type="button" data-note="Adding a city means an advisor who lives there, not a mailing address. We have declined mandates rather than pretend otherwise." style="margin-top:1.2rem">Add a city</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head"><h2>Standards that are not settings</h2><span class="pill pill--rest">Two principals to change</span></div>
+          <div class="panel__body">
+            <div class="toggle-row">
+              <div>
+                <p class="nm">Every candidate is met in person before being proposed</p>
+                <p class="ds">Turning this off would make us an introduction service. It has never been off.</p>
+              </div>
+              <label class="switch"><input type="checkbox" checked disabled><span></span></label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <p class="nm">Consent is asked separately for every disclosure</p>
+                <p class="ds">The consent ledger depends on it, and so does everything we tell members about privacy.</p>
+              </div>
+              <label class="switch"><input type="checkbox" checked disabled><span></span></label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <p class="nm">A case cannot be sent without a second advisor's disagreement</p>
+                <p class="ds">Five conditions on the compose screen. Removing one would be the fastest way to lower the standard invisibly.</p>
+              </div>
+              <label class="switch"><input type="checkbox" checked disabled><span></span></label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <p class="nm">No public profiles, directory or browsing</p>
+                <p class="ds">The absence is the product. There is no version of this house with a member list.</p>
+              </div>
+              <label class="switch"><input type="checkbox" checked disabled><span></span></label>
+            </div>
+            <div class="note-inline">
+              These are shown as switches to make a point: they are the four things that could be
+              switched off quietly and would destroy the house within a year. They require two
+              principals, a written reason, and the reason is published to every member.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head"><h2>Document versions in force</h2></div>
+          <div class="panel__body">
+            <dl class="kv">
+              <dt>Engagement letter</dt><dd>v4 — in force since 11 March 2026</dd>
+              <dt>Confidentiality undertaking</dt><dd>v2 — since 4 January 2025</dd>
+              <dt>Data terms</dt><dd>v3 — since 11 March 2026</dd>
+              <dt>Identity service terms</dt><dd>v1 — since 2 June 2026</dd>
+            </dl>
+            <p class="quiet" style="margin-top:1rem">
+              A new version never applies retrospectively. Members are told when one changes and are
+              sent the version they are on, not the current one.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script src="assets/js/admin.js"></script>
+</body>
+</html>

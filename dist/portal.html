@@ -1,0 +1,2584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Member Access — Legend</title>
+<meta name="description" content="The Legend private client portal. Members only.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0B0B0C">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+<link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body class="portal-body">
+<div class="grain" aria-hidden="true"></div>
+
+<!-- ========================================================== LOCK SCREEN -->
+<section class="lock" id="lock">
+  <div class="lock__art" aria-hidden="true">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="lk1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#171719"/><stop offset="1" stop-color="#08080A"/></linearGradient>
+        <radialGradient id="lk2" cx=".68" cy=".3" r=".55"><stop offset="0" stop-color="#D9C9A8" stop-opacity=".16"/><stop offset="1" stop-color="#D9C9A8" stop-opacity="0"/></radialGradient>
+        <filter id="lkb" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="42"/></filter>
+      </defs>
+      <rect width="1600" height="900" fill="url(#lk1)"/>
+      <rect width="1600" height="900" fill="url(#lk2)"/>
+      <g filter="url(#lkb)" opacity=".7"><ellipse cx="1120" cy="300" rx="280" ry="180" fill="#E4D6B6" fill-opacity=".10"/></g>
+      <g fill="none" stroke="#E4D6B6" stroke-opacity=".10">
+        <circle cx="1120" cy="300" r="150"/><circle cx="1120" cy="300" r="240" stroke-opacity=".06"/>
+      </g>
+      <path d="M0 720h1600" stroke="#E4D6B6" stroke-opacity=".06"/>
+    </svg>
+  </div>
+
+  <div class="lock__inner">
+    <svg class="lock__mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <circle cx="20" cy="20" r="18.4" stroke="currentColor" stroke-width=".9" opacity=".5"/>
+      <path d="M11.6 25.4h16.8" stroke="currentColor" stroke-width="1.15" stroke-linecap="square"/>
+      <path d="M20 10.2v15.2" stroke="currentColor" stroke-width="1.15" stroke-linecap="square"/>
+    </svg>
+
+    <h1>Member access</h1>
+    <p class="intro">Your advisor issues and renews this access personally. If you have mislaid it, write to the office and it will be reissued.</p>
+
+    <form id="lock-form" novalidate>
+      <div class="p-field">
+        <label for="lk-email">Email</label>
+        <input id="lk-email" type="email" autocomplete="off" placeholder="The address held on your file">
+      </div>
+      <div class="p-field">
+        <label for="lk-code">Access reference</label>
+        <input id="lk-code" type="text" autocomplete="off" placeholder="Issued by your advisor">
+      </div>
+      <button class="btn btn--solid" type="submit" style="width:100%;justify-content:center">Enter</button>
+    </form>
+
+    <p class="disclaimer">
+      <strong style="color:var(--champagne)">Design preview.</strong> No authentication is performed
+      and nothing is transmitted or stored. Any entry opens the portal with sample data so the
+      experience can be reviewed. <a class="link" href="index.html">Return to the public site</a>
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================== PORTAL -->
+<div class="portal" id="portal" hidden>
+
+  <!-- RAIL -->
+  <aside class="rail">
+    <div>
+      <a class="rail__brand" href="index.html">
+        <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <circle cx="20" cy="20" r="18.4" stroke="currentColor" stroke-width=".9" opacity=".5"/>
+          <path d="M11.6 25.4h16.8" stroke="currentColor" stroke-width="1.15" stroke-linecap="square"/>
+          <path d="M20 10.2v15.2" stroke="currentColor" stroke-width="1.15" stroke-linecap="square"/>
+        </svg>
+        <span><b>Legend</b><span>Private Client Portal</span></span>
+      </a>
+
+      <div class="rail__member">
+        <p class="name">A. Marchand</p>
+        <span class="ref">Signature · SG-2411</span>
+      </div>
+
+      <nav class="rail__nav" id="rail-nav" aria-label="Portal">
+        <a href="#overview" data-view="overview"><i class="mk"></i><span>Overview</span></a>
+        <p class="group">The search</p>
+        <a href="#proposed" data-view="proposed"><i class="mk"></i><span>Proposed for you</span><span class="count">2</span></a>
+        <a href="#requests" data-view="requests"><i class="mk"></i><span>Asked of you</span><span class="count">2</span></a>
+        <a href="#introductions" data-view="introductions"><i class="mk"></i><span>Introductions</span><span class="count">1</span></a>
+        <a href="#appointments" data-view="appointments"><i class="mk"></i><span>Appointments</span></a>
+        <a href="#messages" data-view="messages"><i class="mk"></i><span>Messages</span></a>
+        <p class="group">Your file</p>
+        <a href="#persona" data-view="persona"><i class="mk"></i><span>Persona</span></a>
+        <a href="#profile" data-view="profile"><i class="mk"></i><span>Private profile</span></a>
+        <a href="#preferences" data-view="preferences"><i class="mk"></i><span>The brief</span></a>
+        <a href="#intentions" data-view="intentions"><i class="mk"></i><span>Intentions</span></a>
+        <a href="#reflections" data-view="reflections"><i class="mk"></i><span>Reflections &amp; standing</span></a>
+        <a href="#insights" data-view="insights"><i class="mk"></i><span>What we have learned</span></a>
+        <p class="group">The relationship</p>
+        <a href="#formation" data-view="formation"><i class="mk"></i><span>Formation</span></a>
+        <a href="#counsel" data-view="counsel"><i class="mk"></i><span>Counsel</span></a>
+        <a href="#continuity" data-view="continuity"><i class="mk"></i><span>Continuity</span></a>
+        <p class="group">The house</p>
+        <a href="#parties" data-view="parties"><i class="mk"></i><span>Private gatherings</span></a>
+        <a href="#assistant" data-view="assistant"><i class="mk"></i><span>Assistant</span></a>
+        <a href="#mandate" data-view="mandate"><i class="mk"></i><span>Mandate &amp; agreement</span></a>
+        <a href="#documents" data-view="documents"><i class="mk"></i><span>Documents</span></a>
+        <p class="group">Privacy &amp; account</p>
+        <a href="#consent" data-view="consent"><i class="mk"></i><span>Consent ledger</span></a>
+        <a href="#data" data-view="data"><i class="mk"></i><span>What we hold</span></a>
+        <a href="#credential" data-view="credential"><i class="mk"></i><span>Verification mark</span></a>
+        <a href="#safety" data-view="safety"><i class="mk"></i><span>Safety &amp; conduct</span></a>
+        <a href="#account" data-view="account"><i class="mk"></i><span>Account &amp; security</span></a>
+      </nav>
+    </div>
+
+    <div class="rail__foot">
+      <div class="advisor">
+        <span class="seal" aria-hidden="true">CV</span>
+        <span class="who">C. Vasseur<span class="role">Your advisor · London</span></span>
+      </div>
+      <a class="out" href="#" id="sign-out">Sign out</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div>
+    <header class="topbar">
+      <h1 id="view-title">Overview</h1>
+      <div class="meta">
+        <span class="date" id="today"></span>
+        <span class="confidential">Confidential</span>
+      </div>
+    </header>
+
+    <p class="preview-note">
+      <span><b>Preview</b> &nbsp;All names, introductions and correspondence below are illustrative sample content.</span>
+      <button type="button" id="empty-toggle">See it as a new member</button>
+    </p>
+
+    <main class="canvas" id="canvas">
+
+      <!-- ============================================= OVERVIEW -->
+      <section class="view is-active" id="view-overview" tabindex="-1" aria-label="Overview">
+        <p class="lede" id="greeting">Good afternoon.</p>
+        <p class="sub">Two matters are waiting for you: an introduction to consider, and a dinner to confirm for the 28th.</p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+
+          <div class="panel panel--accent">
+            <div class="panel__head">
+              <h2>Awaiting your consideration</h2>
+              <span class="pill pill--action">Action required</span>
+            </div>
+            <div class="panel__body">
+              <p style="font-family:var(--serif);font-size:1.5rem;line-height:1.35;color:#EDEAE3">
+                Introduction No. 07 — a founder in Zurich, recently returned from a decade in Singapore.
+              </p>
+              <p style="color:var(--fg-soft);font-size:.92rem">
+                Your advisor met them twice before writing the case. Their name, profession and
+                photograph remain withheld until you accept, and they have not been told who you are.
+              </p>
+            </div>
+            <div class="panel__foot">
+              <a class="btn" href="#introductions" data-go="introductions"><span>Read the case</span><i class="arrow"></i></a>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Next appointment</h2></div>
+            <div class="panel__body">
+              <p style="font-family:var(--serif);font-size:2rem;line-height:1;color:#EDEAE3">Friday 28 August</p>
+              <p style="font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--fg-faint)">20:00 · Marylebone, London</p>
+              <p style="color:var(--fg-soft);font-size:.92rem">
+                Dinner arranged following Introduction No. 06. The table is held in our name.
+              </p>
+            </div>
+            <div class="panel__foot">
+              <a class="btn" href="#appointments" data-go="appointments"><span>All appointments</span><i class="arrow"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols cols--5-7" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Your engagement</h2></div>
+            <div class="panel__body">
+              <ul class="spine">
+                <li class="done"><span class="no">01</span><span>Private consultation</span></li>
+                <li class="done"><span class="no">02</span><span>Personal profile</span></li>
+                <li class="done"><span class="no">03</span><span>Curation</span></li>
+                <li class="now"><span class="no">04</span><span>Assessment &amp; introduction</span></li>
+                <li><span class="no">05</span><span>Introduction</span></li>
+                <li><span class="no">06</span><span>Ongoing advisory</span></li>
+              </ul>
+            </div>
+            <div class="panel__foot">
+              <p class="quiet" style="margin:0">Signature engagement · commenced 14 March 2026 · no fixed term</p>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <h2>From your advisor</h2>
+              <span class="pill pill--rest">2 days ago</span>
+            </div>
+            <div class="panel__body">
+              <p style="font-family:var(--serif);font-size:1.24rem;line-height:1.6;font-style:italic;color:#EDEAE3">
+                &ldquo;I would rather you read the case twice and take the week than answer me tonight.
+                There is nothing being lost by considering it properly.&rdquo;
+              </p>
+              <p class="quiet" style="margin-top:1.2rem">C. Vasseur · London</p>
+            </div>
+            <div class="panel__foot">
+              <a class="btn" href="#messages" data-go="messages"><span>Open correspondence</span><i class="arrow"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols cols--3" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Proposed for you</h2><span class="pill pill--action">2 waiting</span></div>
+            <div class="panel__body">
+              <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                Two candidates your advisor believes are worth a full case. Both cleared a persona
+                exchange first.
+              </p>
+            </div>
+            <div class="panel__foot">
+              <a class="btn" href="#proposed" data-go="proposed"><span>Consider them</span><i class="arrow"></i></a>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Your persona</h2><span class="pill pill--rest">72% complete</span></div>
+            <div class="panel__body">
+              <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                Four sessions so far. Another conversation would sharpen what it says on your behalf.
+              </p>
+            </div>
+            <div class="panel__foot">
+              <a class="btn" href="#persona" data-go="persona"><span>Continue the conversation</span><i class="arrow"></i></a>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Outstanding</h2><span class="pill pill--action">1 reflection</span></div>
+            <div class="panel__body">
+              <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                Your advisor is waiting on your account of the 28th. It shapes what comes next.
+              </p>
+            </div>
+            <div class="panel__foot">
+              <a class="btn" href="#reflections" data-go="reflections"><span>Record it</span><i class="arrow"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel--plain" style="margin-top:1.6rem">
+          <div class="figs">
+            <div><span class="n">04</span><span class="l">Introductions to date</span></div>
+            <div><span class="n">02</span><span class="l">Met in person</span></div>
+            <div><span class="n">4.6</span><span class="l">Your standing, out of five</span></div>
+            <div><span class="n">17</span><span class="l">Candidates assessed, not brought to you</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================== INTRODUCTIONS -->
+      <section class="view" id="view-introductions" tabindex="-1" aria-label="Introductions">
+        <p class="lede">Introductions</p>
+        <p class="sub">Four in eleven months. Each was argued internally before it reached you, and each carries the reasoning behind it.</p>
+
+        <div class="cols cols--5-7" style="margin-top:2.6rem">
+          <div>
+            <div class="intro-list" id="intro-list">
+              <button class="intro-row" type="button" data-case="07" aria-current="true">
+                <span class="ref">No. 07</span>
+                <span>
+                  <span class="ttl">A founder in Zurich</span>
+                  <span class="sub">Written 17 August · met twice by your advisor</span>
+                </span>
+                <span class="pill pill--action">Awaiting you</span>
+              </button>
+              <button class="intro-row" type="button" data-case="06">
+                <span class="ref">No. 06</span>
+                <span>
+                  <span class="ttl">Marguerite</span>
+                  <span class="sub">Accepted 2 August · dinner on the 28th</span>
+                </span>
+                <span class="pill pill--live">Meeting arranged</span>
+              </button>
+              <button class="intro-row" type="button" data-case="05">
+                <span class="ref">No. 05</span>
+                <span>
+                  <span class="ttl">Two meetings, then concluded</span>
+                  <span class="sub">Concluded 11 June at your request</span>
+                </span>
+                <span class="pill pill--rest">Concluded</span>
+              </button>
+              <button class="intro-row" type="button" data-case="04">
+                <span class="ref">No. 04</span>
+                <span>
+                  <span class="ttl">Declined before introduction</span>
+                  <span class="sub">Declined 3 April · geography</span>
+                </span>
+                <span class="pill pill--rest">Declined</span>
+              </button>
+            </div>
+            <p class="quiet" style="margin-top:1.4rem">
+              Nothing here is shared with anyone. Declining costs you nothing and is never explained
+              to the other party.
+            </p>
+          </div>
+
+          <div id="case-holder">
+            <!-- Case 07 -->
+            <article class="case" data-case-panel="07">
+              <div class="case__head">
+                <div>
+                  <p class="quiet" style="margin:0">Introduction No. 07</p>
+                  <p style="font-family:var(--serif);font-size:1.9rem;line-height:1.15;margin-top:.5rem">A founder in Zurich</p>
+                </div>
+                <span class="pill pill--action">Awaiting your consideration</span>
+              </div>
+
+              <div class="case__body">
+                <h4>The case</h4>
+                <p>
+                  Forty-one. Built and sold a logistics business across South-East Asia over eleven
+                  years, returned to Zurich in 2024, and now holds two board seats and a great deal
+                  more of their own time than they are used to. Divorced, no children, and direct
+                  about wanting both.
+                </p>
+                <p>
+                  I met them first in Zurich in June and again in London last month. They are
+                  unusually unhurried for someone with that record — the kind of person who answers
+                  a question after a pause rather than during it. They read seriously. They cook.
+                  They have kept the same three friends since university, which I have learned to
+                  treat as meaningful.
+                </p>
+                <p>
+                  On the point you raised in March: they have moved for a person before and would
+                  do so again, but they said it without the eagerness of someone performing
+                  flexibility.
+                </p>
+
+                <h4>Why I am bringing this to you</h4>
+                <p class="serif-note">
+                  You have twice told me that you do not want to be the more ambitious person in the
+                  room, and twice declined people who agreed with you too readily. This is neither.
+                </p>
+                <p>
+                  The practical fit is also better than it looks on paper: Zurich and London is a
+                  ninety-minute problem, not a transatlantic one, and their calendar is now their
+                  own in a way that yours is not.
+                </p>
+
+                <h4>Where I am less certain</h4>
+                <p>
+                  They came out of a long marriage two years ago and have met very few people since.
+                  I do not think that is a reason to wait, but you should hear it from me first
+                  rather than discover it over dinner.
+                </p>
+
+                <div class="withheld" style="margin-top:2.2rem">
+                  <h4 style="margin-bottom:.6rem">What remains withheld</h4>
+                  <p style="font-size:.88rem;margin:0">
+                    Their name, employer, photograph and city of residence are withheld until you
+                    accept. They have not been told your identity, your profession, or that this
+                    case exists. Nothing is disclosed on either side without consent given for this
+                    introduction specifically.
+                  </p>
+                </div>
+              </div>
+
+              <div class="case__actions" id="case-actions-07">
+                <button class="btn btn--solid" type="button" id="accept-07">Accept the introduction</button>
+                <button class="btn btn--quiet" type="button" id="decline-07">Decline</button>
+                <a class="btn" href="#messages" data-go="messages"><span>Ask C. Vasseur a question</span><i class="arrow"></i></a>
+              </div>
+              <div class="decided" id="case-decided-07" hidden></div>
+            </article>
+
+            <!-- Case 06 -->
+            <article class="case" data-case-panel="06" hidden>
+              <div class="case__head">
+                <div>
+                  <p class="quiet" style="margin:0">Introduction No. 06</p>
+                  <p style="font-family:var(--serif);font-size:1.9rem;line-height:1.15;margin-top:.5rem">Marguerite</p>
+                </div>
+                <span class="pill pill--live">Meeting arranged</span>
+              </div>
+              <div class="case__body">
+                <h4>Where this stands</h4>
+                <p>
+                  You accepted on 2 August. Marguerite accepted on the 5th, and both parties have
+                  now been given the other's name. Dinner is held for Friday 28 August at 20:00 in
+                  Marylebone, under our reservation.
+                </p>
+                <h4>Before you go</h4>
+                <p>
+                  She knows your first name and that you work in private markets; nothing further
+                  was shared. She asked one question about you, which I answered honestly: whether
+                  you were seeing anyone else through us. You are not.
+                </p>
+                <p>
+                  I will call you on the Saturday, whenever suits. There is no correct answer to
+                  give me.
+                </p>
+              </div>
+              <div class="case__actions">
+                <a class="btn" href="#appointments" data-go="appointments"><span>See the arrangement</span><i class="arrow"></i></a>
+                <button class="btn btn--quiet" type="button" data-note="A request to reschedule has been passed to C. Vasseur. She will telephone you today.">Request a change</button>
+              </div>
+            </article>
+
+            <!-- Case 05 -->
+            <article class="case" data-case-panel="05" hidden>
+              <div class="case__head">
+                <div>
+                  <p class="quiet" style="margin:0">Introduction No. 05</p>
+                  <p style="font-family:var(--serif);font-size:1.9rem;line-height:1.15;margin-top:.5rem">Two meetings, then concluded</p>
+                </div>
+                <span class="pill pill--rest">Concluded</span>
+              </div>
+              <div class="case__body">
+                <h4>Your account</h4>
+                <p>
+                  &ldquo;Genuinely good company. But we want different decades — she is building
+                  something that needs the next five years, and I have just finished doing exactly
+                  that.&rdquo;
+                </p>
+                <h4>What I took from it</h4>
+                <p>
+                  That life stage is doing more work in your considerations than either of us
+                  assumed at the outset, and that I had been weighting values and temperament too
+                  heavily against timing. I have adjusted the brief accordingly — you will see it
+                  reflected in No. 07.
+                </p>
+                <p>
+                  She was told the same thing you were, in the same words. There is no version of
+                  this in which one party hears something kinder.
+                </p>
+              </div>
+            </article>
+
+            <!-- Case 04 -->
+            <article class="case" data-case-panel="04" hidden>
+              <div class="case__head">
+                <div>
+                  <p class="quiet" style="margin:0">Introduction No. 04</p>
+                  <p style="font-family:var(--serif);font-size:1.9rem;line-height:1.15;margin-top:.5rem">Declined before introduction</p>
+                </div>
+                <span class="pill pill--rest">Declined</span>
+              </div>
+              <div class="case__body">
+                <h4>Your decision</h4>
+                <p>
+                  Declined on 3 April on geography: New York, with no intention of leaving, and at
+                  that point you were not prepared to consider a transatlantic beginning.
+                </p>
+                <h4>Handling</h4>
+                <p>
+                  Nothing was disclosed. They were never told that a case had been written, and no
+                  approach was made. Your name did not appear at any stage.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================= APPOINTMENTS -->
+      <section class="view" id="view-appointments" tabindex="-1" aria-label="Appointments">
+        <p class="lede">Appointments</p>
+        <p class="sub">Arranged around your calendar. Anything here can be moved by telling your advisor; nothing requires an explanation.</p>
+
+        <div class="panel" style="margin-top:2.6rem">
+          <div class="panel__head"><h2>Upcoming</h2></div>
+          <div class="panel__body">
+            <div class="appt">
+              <span class="when">28 Aug<small>Fri · 20:00</small></span>
+              <span>
+                <span class="what">Dinner — Introduction No. 06</span>
+                <span class="where">Marylebone, London · table held under our name · smart, not formal</span>
+              </span>
+              <button class="btn btn--quiet" type="button" data-note="Your advisor has been notified and will telephone you today to rearrange.">Move</button>
+            </div>
+            <div class="appt">
+              <span class="when">02 Sep<small>Tue · 09:30</small></span>
+              <span>
+                <span class="what">Quarterly review with C. Vasseur</span>
+                <span class="where">Secure call · 45 minutes · agenda sent the day before</span>
+              </span>
+              <button class="btn btn--quiet" type="button" data-note="Your advisor has been notified and will telephone you today to rearrange.">Move</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head"><h2>Past</h2></div>
+          <div class="panel__body">
+            <div class="appt appt--past">
+              <span class="when">05 Aug<small>Tue · 18:30</small></span>
+              <span><span class="what">Briefing call before Introduction No. 06</span><span class="where">Secure call · 20 minutes</span></span>
+              <span class="pill pill--rest">Held</span>
+            </div>
+            <div class="appt appt--past">
+              <span class="when">11 Jun<small>Wed · 13:00</small></span>
+              <span><span class="what">Debrief — Introduction No. 05</span><span class="where">In person, Mayfair · 1 hour</span></span>
+              <span class="pill pill--rest">Held</span>
+            </div>
+            <div class="appt appt--past">
+              <span class="when">14 Mar<small>Fri · 11:00</small></span>
+              <span><span class="what">Private consultation — engagement commenced</span><span class="where">In person, London · 3 hours</span></span>
+              <span class="pill pill--rest">Held</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= MESSAGES -->
+      <section class="view" id="view-messages" tabindex="-1" aria-label="Messages">
+        <p class="lede">Correspondence</p>
+        <p class="sub">Between you and C. Vasseur only. No one else at the house reads this thread.</p>
+
+        <div class="panel" style="margin-top:2.6rem">
+          <div class="panel__head">
+            <h2>C. Vasseur · Your advisor</h2>
+            <span class="pill pill--rest">London · replies within a day</span>
+          </div>
+
+          <div class="thread" id="thread">
+            <div class="msg msg--them">
+              <p class="who">C. Vasseur · 17 August</p>
+              <div class="bubble">
+                No. 07 is written and with you. I met them a second time in London before I put
+                anything down, which is why this has taken three weeks rather than one.
+              </div>
+            </div>
+            <div class="msg msg--them">
+              <p class="who">C. Vasseur · 17 August</p>
+              <div class="bubble">
+                I would rather you read the case twice and take the week than answer me tonight.
+                There is nothing being lost by considering it properly.
+              </div>
+            </div>
+            <div class="msg msg--me">
+              <p class="who">You · 18 August</p>
+              <div class="bubble">
+                Read it on the flight. The Singapore decade is the part I keep returning to — I want
+                to understand why they came back before I decide.
+              </div>
+            </div>
+            <div class="msg msg--them">
+              <p class="who">C. Vasseur · 18 August</p>
+              <div class="bubble">
+                A fair question, and I asked it. Their answer was about a parent, not about the
+                business. I can tell you the rest on a call, or leave it for them to tell you
+                themselves — which I would prefer, if you accept.
+              </div>
+            </div>
+          </div>
+
+          <form class="composer" id="composer">
+            <textarea id="msg-input" placeholder="Write to your advisor" aria-label="Write to your advisor"></textarea>
+            <button class="btn btn--quiet" type="submit">Send</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============================================== PROFILE -->
+      <section class="view" id="view-profile" tabindex="-1" aria-label="Private profile">
+        <p class="lede">Your private profile</p>
+        <p class="sub">
+          The portrait your advisor works from. It exists here and in your file, and nowhere else —
+          it is never shown to another member, in whole or in part. Complete it in your own time;
+          nothing here is required, and a blank answer is an answer.
+        </p>
+
+        <div class="persona-state" style="margin-top:2.2rem">
+          <span class="pct" id="profile-pct">64<small style="font-size:.4em">%</small></span>
+          <div>
+            <p style="font-size:.88rem;color:#EDEAE3;margin:0">Profile completeness</p>
+            <div class="bar"><i id="profile-bar" style="width:64%"></i></div>
+            <p class="quiet" style="margin-top:.7rem" id="profile-missing">
+              Still open: languages, faith and cultural considerations, what your household looks
+              like day to day, and the two questions under Standards.
+            </p>
+          </div>
+        </div>
+
+        <form id="profile-form" style="margin-top:1.6rem">
+          <div class="cols cols--2">
+
+            <!-- PERSONAL -->
+            <div class="panel" data-section="personal">
+              <div class="panel__head">
+                <h2>Personal</h2>
+                <span class="pill pill--rest">Yours to edit</span>
+              </div>
+              <div class="panel__body">
+                <div class="field-row">
+                  <div class="p-field">
+                    <label for="pf-name">Name</label>
+                    <input id="pf-name" type="text" value="A. Marchand">
+                  </div>
+                  <div class="p-field">
+                    <label for="pf-age">Age</label>
+                    <input id="pf-age" type="text" value="44">
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="p-field">
+                    <label for="pf-city">Principal city</label>
+                    <input id="pf-city" type="text" value="London">
+                  </div>
+                  <div class="p-field">
+                    <label for="pf-city2">Second residence</label>
+                    <input id="pf-city2" type="text" value="Bordeaux">
+                  </div>
+                </div>
+                <div class="p-field">
+                  <label for="pf-lang">Languages</label>
+                  <input id="pf-lang" type="text" placeholder="Not yet answered">
+                </div>
+                <div class="p-field">
+                  <label for="pf-vis">How visible are you publicly</label>
+                  <select id="pf-vis">
+                    <option>A private individual</option>
+                    <option selected>Known within my field</option>
+                    <option>Publicly recognised</option>
+                  </select>
+                </div>
+                <button class="btn btn--quiet" type="button" data-save="personal">Save this section</button>
+              </div>
+            </div>
+
+            <!-- LIFE -->
+            <div class="panel" data-section="life">
+              <div class="panel__head">
+                <h2>Life</h2>
+                <span class="pill pill--rest">Yours to edit</span>
+              </div>
+              <div class="panel__body">
+                <div class="p-field">
+                  <label for="pf-work">Occupation</label>
+                  <input id="pf-work" type="text" value="Private markets · partner">
+                </div>
+                <div class="p-field">
+                  <label for="pf-travel">Travel</label>
+                  <select id="pf-travel">
+                    <option>Rarely</option>
+                    <option>Monthly</option>
+                    <option selected>Most weeks, mainly Europe</option>
+                    <option>I live between cities</option>
+                  </select>
+                </div>
+                <div class="p-field">
+                  <label for="pf-outside">Outside work</label>
+                  <textarea id="pf-outside">Sailing, the cello badly, one long walk a week</textarea>
+                </div>
+                <div class="p-field">
+                  <label for="pf-household">What your household looks like day to day</label>
+                  <textarea id="pf-household" placeholder="Not yet answered — who is in the house, and what an ordinary week contains"></textarea>
+                </div>
+                <button class="btn btn--quiet" type="button" data-save="life">Save this section</button>
+              </div>
+            </div>
+
+            <!-- INTENTIONS & FAMILY -->
+            <div class="panel" data-section="family">
+              <div class="panel__head">
+                <h2>Family &amp; circumstances</h2>
+                <span class="pill pill--action">Discussed before it changes the search</span>
+              </div>
+              <div class="panel__body">
+                <div class="field-row">
+                  <div class="p-field">
+                    <label for="pf-status">Situation</label>
+                    <select id="pf-status">
+                      <option selected>Divorced, 2019</option>
+                      <option>Single</option>
+                      <option>Widowed</option>
+                      <option>Separated</option>
+                      <option>Prefer to discuss</option>
+                    </select>
+                  </div>
+                  <div class="p-field">
+                    <label for="pf-children">Children</label>
+                    <input id="pf-children" type="text" value="Two, in their twenties">
+                  </div>
+                </div>
+                <div class="p-field">
+                  <label for="pf-more">Further children</label>
+                  <select id="pf-more">
+                    <option selected>Not sought</option>
+                    <option>Would like</option>
+                    <option>Open</option>
+                    <option>Prefer to discuss</option>
+                  </select>
+                </div>
+                <div class="p-field">
+                  <label for="pf-faith">Faith, culture, and family expectations</label>
+                  <textarea id="pf-faith" placeholder="Not yet answered — where these matter to you, and where they do not"></textarea>
+                  <p class="hint" style="font-size:.72rem;color:var(--fg-faint);margin-top:.7rem">
+                    We ask directly because these considerations decide more introductions than any other.
+                  </p>
+                </div>
+                <button class="btn btn--quiet" type="button" data-save="family">Save this section</button>
+              </div>
+            </div>
+
+            <!-- STANDARDS -->
+            <div class="panel" data-section="standards">
+              <div class="panel__head">
+                <h2>Standards</h2>
+                <span class="pill pill--action">Discussed before it changes the search</span>
+              </div>
+              <div class="panel__body">
+                <div class="p-field">
+                  <label for="pf-worth">What would make an introduction worth the evening</label>
+                  <textarea id="pf-worth">Someone with their own centre of gravity. I have no wish to be the interesting one.</textarea>
+                </div>
+                <div class="p-field">
+                  <label for="pf-nonneg">Where you will not compromise</label>
+                  <textarea id="pf-nonneg">Honesty about money and about children. Both were the reason last time.</textarea>
+                </div>
+                <div class="p-field">
+                  <label for="pf-missing">What has been missing until now</label>
+                  <textarea id="pf-missing" placeholder="Not yet answered — often the most useful answer on this page"></textarea>
+                </div>
+                <div class="p-field">
+                  <label for="pf-wrong">Where you think you have been wrong before</label>
+                  <textarea id="pf-wrong" placeholder="Not yet answered — your advisor will not use this against you"></textarea>
+                </div>
+                <button class="btn btn--quiet" type="button" data-save="standards">Save this section</button>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <div class="cols cols--7-5" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>How editing works here</h2></div>
+            <div class="panel__body">
+              <ul class="includes">
+                <li><strong style="color:#EDEAE3">Facts you own</strong> — name, cities, languages, occupation, household. Saved the moment you save them.</li>
+                <li><strong style="color:#EDEAE3">Judgments that steer the search</strong> — standards, family considerations, what you will not compromise. Saved here, then raised by your advisor before the search actually changes.</li>
+                <li>Nothing is ever published, listed, or shown to another member.</li>
+                <li>Your advisor sees what changed and when, so the reasoning stays beside the change.</li>
+              </ul>
+              <div class="note-inline">
+                Two other places add to this portrait without you filling in a field: the
+                <a class="link" href="#persona" data-go="persona">persona conversation</a>, which is
+                where the harder things surface, and
+                <a class="link" href="#reflections" data-go="reflections">your reflections</a> after
+                each meeting.
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Recent changes</h2></div>
+            <div class="panel__body">
+              <dl class="kv kv--stack" id="profile-log">
+                <dt>11 June · Standards</dt>
+                <dd>&ldquo;Where you will not compromise&rdquo; rewritten by you after Introduction No. 05. Discussed with C. Vasseur on the 12th.</dd>
+                <dt>2 April · Personal</dt>
+                <dd>Second residence added.</dd>
+                <dt>19 March · Whole profile</dt>
+                <dd>Drawn from your application and the consultation, confirmed by you.</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== PREFERENCES -->
+      <section class="view" id="view-preferences" tabindex="-1" aria-label="The brief">
+        <p class="lede">The brief</p>
+        <p class="sub">What we are actually searching against. Revised four times since March — the current version is below, with the reasoning your advisor recorded each time.</p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Current brief</h2><span class="pill pill--rest">Revised 11 June</span></div>
+            <div class="panel__body">
+              <dl class="kv">
+                <dt>Age considered</dt><dd>38 — 50</dd>
+                <dt>Geography</dt><dd>Europe, without limitation within it</dd>
+                <dt>Life stage</dt><dd>Established; not building something that needs the next five years</dd>
+                <dt>Children</dt><dd>Own children welcome; no further children sought</dd>
+                <dt>Background</dt><dd>No requirement of faith or nationality; French an advantage, not a condition</dd>
+                <dt>Temperament</dt><dd>Self-possessed. Comfortable being disagreed with</dd>
+                <dt>Excluded</dt><dd>Anyone within your firm, its portfolio, or your board circle</dd>
+              </dl>
+            </div>
+            <div class="panel__foot">
+              <button class="btn btn--quiet" type="button" data-toggle="brief-box">Propose a revision</button>
+              <div id="brief-box" hidden style="margin-top:1.6rem;max-width:600px">
+                <div class="p-field">
+                  <label for="brief-what">What should we change</label>
+                  <textarea id="brief-what" placeholder="However provisional. Your advisor will call it back to you."></textarea>
+                </div>
+                <button class="btn btn--solid" type="button" data-note="Sent. C. Vasseur will discuss the revision with you before the search is altered.">Send to my advisor</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>How it has changed</h2></div>
+            <div class="panel__body">
+              <dl class="kv kv--stack">
+                <dt>11 June — life stage added</dt>
+                <dd>After No. 05. Timing was doing more work in your decisions than the brief admitted.</dd>
+                <dt>3 April — geography narrowed</dt>
+                <dd>North America removed at your request following No. 04.</dd>
+                <dt>2 April — temperament clarified</dt>
+                <dd>&ldquo;Comfortable being disagreed with&rdquo; added in your own words.</dd>
+                <dt>14 March — brief established</dt>
+                <dd>Drawn from the consultation and confirmed by you on the 19th.</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= INSIGHTS -->
+      <section class="view" id="view-insights" tabindex="-1" aria-label="What we have learned">
+        <p class="lede">What we have learned</p>
+        <p class="sub">Not a score, and not an algorithm's opinion of you. This is what your advisor has observed across eleven months, written down so that you can disagree with it.</p>
+
+        <div class="panel panel--plain" style="margin-top:2.6rem">
+          <div class="figs">
+            <div><span class="n">21</span><span class="l">Candidates assessed</span></div>
+            <div><span class="n">04</span><span class="l">Brought to you</span></div>
+            <div><span class="n">02</span><span class="l">Met in person</span></div>
+            <div><span class="n">04</span><span class="l">Revisions to the brief</span></div>
+          </div>
+        </div>
+
+        <div class="cols cols--2" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Observations</h2></div>
+            <div class="panel__body">
+              <p style="font-family:var(--serif);font-size:1.3rem;line-height:1.55;color:#EDEAE3">
+                You decide slowly and well. Of the four cases put to you, the two you declined were
+                declined for the same reason you gave at the consultation, almost word for word.
+              </p>
+              <p style="color:var(--fg-soft);font-size:.92rem">
+                That consistency is unusual and it makes the search materially easier. It also means
+                a case that meets your stated brief but that you decline is worth a conversation —
+                it usually indicates something the brief has not yet captured.
+              </p>
+              <p style="color:var(--fg-soft);font-size:.92rem">
+                The one thing I would put to you: you describe what you do not want with far more
+                precision than what you do. That is common, and it is not a criticism — but it is
+                why I keep asking the same question in different ways.
+              </p>
+              <p class="quiet">C. Vasseur · recorded 12 August</p>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>What we are adjusting</h2></div>
+            <div class="panel__body">
+              <ul class="includes">
+                <li>Weighting life stage alongside values, rather than beneath them.</li>
+                <li>Searching Zurich, Geneva and Milan properly, which we had not before June.</li>
+                <li>Bringing you fewer cases, with more written reasoning in each.</li>
+                <li>Asking about the first meeting rather than the first impression.</li>
+              </ul>
+              <div class="note-inline">
+                These adjustments are made by your advisor, recorded here, and reversible at your
+                word. Nothing about your file is changed automatically.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================ CONCIERGE -->
+      <section class="view" id="view-assistant" tabindex="-1" aria-label="Assistant">
+        <p class="lede">Your assistant</p>
+        <p class="sub">Within the scope of your engagement: the arrangements surrounding an introduction — the table, the travel, the flowers, the discretion of the venue. Ask, and it is handled.</p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Make a request</h2></div>
+            <div class="panel__body">
+              <form id="concierge-form" novalidate>
+                <div class="p-field">
+                  <label for="c-type">Nature of the request</label>
+                  <select id="c-type">
+                    <option>A reservation</option>
+                    <option>Travel or transfer</option>
+                    <option>A private room or discreet venue</option>
+                    <option>Flowers or a note delivered</option>
+                    <option>Something else</option>
+                  </select>
+                </div>
+                <div class="p-field">
+                  <label for="c-when">When</label>
+                  <input id="c-when" type="text" placeholder="Date, time, city">
+                </div>
+                <div class="p-field">
+                  <label for="c-detail">Details</label>
+                  <textarea id="c-detail" placeholder="As much or as little as you wish"></textarea>
+                </div>
+                <button class="btn btn--solid" type="submit">Send to the office</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Recent</h2></div>
+            <div class="panel__body">
+              <dl class="kv kv--stack" id="concierge-log">
+                <dt>05 August · Reservation</dt>
+                <dd>Marylebone, 28 August, 20:00. Held under our name, corner table, no music.</dd>
+                <dt>04 August · Discretion</dt>
+                <dd>Venue checked against your exclusion list before booking. Two removed.</dd>
+                <dt>10 June · Transfer</dt>
+                <dd>Car to Mayfair, 11 June. Arranged and settled by the office.</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================ DOCUMENTS -->
+      <section class="view" id="view-documents" tabindex="-1" aria-label="Documents">
+        <p class="lede">Documents</p>
+        <p class="sub">Your engagement papers and the written record of each introduction. Held here and released to you only.</p>
+
+        <div class="panel" style="margin-top:2.6rem">
+          <div class="panel__head"><h2>Engagement</h2></div>
+          <div class="panel__body">
+            <div class="docs">
+              <button class="doc" type="button" data-note="The secure viewer opens in the released build. Your advisor can send any document to you directly in the meantime.">
+                <span class="ic" aria-hidden="true"></span>
+                <span class="nm">Engagement letter — Signature</span>
+                <span class="dt">14 Mar 2026</span>
+                <span class="go">Open</span>
+              </button>
+              <button class="doc" type="button" data-note="The secure viewer opens in the released build. Your advisor can send any document to you directly in the meantime.">
+                <span class="ic" aria-hidden="true"></span>
+                <span class="nm">Confidentiality undertaking — both parties</span>
+                <span class="dt">14 Mar 2026</span>
+                <span class="go">Open</span>
+              </button>
+              <button class="doc" type="button" data-note="The secure viewer opens in the released build. Your advisor can send any document to you directly in the meantime.">
+                <span class="ic" aria-hidden="true"></span>
+                <span class="nm">Fee note — engagement commencement</span>
+                <span class="dt">18 Mar 2026</span>
+                <span class="go">Open</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head"><h2>Introductions</h2></div>
+          <div class="panel__body">
+            <div class="docs">
+              <button class="doc" type="button" data-note="The secure viewer opens in the released build. Your advisor can send any document to you directly in the meantime.">
+                <span class="ic" aria-hidden="true"></span>
+                <span class="nm">Introduction No. 07 — written case</span>
+                <span class="dt">17 Aug 2026</span>
+                <span class="go">Open</span>
+              </button>
+              <button class="doc" type="button" data-note="The secure viewer opens in the released build. Your advisor can send any document to you directly in the meantime.">
+                <span class="ic" aria-hidden="true"></span>
+                <span class="nm">Introduction No. 06 — written case &amp; arrangement</span>
+                <span class="dt">02 Aug 2026</span>
+                <span class="go">Open</span>
+              </button>
+              <button class="doc" type="button" data-note="The secure viewer opens in the released build. Your advisor can send any document to you directly in the meantime.">
+                <span class="ic" aria-hidden="true"></span>
+                <span class="nm">Introduction No. 05 — case &amp; concluding note</span>
+                <span class="dt">11 Jun 2026</span>
+                <span class="go">Open</span>
+              </button>
+            </div>
+            <div class="note-inline">
+              Documents are never emailed as attachments unless you ask for it in writing. Retention
+              and destruction are set out in your engagement letter.
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================= PERSONA -->
+      <section class="view" id="view-persona" tabindex="-1" aria-label="Persona">
+        <p class="lede">Your persona</p>
+        <p class="sub">
+          Built from conversation, not from a questionnaire. It is the working model your advisor
+          uses — and, with your permission, the thing that speaks first, so that you do not have to
+          spend an evening discovering an incompatibility a conversation could have found.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+
+          <div class="panel">
+            <div class="panel__head">
+              <h2>Conversation</h2>
+              <span class="pill pill--rest">Session 4 · resumes where you left it</span>
+            </div>
+
+            <div class="thread chat-scroll" id="persona-thread">
+              <div class="msg msg--ai">
+                <p class="who">Legend · Assistant</p>
+                <div class="bubble">
+                  Last time you said you had twice declined people who agreed with you too readily.
+                  I want to test that. When someone disagrees with you well — what does that
+                  actually look like?
+                </div>
+              </div>
+              <div class="msg msg--me">
+                <p class="who">You</p>
+                <div class="bubble">
+                  They have thought about it before I raised it. Not contrarian — just already
+                  somewhere else, and able to say why without needing me to concede.
+                </div>
+              </div>
+              <div class="msg msg--ai">
+                <p class="who">Legend · Assistant</p>
+                <div class="bubble">
+                  That is a standard about competence, not temperament. Would you rather be with
+                  someone who is right, or someone who is easy to be around on a bad week?
+                </div>
+              </div>
+            </div>
+
+            <form class="composer" id="persona-form">
+              <textarea id="persona-input" placeholder="Answer in your own words" aria-label="Answer the assistant"></textarea>
+              <button class="btn btn--quiet" type="submit">Send</button>
+            </form>
+            <div class="panel__foot">
+              <p class="quiet" style="margin:0">
+                Nothing here is shared with another member. What the persona may say on your behalf
+                is controlled below, and your advisor reads every exchange before anyone does.
+              </p>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="persona-state">
+              <span class="pct" id="persona-pct">72<small style="font-size:.4em">%</small></span>
+              <div>
+                <p style="font-size:.88rem;color:#EDEAE3;margin:0">Persona completeness</p>
+                <div class="bar"><i id="persona-bar" style="width:72%"></i></div>
+                <p class="quiet" style="margin-top:.7rem">
+                  Four sessions so far. Around six is where it stops changing much.
+                </p>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel__head"><h2>As it currently reads</h2></div>
+              <div class="panel__body">
+                <div class="traits">
+                  <div class="trait">
+                    <span><span class="nm">Directness</span><span class="ds">Prefers the difficult sentence early</span></span>
+                    <span class="dots" aria-label="4 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
+                  </div>
+                  <div class="trait">
+                    <span><span class="nm">Pace of life</span><span class="ds">Full, but protective of unscheduled time</span></span>
+                    <span class="dots" aria-label="3 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>
+                  </div>
+                  <div class="trait">
+                    <span><span class="nm">Need for autonomy</span><span class="ds">High — separate interests are a requirement, not a tolerance</span></span>
+                    <span class="dots" aria-label="5 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>
+                  </div>
+                  <div class="trait">
+                    <span><span class="nm">Social appetite</span><span class="ds">Small rooms; declines large ones without regret</span></span>
+                    <span class="dots" aria-label="2 of 5"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span>
+                  </div>
+                  <div class="trait">
+                    <span><span class="nm">Conflict style</span><span class="ds">Cools first, returns to it properly, does not let it sit</span></span>
+                    <span class="dots" aria-label="4 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
+                  </div>
+                </div>
+                <button class="btn btn--quiet" type="button" data-note="Disagreements are useful — your advisor will correct the persona with you rather than adjusting it silently.">This is wrong about me</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head">
+            <h2>Persona conversations</h2>
+            <span class="pill pill--rest">First-stage screening</span>
+          </div>
+          <div class="panel__body">
+            <p class="quiet" style="margin-top:0">
+              With mutual consent, your persona and another member's persona hold a structured
+              exchange before either of you spends an evening. Neither identity is disclosed. The
+              transcript goes to both advisors; a summary comes to you.
+            </p>
+
+            <dl class="kv kv--stack" style="margin-top:1.6rem">
+              <dt>Candidate No. 09 · 14 exchanges · advanced</dt>
+              <dd>
+                Close on autonomy, directness and how each handles a bad week. Divergent on social
+                appetite — she keeps a much fuller table than you do. Not disqualifying; worth
+                raising at a first meeting rather than a third.
+              </dd>
+              <dt>Candidate No. 11 · 9 exchanges · not advanced</dt>
+              <dd>
+                Values aligned, timing did not. She is building something that needs the next five
+                years; you have just finished doing exactly that. Closed by your advisor, not by the
+                system.
+              </dd>
+              <dt>Candidate No. 08 · 6 exchanges · not advanced</dt>
+              <dd>
+                Ended early. The exchange showed a difference on children that the written brief had
+                recorded ambiguously on both sides. The brief has been corrected.
+              </dd>
+            </dl>
+
+            <div class="note-inline">
+              A persona conversation narrows the field. It has never decided anything — every
+              candidate that advances is read, argued and put to you by an advisor whose name is on
+              it. Where a persona and an advisor disagree, the advisor prevails.
+            </div>
+          </div>
+          <div class="panel__foot">
+            <div class="consent" style="margin:0">
+              <input id="persona-consent" type="checkbox" checked>
+              <span>
+                My persona may hold screening conversations with the personas of members my advisor
+                selects, on the terms above. Withdrawable at any time, without affecting the search.
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= PROPOSED -->
+      <section class="view" id="view-proposed" tabindex="-1" aria-label="Proposed for you">
+        <p class="lede">Proposed for you</p>
+        <p class="sub">
+          Candidates your advisor believes are worth a full case. Nothing here has been approached,
+          and no one has been told you exist. Say yes and the work of a written introduction begins;
+          say no and it ends silently.
+        </p>
+
+        <div style="margin-top:2.6rem" id="proposals">
+          <article class="proposal" data-proposal="09">
+            <div class="proposal__head">
+              <div>
+                <p class="quiet" style="margin:0">Candidate No. 09 · Zurich</p>
+                <p class="proposal__ttl" style="margin-top:.5rem">A founder, recently returned from a decade abroad</p>
+              </div>
+              <span class="pill pill--action">Awaiting you</span>
+            </div>
+            <p class="proposal__read">
+              Forty-one. Sold a logistics business, now holds two board seats and considerably more
+              of her own time than she is used to. Met twice by your advisor. The persona exchange
+              ran to fourteen turns and closed on the same standards you set in March — with one
+              honest divergence on social appetite that is worth knowing before dinner rather than
+              after.
+            </p>
+            <dl class="tier__spec" style="margin-top:1.4rem">
+              <div><dt>Persona exchange</dt><dd>Advanced · 14 turns</dd></div>
+              <div><dt>Met by</dt><dd>C. Vasseur, twice</dd></div>
+              <div><dt>Distance</dt><dd>90 minutes</dd></div>
+              <div><dt>Withheld</dt><dd>Name, employer, photograph</dd></div>
+            </dl>
+            <div class="proposal__acts">
+              <button class="btn btn--solid" type="button" data-propose="yes" data-id="09">Prepare a full case</button>
+              <button class="btn btn--quiet" type="button" data-propose="no" data-id="09">Not this one</button>
+            </div>
+          </article>
+
+          <article class="proposal" data-proposal="12">
+            <div class="proposal__head">
+              <div>
+                <p class="quiet" style="margin:0">Candidate No. 12 · London</p>
+                <p class="proposal__ttl" style="margin-top:.5rem">Runs a foundation; twenty years in publishing before it</p>
+              </div>
+              <span class="pill pill--action">Awaiting you</span>
+            </div>
+            <p class="proposal__read">
+              Forty-six, two children in their teens. Your advisor hesitated over this one — the
+              week is fuller than you would choose — and is putting it to you anyway because the
+              persona exchange found something the brief keeps missing: you respond to people who
+              have built an institution, not only a career.
+            </p>
+            <dl class="tier__spec" style="margin-top:1.4rem">
+              <div><dt>Persona exchange</dt><dd>Advanced · 11 turns</dd></div>
+              <div><dt>Met by</dt><dd>C. Vasseur, once</dd></div>
+              <div><dt>Distance</dt><dd>Same city</dd></div>
+              <div><dt>Withheld</dt><dd>Name, foundation, photograph</dd></div>
+            </dl>
+            <div class="proposal__acts">
+              <button class="btn btn--solid" type="button" data-propose="yes" data-id="12">Prepare a full case</button>
+              <button class="btn btn--quiet" type="button" data-propose="no" data-id="12">Not this one</button>
+            </div>
+          </article>
+        </div>
+
+        <p class="quiet" style="margin-top:1.6rem">
+          Two proposals in six weeks. If that seems few, it is because twenty-one people were
+          assessed to produce them.
+        </p>
+      </section>
+
+      <!-- ============================================= INTENTIONS -->
+      <section class="view" id="view-intentions" tabindex="-1" aria-label="Intentions">
+        <p class="lede">Intentions</p>
+        <p class="sub">
+          What you are actually seeking, in your own words and on the record. Members are only ever
+          considered for one another where the stated intention is the same on both sides — and
+          where both have consented to that particular introduction.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>What you are seeking</h2></div>
+            <div class="panel__body">
+              <div class="p-field">
+                <label>Nature of what you are looking for</label>
+                <div class="choice" style="margin-top:.8rem">
+                  <input type="radio" id="i1" name="seeking" value="marriage" checked><label for="i1">A partnership, with marriage in view</label>
+                  <input type="radio" id="i2" name="seeking" value="partnership"><label for="i2">A long-term partnership</label>
+                  <input type="radio" id="i3" name="seeking" value="companionship"><label for="i3">Companionship, unhurried</label>
+                  <input type="radio" id="i4" name="seeking" value="social"><label for="i4">Social introductions only</label>
+                </div>
+              </div>
+
+              <div class="p-field">
+                <label>Pace</label>
+                <div class="choice" style="margin-top:.8rem">
+                  <input type="radio" id="p1i" name="pace" value="slow" checked><label for="p1i">Slowly, and properly</label>
+                  <input type="radio" id="p2i" name="pace" value="open"><label for="p2i">Open — it will find its own pace</label>
+                  <input type="radio" id="p3i" name="pace" value="decided"><label for="p3i">I know what I want and would like it soon</label>
+                </div>
+              </div>
+
+              <div class="p-field">
+                <label>Exclusivity while we are searching</label>
+                <div class="choice" style="margin-top:.8rem">
+                  <input type="radio" id="x1" name="excl" value="one" checked><label for="x1">One introduction at a time</label>
+                  <input type="radio" id="x2" name="excl" value="several"><label for="x2">I am comfortable meeting several</label>
+                </div>
+              </div>
+
+              <div class="p-field">
+                <label for="int-note">Anything your advisor should understand about this</label>
+                <textarea id="int-note" placeholder="Optional. Changes here are discussed, never applied silently."></textarea>
+              </div>
+
+              <button class="btn btn--solid" type="button" data-note="Recorded. C. Vasseur will confirm the change with you before the search is altered.">Record my intentions</button>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>How this is used</h2></div>
+              <div class="panel__body">
+                <ul class="includes">
+                  <li>Matched only against members whose stated intention is the same.</li>
+                  <li>Applied identically to every member, whoever they are.</li>
+                  <li>Consent is asked separately for each introduction, on both sides.</li>
+                  <li>Changing this never appears as a notification to anyone else.</li>
+                </ul>
+                <div class="note-inline">
+                  There is no browsing here, and there never will be. Nobody is listed, ranked or
+                  made available to be chosen from. This is the mechanism by which two people who
+                  want the same thing are brought to each other's attention — and nothing else.
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel__head"><h2>On the record</h2></div>
+              <div class="panel__body">
+                <dl class="kv kv--stack">
+                  <dt>Current — since 11 June</dt>
+                  <dd>A long-term partnership · slowly and properly · one introduction at a time</dd>
+                  <dt>Previous — 14 March to 11 June</dt>
+                  <dd>A partnership, with marriage in view · open on pace</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================== REFLECTIONS -->
+      <section class="view" id="view-reflections" tabindex="-1" aria-label="Reflections and standing">
+        <p class="lede">Reflections &amp; standing</p>
+        <p class="sub">
+          After each meeting both parties write privately to their own advisor. It is the single
+          most useful thing a member does — and it works only because it goes to us, never to the
+          other person.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+
+          <div class="panel">
+            <div class="panel__head">
+              <h2>Record a reflection</h2>
+              <span class="pill pill--action">One outstanding</span>
+            </div>
+            <div class="panel__body">
+              <form id="reflection-form">
+                <div class="p-field">
+                  <label for="ref-who">Which meeting</label>
+                  <select id="ref-who">
+                    <option>Introduction No. 06 — 28 August</option>
+                    <option>Introduction No. 05 — second meeting, 4 June</option>
+                    <option>Introduction No. 05 — first meeting, 21 May</option>
+                  </select>
+                </div>
+
+                <div class="p-field">
+                  <label>Would you meet again</label>
+                  <div class="choice" style="margin-top:.8rem">
+                    <input type="radio" id="ag1" name="again" value="yes"><label for="ag1">Yes</label>
+                    <input type="radio" id="ag2" name="again" value="unsure"><label for="ag2">Undecided</label>
+                    <input type="radio" id="ag3" name="again" value="no"><label for="ag3">No</label>
+                  </div>
+                </div>
+
+                <div class="p-field">
+                  <label>The evening itself, out of five</label>
+                  <div class="rate">
+                    <input type="radio" id="r1" name="score" value="1"><label for="r1">1</label>
+                    <input type="radio" id="r2" name="score" value="2"><label for="r2">2</label>
+                    <input type="radio" id="r3" name="score" value="3"><label for="r3">3</label>
+                    <input type="radio" id="r4" name="score" value="4"><label for="r4">4</label>
+                    <input type="radio" id="r5" name="score" value="5"><label for="r5">5</label>
+                  </div>
+                  <p class="quiet" style="margin-top:.9rem">
+                    This is never shown to the other person, never attributed, and never published.
+                    It moves an average that only they and their advisor can see.
+                  </p>
+                </div>
+
+                <div class="p-field">
+                  <label for="ref-text">In your own words</label>
+                  <textarea id="ref-text" placeholder="What worked, what did not, and what you would want us to understand"></textarea>
+                </div>
+
+                <button class="btn btn--solid" type="submit">Send to C. Vasseur</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head">
+                <h2>Your standing</h2>
+                <span class="pill pill--rest">Private to you</span>
+              </div>
+              <div class="panel__body">
+                <div class="standing">
+                  <span class="fig">4.6<small> / 5</small></span>
+                  <div>
+                    <div class="scale" aria-label="4.6 of 5">
+                      <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+                    </div>
+                    <p class="quiet" style="margin-top:1rem">
+                      From 5 assessments by people you have met, across 11 months.
+                    </p>
+                  </div>
+                </div>
+                <dl class="kv kv--stack" style="margin-top:1.6rem">
+                  <dt>What is said most often</dt>
+                  <dd>&ldquo;Better company than his diary suggests.&rdquo; Twice, in different words.</dd>
+                  <dt>The recurring reservation</dt>
+                  <dd>Two people noted that you asked more questions than you answered.</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <p class="quiet" style="margin:0">
+                  Everyone we introduce is assessed the same way, in both directions. Nobody sees
+                  anyone else's figure — not members, and not the people you meet.
+                </p>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel__head"><h2>Your past reflections</h2></div>
+              <div class="panel__body">
+                <dl class="kv kv--stack" id="reflection-log">
+                  <dt>11 June · Introduction No. 05</dt>
+                  <dd>Concluded. &ldquo;Genuinely good company. But we want different decades.&rdquo; · 4 / 5</dd>
+                  <dt>21 May · Introduction No. 05</dt>
+                  <dd>Would meet again. &ldquo;Easier than I expected. I talked too much.&rdquo; · 4 / 5</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= PARTIES -->
+      <section class="view" id="view-parties" tabindex="-1" aria-label="Private gatherings">
+        <p class="lede">Private gatherings</p>
+        <p class="sub">
+          A small number of dinners and salons each season, hosted by the house. Guests are invited
+          by advisors; numbers are held deliberately low. Attending is never a condition of
+          anything, and declining is never noted.
+        </p>
+
+        <div class="panel" style="margin-top:2.6rem">
+          <div class="panel__head"><h2>This season</h2><span class="pill pill--rest">By request · not first-come</span></div>
+          <div class="panel__body">
+            <div class="event">
+              <span class="date">12 Sep<small>Fri · 19:30</small></span>
+              <div>
+                <p class="ttl">A dinner for fourteen</p>
+                <p class="meta">Mayfair, London · black tie optional · seating arranged by the house</p>
+                <p class="desc">
+                  Our autumn table. Fourteen members and guests, one long table, no speeches. Your
+                  advisor arranges the seating and will tell you in advance who is expected.
+                </p>
+              </div>
+              <button class="btn btn--quiet" type="button" data-rsvp="A dinner for fourteen">Request a place</button>
+            </div>
+
+            <div class="event">
+              <span class="date">04 Oct<small>Sat · 18:00</small></span>
+              <div>
+                <p class="ttl">A private view, then supper</p>
+                <p class="meta">Geneva · twenty places · smart</p>
+                <p class="desc">
+                  A closed viewing of a private collection, followed by supper for those who stay.
+                  Members frequently bring a friend of the house; ask your advisor first.
+                </p>
+              </div>
+              <button class="btn btn--quiet" type="button" data-rsvp="A private view, then supper">Request a place</button>
+            </div>
+
+            <div class="event">
+              <span class="date">21 Nov<small>Fri · 20:00</small></span>
+              <div>
+                <p class="ttl">The winter salon</p>
+                <p class="meta">Paris · thirty places · by invitation of a principal</p>
+                <p class="desc">
+                  Conversation with two speakers and no programme after nine. This one is invited
+                  rather than requested — register interest and your advisor will put your name in.
+                </p>
+              </div>
+              <button class="btn btn--quiet" type="button" data-rsvp="The winter salon">Register interest</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols cols--2" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Your reservations</h2></div>
+            <div class="panel__body">
+              <dl class="kv kv--stack" id="rsvp-log">
+                <dt>Requested — 12 Sep, London</dt>
+                <dd>A dinner for fourteen. Confirmed by the office on 2 August. One place.</dd>
+                <dt>Attended — 14 May, London</dt>
+                <dd>Spring supper. Your advisor noted two conversations worth following up.</dd>
+              </dl>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>How gatherings work</h2></div>
+            <div class="panel__body">
+              <ul class="includes">
+                <li>Guest lists are never circulated, before or after.</li>
+                <li>No photography, by anyone, at any gathering.</li>
+                <li>Members may ask not to be seated near a particular person, without giving a reason.</li>
+                <li>A gathering is not a search. Nobody is presented to anybody.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= MANDATE -->
+      <section class="view" id="view-mandate" tabindex="-1" aria-label="Mandate and agreement">
+        <p class="lede">Mandate &amp; agreement</p>
+        <p class="sub">
+          What you have retained us to do, on what terms, and for how long. Everything here was
+          agreed before any work began.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+
+          <div class="panel">
+            <div class="panel__head"><h2>Your mandate</h2><span class="pill pill--live">Active</span></div>
+            <div class="panel__body">
+              <div class="plan">
+                <span class="roman">II</span>
+                <div>
+                  <p class="nm">Signature</p>
+                  <p class="sub">Commenced 14 March 2026 · reviewed each March · no fixed term</p>
+                </div>
+              </div>
+
+              <dl class="kv" style="margin-top:1.8rem">
+                <dt>Areas retained</dt><dd>Assessment · Search &amp; Introduction · Formation · Counsel</dd>
+                <dt>Not retained</dt><dd>Continuity — available at annual review</dd>
+                <dt>Reach</dt><dd>Europe, without limitation within it</dd>
+                <dt>Advisor</dt><dd>C. Vasseur, London</dd>
+                <dt>Fee agreed</dt><dd>Settled in full, 18 March 2026</dd>
+                <dt>Next review</dt><dd>14 March 2027</dd>
+              </dl>
+
+              <div class="note-inline">
+                There are no monthly charges, no automatic renewal, and no fee contingent on the
+                outcome of an introduction. A mandate ends when either party says so, in writing.
+              </div>
+
+              <button class="btn btn--quiet" type="button" data-note="Your advisor will call to discuss adding Continuity. It can also wait until the March review — there is no advantage to deciding today." style="margin-top:1.4rem">Discuss adding an area</button>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>The agreement</h2></div>
+              <div class="panel__body">
+                <p class="signed">Signed by both parties · 14 March 2026</p>
+                <dl class="kv kv--stack" style="margin-top:1.4rem">
+                  <dt>Engagement letter</dt>
+                  <dd>Scope, fee, term, and what we undertake to do. Version 2 — amended 11 June to widen the geography.</dd>
+                  <dt>Confidentiality undertaking</dt>
+                  <dd>Binds the house, its advisors, and you. Survives the end of the mandate.</dd>
+                  <dt>Data terms</dt>
+                  <dd>What we hold, who may see it, how long it is kept, and how to have it destroyed.</dd>
+                </dl>
+                <div class="stack gap-s" style="margin-top:1.6rem">
+                  <button class="btn btn--quiet" type="button" data-note="The secure viewer opens in the released build. Your advisor can send the executed agreement to you directly in the meantime.">Read the agreement</button>
+                  <button class="btn" type="button" data-note="Passed to C. Vasseur. Amendments are discussed first and recorded alongside the reason for them."><span>Request an amendment</span><i class="arrow"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel__head"><h2>Amendment history</h2></div>
+              <div class="panel__body">
+                <dl class="kv kv--stack">
+                  <dt>11 June 2026 — geography widened</dt>
+                  <dd>Europe without limitation, replacing London and Paris. Signed by both parties.</dd>
+                  <dt>14 March 2026 — engagement commenced</dt>
+                  <dd>Signature mandate, three areas retained.</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Fees</h2><span class="pill pill--rest">Settled in full</span></div>
+            <div class="panel__body">
+              <div class="invoice">
+                <span class="amt">$38,000</span>
+                <div><p class="nm" style="font-size:.92rem;color:#EDEAE3">Signature mandate — engagement commencement</p>
+                     <p class="ds" style="font-size:.76rem;color:var(--fg-faint);margin-top:.3rem">Fee note SG-2411-01 · agreed before any work began</p></div>
+                <span class="dt">18 Mar 2026</span>
+                <button class="btn btn--quiet" type="button" data-note="The secure viewer opens in the released build. The office can send the fee note to you or to whoever settles your affairs.">Fee note</button>
+              </div>
+              <div class="invoice">
+                <span class="amt">$0</span>
+                <div><p class="nm" style="font-size:.92rem;color:#EDEAE3">Amendment — geography widened</p>
+                     <p class="ds" style="font-size:.76rem;color:var(--fg-faint);margin-top:.3rem">No further fee. Amendments within a mandate are not charged.</p></div>
+                <span class="dt">11 Jun 2026</span>
+                <span class="pill pill--rest">No charge</span>
+              </div>
+              <div class="note-inline">
+                No monthly charge, no automatic renewal, and no fee contingent on the outcome of an
+                introduction. Should you add Continuity, it is quoted at review and agreed in
+                writing before it begins.
+              </div>
+              <div class="stack gap-s" style="margin-top:1.4rem">
+                <button class="btn btn--quiet" type="button" data-note="The office will send settlement details through your chosen channel. We do not take card payments in the portal, and we never ask for bank details by email.">How fees are settled</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Verification</h2><span class="pill pill--live">Complete</span></div>
+            <div class="panel__body">
+              <p class="quiet" style="margin-top:0">
+                We verify everyone we introduce. That obligation runs in both directions — the
+                people you meet were told the same about you.
+              </p>
+              <dl class="kv" style="margin-top:1.2rem">
+                <dt>Identity</dt><dd>Confirmed in person, 14 March</dd>
+                <dt>Situation</dt><dd>Confirmed at consultation</dd>
+                <dt>Referred by</dt><dd>An advisor of the house</dd>
+                <dt>Re-confirmed</dt><dd>At each annual review</dd>
+              </dl>
+            </div>
+          </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================== CONSENT REQUESTS -->
+      <section class="view" id="view-requests" tabindex="-1" aria-label="Consent requests">
+        <p class="lede">Asked of you</p>
+        <p class="sub">
+          You are a client here, and you are also someone another member's advisor may believe is
+          right for them. Nothing about you moves in that direction without you saying so, each
+          time, on the record.
+        </p>
+
+        <div style="margin-top:2.6rem" id="requests">
+          <article class="request" data-request="a">
+            <div class="proposal__head">
+              <div>
+                <p class="quiet" style="margin:0">Requested by an advisor of the house · 18 August</p>
+                <p class="request__q" style="margin-top:.6rem">
+                  May we tell a member in Paris that someone of your description exists?
+                </p>
+              </div>
+              <span class="pill pill--action">Awaiting you</span>
+            </div>
+            <p class="proposal__read">
+              A colleague is conducting a search and believes you may suit her member. She would
+              like to describe you in outline only — age band, city, profession in general terms,
+              and what you are seeking. <strong style="color:#EDEAE3">Not your name, not your
+              employer, not your photograph.</strong> If the member is interested, the request comes
+              back to you again before anything further is said.
+            </p>
+            <dl class="tier__spec" style="margin-top:1.4rem">
+              <div><dt>Would be disclosed</dt><dd>Outline only, no identity</dd></div>
+              <div><dt>Asked by</dt><dd>An advisor of the house</dd></div>
+              <div><dt>Their member knows</dt><dd>Nothing, until you agree</dd></div>
+              <div><dt>If you decline</dt><dd>Nothing happens, and no reason is given</dd></div>
+            </dl>
+            <div class="request__acts">
+              <button class="btn btn--solid" type="button" data-consent="yes" data-req="a">Yes, in outline</button>
+              <button class="btn btn--quiet" type="button" data-consent="no" data-req="a">No</button>
+              <button class="btn" type="button" data-note="C. Vasseur will call you before this goes any further. Nothing has been disclosed."><span>Ask my advisor first</span><i class="arrow"></i></button>
+            </div>
+          </article>
+
+          <article class="request" data-request="b">
+            <div class="proposal__head">
+              <div>
+                <p class="quiet" style="margin:0">Second stage · 14 August</p>
+                <p class="request__q" style="margin-top:.6rem">
+                  A member has read your outline and would like to know who you are.
+                </p>
+              </div>
+              <span class="pill pill--action">Awaiting you</span>
+            </div>
+            <p class="proposal__read">
+              You agreed to an outline on 2 August. She has now been shown it and would like to
+              proceed. This is the point at which your name would be disclosed — and hers to you, at
+              the same moment and not before. Your advisor has read her file and thinks well of it.
+            </p>
+            <dl class="tier__spec" style="margin-top:1.4rem">
+              <div><dt>Would be disclosed</dt><dd>Your first name and city</dd></div>
+              <div><dt>You would receive</dt><dd>Her name, and a written case</dd></div>
+              <div><dt>Exchange</dt><dd>Simultaneous, or not at all</dd></div>
+              <div><dt>Withdrawable</dt><dd>Until the moment you both agree</dd></div>
+            </dl>
+            <div class="request__acts">
+              <button class="btn btn--solid" type="button" data-consent="yes" data-req="b">Exchange names</button>
+              <button class="btn btn--quiet" type="button" data-consent="no" data-req="b">Not now</button>
+            </div>
+          </article>
+        </div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          Every answer you give here is written to your
+          <a class="link" href="#consent" data-go="consent">consent ledger</a>, with the date and
+          who asked. Declining is never disclosed to the other party, never explained, and never
+          counted against you.
+        </div>
+      </section>
+
+      <!-- ========================================= CONSENT LEDGER -->
+      <section class="view" id="view-consent" tabindex="-1" aria-label="Consent ledger">
+        <p class="lede">Consent ledger</p>
+        <p class="sub">
+          We tell you that nothing about you is disclosed without your permission, given for that
+          specific occasion. This is the record of every time we asked, what we would have said, and
+          what you answered — including the times you said no and we stopped.
+        </p>
+
+        <div class="cols cols--3" style="margin-top:2.6rem">
+          <div class="panel panel--plain"><div class="figs"><div><span class="n">14</span><span class="l">Times we asked</span></div></div></div>
+          <div class="panel panel--plain"><div class="figs"><div><span class="n">9</span><span class="l">You agreed</span></div></div></div>
+          <div class="panel panel--plain"><div class="figs"><div><span class="n">5</span><span class="l">You declined — nothing was said</span></div></div></div>
+        </div>
+
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head">
+            <h2>The record</h2>
+            <span class="pill pill--rest">Newest first · never edited</span>
+          </div>
+          <div class="panel__body">
+            <div class="ledger" id="ledger">
+              <div class="ledger__row">
+                <span class="ledger__when">18 Aug</span>
+                <span class="ledger__what">Your outline — age band, city, profession in general terms</span>
+                <span class="ledger__to">Requested for a member in Paris · awaiting your answer</span>
+                <span class="ledger__by">Pending</span>
+              </div>
+              <div class="ledger__row">
+                <span class="ledger__when">05 Aug</span>
+                <span class="ledger__what">Your first name, and that you work in private markets</span>
+                <span class="ledger__to">Disclosed to Marguerite, on her acceptance of Introduction No. 06</span>
+                <span class="ledger__by">You agreed · 2 Aug</span>
+              </div>
+              <div class="ledger__row ledger__row--withheld">
+                <span class="ledger__when">05 Aug</span>
+                <span class="ledger__what">Your surname and firm</span>
+                <span class="ledger__to">She asked. Withheld — you had not agreed to it</span>
+                <span class="ledger__by">Withheld</span>
+              </div>
+              <div class="ledger__row">
+                <span class="ledger__when">02 Aug</span>
+                <span class="ledger__what">Written case describing you, without identity</span>
+                <span class="ledger__to">Shown to Marguerite by her advisor</span>
+                <span class="ledger__by">You agreed · 2 Aug</span>
+              </div>
+              <div class="ledger__row ledger__row--withheld">
+                <span class="ledger__when">21 Jul</span>
+                <span class="ledger__what">Your outline</span>
+                <span class="ledger__to">Requested for a member in New York</span>
+                <span class="ledger__by">You declined</span>
+              </div>
+              <div class="ledger__row">
+                <span class="ledger__when">14 Jun</span>
+                <span class="ledger__what">Your persona, for a screening exchange</span>
+                <span class="ledger__to">Candidate No. 09 · standing permission, withdrawable</span>
+                <span class="ledger__by">You agreed · 14 Jun</span>
+              </div>
+              <div class="ledger__row ledger__row--withheld">
+                <span class="ledger__when">03 Apr</span>
+                <span class="ledger__what">Everything</span>
+                <span class="ledger__to">Introduction No. 04 — you declined before any approach</span>
+                <span class="ledger__by">Nothing disclosed</span>
+              </div>
+              <div class="ledger__row">
+                <span class="ledger__when">14 Mar</span>
+                <span class="ledger__what">Your file, to the advisors working on your engagement</span>
+                <span class="ledger__to">C. Vasseur, and one researcher named in your agreement</span>
+                <span class="ledger__by">You agreed · 14 Mar</span>
+              </div>
+            </div>
+          </div>
+          <div class="panel__foot">
+            <p class="quiet" style="margin:0">
+              Entries are written when the decision is made and are never altered afterwards. If a
+              line here does not match your memory of it, tell your advisor — that is exactly what
+              the ledger is for.
+            </p>
+          </div>
+        </div>
+
+        <div class="cols cols--2" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Standing permissions</h2></div>
+            <div class="panel__body">
+              <div class="toggle-row">
+                <div>
+                  <p class="nm">Persona screening exchanges</p>
+                  <p class="ds">Your persona may speak with the personas of members your advisor selects.</p>
+                </div>
+                <label class="switch"><input type="checkbox" checked data-perm="persona"><span></span></label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <p class="nm">Outline requests from other advisors of the house</p>
+                  <p class="ds">Each one still comes to you individually. Turning this off stops them being raised at all.</p>
+                </div>
+                <label class="switch"><input type="checkbox" checked data-perm="outline"><span></span></label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <p class="nm">Consideration for private gatherings</p>
+                  <p class="ds">Your name may be put on a seating plan the house prepares.</p>
+                </div>
+                <label class="switch"><input type="checkbox" checked data-perm="gatherings"><span></span></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Withdraw everything</h2></div>
+            <div class="panel__body">
+              <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                A single instruction that suspends every standing permission and stops any disclosure
+                in progress. Your engagement continues; the search simply pauses until you lift it.
+              </p>
+              <button class="btn btn--quiet" type="button" data-note="Suspended. Every standing permission is off and any disclosure in progress has stopped. C. Vasseur has been notified and will not ask you to explain." style="margin-top:1.4rem">Suspend all disclosure</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= FORMATION -->
+      <section class="view" id="view-formation" tabindex="-1" aria-label="Formation">
+        <p class="lede">Formation</p>
+        <p class="sub">
+          The first year of a relationship, worked at deliberately. Retained under your mandate and
+          ready when you are — it opens once a relationship establishes and both people agree to it.
+        </p>
+
+        <div class="panel" style="margin-top:2.6rem">
+          <div class="panel__head"><h2>Status</h2><span class="pill pill--rest">Retained · not yet begun</span></div>
+          <div class="panel__body">
+            <p style="font-family:var(--serif);font-size:1.4rem;line-height:1.45;color:#EDEAE3;margin:0">
+              Nothing is running here yet. Introduction No. 06 has a dinner on the 28th; if that
+              becomes something, this is where the work moves.
+            </p>
+            <p class="quiet">
+              Formation is never begun unilaterally. Both people are asked, separately, and either
+              may decline without it affecting anything else.
+            </p>
+          </div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>The conversations most couples postpone</h2></div>
+            <div class="panel__body">
+              <p class="quiet" style="margin-top:0">
+                Worked through in order, at your pace, separately at first and together when both
+                are ready. Nothing is reported from one of you to the other.
+              </p>
+              <div class="convo" style="margin-top:1.4rem">
+                <div class="convo__item">
+                  <span class="no">01</span>
+                  <div>
+                    <p class="nm">Money, plainly</p>
+                    <p class="ds">What each of you has, what each expects, and what happens to it. The conversation that most often arrives too late.</p>
+                  </div>
+                  <span class="pill pill--rest">Not started</span>
+                </div>
+                <div class="convo__item">
+                  <span class="no">02</span>
+                  <div>
+                    <p class="nm">Children, and other people's children</p>
+                    <p class="ds">Yours are in their twenties. Hers may not be. What each of you expects of the other, said out loud.</p>
+                  </div>
+                  <span class="pill pill--rest">Not started</span>
+                </div>
+                <div class="convo__item">
+                  <span class="no">03</span>
+                  <div>
+                    <p class="nm">Geography</p>
+                    <p class="ds">Two established households, two cities, and whether either of you will actually move.</p>
+                  </div>
+                  <span class="pill pill--rest">Not started</span>
+                </div>
+                <div class="convo__item">
+                  <span class="no">04</span>
+                  <div>
+                    <p class="nm">Families, and being introduced to them</p>
+                    <p class="ds">When, to whom, and what each family will make of it.</p>
+                  </div>
+                  <span class="pill pill--rest">Not started</span>
+                </div>
+                <div class="convo__item">
+                  <span class="no">05</span>
+                  <div>
+                    <p class="nm">Becoming known</p>
+                    <p class="ds">How and when a relationship stops being private, and who is told first.</p>
+                  </div>
+                  <span class="pill pill--rest">Not started</span>
+                </div>
+                <div class="convo__item">
+                  <span class="no">06</span>
+                  <div>
+                    <p class="nm">What each of you is like at your worst</p>
+                    <p class="ds">Every couple discovers this. Doing it deliberately is cheaper than discovering it.</p>
+                  </div>
+                  <span class="pill pill--rest">Not started</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What Formation includes</h2></div>
+              <div class="panel__body">
+                <ul class="includes">
+                  <li>Counsel through the early months, separately and together as you prefer</li>
+                  <li>Joint sessions arranged around two calendars</li>
+                  <li>The introduction of two established households</li>
+                  <li>Managing exposure — when a relationship becomes known</li>
+                  <li>Coordination with your own advisors where matters become formal</li>
+                </ul>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Where our limits are</h2></div>
+              <div class="panel__body">
+                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                  We are not therapists and do not present ourselves as such. Where clinical help is
+                  the right answer we say so plainly and make an introduction to someone qualified.
+                  Legal and financial matters go to your own advisors, or to firms we can name.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================ CONTINUITY -->
+      <section class="view" id="view-continuity" tabindex="-1" aria-label="Continuity">
+        <p class="lede">Continuity</p>
+        <p class="sub">
+          The long retainer: an advisor who already holds the whole history, available across the
+          years and at the decisions that are hard to take alone.
+        </p>
+
+        <div class="panel panel--accent" style="margin-top:2.6rem">
+          <div class="panel__head"><h2>Not currently retained</h2><span class="pill pill--rest">Available at review</span></div>
+          <div class="panel__body">
+            <p style="font-family:var(--serif);font-size:1.4rem;line-height:1.45;color:#EDEAE3;margin:0">
+              Your Signature mandate holds four of the five areas. Continuity is the fifth, and it
+              is the one that runs after everything else has finished.
+            </p>
+            <p style="font-size:.92rem;color:var(--fg-soft)">
+              There is no advantage to deciding today. It is raised properly at your review in March,
+              when there will be a year of evidence to discuss rather than a proposal to consider.
+            </p>
+            <div class="stack gap-s" style="margin-top:1.4rem">
+              <button class="btn btn--quiet" type="button" data-note="C. Vasseur will telephone to discuss it. She will also tell you if she thinks you do not need it — she has done so before.">Discuss it with my advisor</button>
+              <a class="btn" href="#mandate" data-go="mandate"><span>See my current mandate</span><i class="arrow"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols cols--2" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>What it would add</h2></div>
+            <div class="panel__body">
+              <ul class="includes">
+                <li>A named advisor retained, who does not start again each time you call</li>
+                <li>Periodic review — not because something is wrong, but so that it does not become so</li>
+                <li>Counsel at thresholds: marriage, relocation, blended families, succession</li>
+                <li>Referral to specialists, with introductions we stand behind</li>
+                <li>Where a relationship must end, the same discretion as its beginning</li>
+              </ul>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>How it is structured</h2></div>
+            <div class="panel__body">
+              <dl class="kv">
+                <dt>Form</dt><dd>Annual retainer, reviewed each year</dd>
+                <dt>Term</dt><dd>Open-ended; ends when either party says so</dd>
+                <dt>Availability</dt><dd>Your advisor, in your time zone</dd>
+                <dt>Begins</dt><dd>Whenever you ask, or at your March review</dd>
+              </dl>
+              <div class="note-inline">
+                Continuity is the only area we will decline to sell you if we do not think you need
+                it. Several members hold Signature for years and never take it.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= YOUR DATA -->
+      <section class="view" id="view-data" tabindex="-1" aria-label="Your data">
+        <p class="lede">What we hold, and your rights over it</p>
+        <p class="sub">
+          Everything the house has about you, why it exists, how long it is kept, and what you can
+          instruct us to do with it. Nothing here requires a reason from you.
+        </p>
+
+        <div class="panel" style="margin-top:2.6rem">
+          <div class="panel__head"><h2>What we hold</h2><span class="pill pill--rest">Complete list</span></div>
+          <div class="panel__body">
+            <div class="holding">
+              <div><p class="nm">Your private profile</p><p class="ds">The portrait your advisor works from — 18 fields, plus your amendments</p></div>
+              <span class="keep">Kept for the mandate + 2 years</span>
+              <button class="btn btn--quiet" type="button" data-note="The secure viewer opens in the released build. Your advisor can send you the file directly in the meantime.">View</button>
+            </div>
+            <div class="holding">
+              <div><p class="nm">Your persona and its transcripts</p><p class="ds">Four sessions of conversation, and three screening exchanges</p></div>
+              <span class="keep">Kept for the mandate + 2 years</span>
+              <button class="btn btn--quiet" type="button" data-note="The secure viewer opens in the released build.">View</button>
+            </div>
+            <div class="holding">
+              <div><p class="nm">Written cases and introductions</p><p class="ds">Four cases, the reasoning behind each, and your decisions</p></div>
+              <span class="keep">Kept for the mandate + 6 years</span>
+              <button class="btn btn--quiet" type="button" data-note="The secure viewer opens in the released build.">View</button>
+            </div>
+            <div class="holding">
+              <div><p class="nm">Your reflections and your standing</p><p class="ds">What you wrote after each meeting, and the figure others gave</p></div>
+              <span class="keep">Kept for the mandate + 2 years</span>
+              <button class="btn btn--quiet" type="button" data-note="The secure viewer opens in the released build.">View</button>
+            </div>
+            <div class="holding">
+              <div><p class="nm">Correspondence with your advisor</p><p class="ds">Every message in this portal, and calls she logged</p></div>
+              <span class="keep">Kept for the mandate + 2 years</span>
+              <button class="btn btn--quiet" type="button" data-note="The secure viewer opens in the released build.">View</button>
+            </div>
+            <div class="holding">
+              <div><p class="nm">Engagement papers and fee records</p><p class="ds">Agreement, amendments, and settled fee notes</p></div>
+              <span class="keep">Kept 7 years — a legal requirement</span>
+              <button class="btn btn--quiet" type="button" data-note="The secure viewer opens in the released build.">View</button>
+            </div>
+            <div class="holding">
+              <div><p class="nm">Your consent ledger</p><p class="ds">Every disclosure asked for, agreed, or withheld</p></div>
+              <span class="keep">Kept 7 years — it is the record of your instructions</span>
+              <a class="btn btn--quiet" href="#consent" data-go="consent">Open</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols cols--3" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Take a copy</h2></div>
+            <div class="panel__body">
+              <p style="font-size:.9rem;color:var(--fg-soft);margin:0">
+                Everything above, in a readable file, delivered however you prefer to receive it.
+              </p>
+              <button class="btn btn--quiet" type="button" data-note="Requested. The office prepares this by hand rather than automatically, and will ask you how you would like to receive it. Usually within five working days." style="margin-top:1.4rem">Request a copy</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>Correct something</h2></div>
+            <div class="panel__body">
+              <p style="font-size:.9rem;color:var(--fg-soft);margin:0">
+                If anything we hold is wrong, tell us and it is corrected — with a note of what
+                changed and when.
+              </p>
+              <a class="btn btn--quiet" href="#profile" data-go="profile" style="margin-top:1.4rem">Edit my profile</a>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>Have it destroyed</h2></div>
+            <div class="panel__body">
+              <p style="font-size:.9rem;color:var(--fg-soft);margin:0">
+                At the end of a mandate, or before it. We will tell you plainly what we are obliged
+                to keep and for how long.
+              </p>
+              <button class="btn btn--quiet" type="button" data-note="A principal of the house will speak with you before anything is destroyed — not to dissuade you, but because destruction cannot be undone and some records we are obliged to keep." style="margin-top:1.4rem">Request destruction</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          We do not sell, rent, or exchange member information, and we never have. Nothing about you
+          is used to train any model outside this house. Your persona exists to serve your search
+          and nothing else.
+        </div>
+      </section>
+
+      <!-- =============================================== SAFETY -->
+      <section class="view" id="view-safety" tabindex="-1" aria-label="Safety and conduct">
+        <p class="lede">Safety &amp; conduct</p>
+        <p class="sub">
+          We introduce you to people you have not met. That places an obligation on us, and it
+          gives you things you should be able to do without asking permission.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel panel--accent">
+            <div class="panel__head"><h2>Report something</h2><span class="pill pill--action">Read the same day</span></div>
+            <div class="panel__body">
+              <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                If someone we introduced behaved badly — dishonesty, pressure, anything that
+                frightened or demeaned you — tell us. This does not go into your reflections and it
+                is not weighed against your standing. It is read by a principal of the house, not
+                only by your advisor.
+              </p>
+              <form id="report-form" style="margin-top:1.6rem">
+                <div class="p-field">
+                  <label for="rep-who">Concerning</label>
+                  <select id="rep-who">
+                    <option>Introduction No. 06</option>
+                    <option>Introduction No. 05</option>
+                    <option>Someone met at a private gathering</option>
+                    <option>Someone at the house</option>
+                    <option>Prefer to describe it below</option>
+                  </select>
+                </div>
+                <div class="p-field">
+                  <label for="rep-what">What happened</label>
+                  <textarea id="rep-what" placeholder="In your own words. As much or as little as you wish."></textarea>
+                </div>
+                <div class="p-field">
+                  <label>What you would like us to do</label>
+                  <div class="choice" style="margin-top:.8rem">
+                    <input type="radio" id="rp1" name="repwant" value="record"><label for="rp1">Record it, nothing more for now</label>
+                    <input type="radio" id="rp2" name="repwant" value="stop"><label for="rp2">End all contact</label>
+                    <input type="radio" id="rp3" name="repwant" value="act"><label for="rp3">I want the house to act</label>
+                    <input type="radio" id="rp4" name="repwant" value="talk"><label for="rp4">Speak to me first</label>
+                  </div>
+                </div>
+                <button class="btn btn--solid" type="submit">Send to a principal</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Before a first meeting</h2></div>
+              <div class="panel__body">
+                <div class="toggle-row">
+                  <div>
+                    <p class="nm">Tell the office where I will be</p>
+                    <p class="ds">The venue and time are held by the office on the evening, and nowhere else.</p>
+                  </div>
+                  <label class="switch"><input type="checkbox" checked><span></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div>
+                    <p class="nm">A call from the office at an agreed hour</p>
+                    <p class="ds">A reason to step away, if you want one. Nobody is told why.</p>
+                  </div>
+                  <label class="switch"><input type="checkbox"><span></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div>
+                    <p class="nm">Arrange transport home through the house</p>
+                    <p class="ds">Booked in our name, settled by the office.</p>
+                  </div>
+                  <label class="switch"><input type="checkbox" checked><span></span></label>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel__head"><h2>People you will never be shown</h2></div>
+              <div class="panel__body">
+                <p class="quiet" style="margin-top:0">
+                  Names, firms and circles excluded from every search. No reason is required, and
+                  the excluded party is never told.
+                </p>
+                <dl class="kv kv--stack" style="margin-top:1.2rem" id="exclusions">
+                  <dt>Your firm, its portfolio, and your board circle</dt>
+                  <dd>Standing exclusion since 14 March.</dd>
+                  <dt>Two individuals named at the consultation</dt>
+                  <dd>Held by C. Vasseur; not recorded in this portal.</dd>
+                </dl>
+                <button class="btn btn--quiet" type="button" data-toggle="excl-box" style="margin-top:1.2rem">Add an exclusion</button>
+                <div id="excl-box" hidden style="margin-top:1.4rem">
+                  <div class="p-field">
+                    <label for="excl-name">Who, or which circle</label>
+                    <input id="excl-name" type="text" placeholder="A name, a firm, or a description">
+                  </div>
+                  <button class="btn btn--solid" type="button" data-note="Added. Nobody is told, and no reason is recorded.">Add to my exclusions</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          What we do on our side: every candidate is met in person before they are proposed, their
+          circumstances confirmed, and a member who behaves badly toward another is removed from the
+          network. That has happened, and it will happen again.
+        </div>
+      </section>
+
+      <!-- ============================================== ACCOUNT -->
+      <section class="view" id="view-account" tabindex="-1" aria-label="Account and security">
+        <p class="lede">Account &amp; security</p>
+        <p class="sub">
+          How we reach you, and how this account is protected. Members whose lives are visible
+          should be able to set both precisely.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+
+          <div class="panel">
+            <div class="panel__head"><h2>How we reach you</h2></div>
+            <div class="panel__body">
+              <div class="p-field">
+                <label>Preferred channel</label>
+                <div class="choice" style="margin-top:.8rem">
+                  <input type="radio" id="ch1" name="chan" value="portal" checked><label for="ch1">This portal only</label>
+                  <input type="radio" id="ch2" name="chan" value="email"><label for="ch2">Email</label>
+                  <input type="radio" id="ch3" name="chan" value="phone"><label for="ch3">Telephone</label>
+                  <input type="radio" id="ch4" name="chan" value="office"><label for="ch4">Through my office</label>
+                </div>
+              </div>
+
+              <div class="toggle-row">
+                <div>
+                  <p class="nm">Never use our name in anything sent to you</p>
+                  <p class="ds">Correspondence arrives from a neutral address with no reference to the house, and calendar entries carry no title.</p>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span></span></label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <p class="nm">Nothing to my telephone after 20:00</p>
+                  <p class="ds">Urgent matters still reach the office; they simply wait.</p>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span></span></label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <p class="nm">Tell me when something needs my answer</p>
+                  <p class="ds">A consent request or an introduction awaiting you. Nothing else — we do not send activity notices.</p>
+                </div>
+                <label class="switch"><input type="checkbox" checked><span></span></label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <p class="nm">The Journal, when there is a new piece</p>
+                  <p class="ds">Irregular. Perhaps four times a year.</p>
+                </div>
+                <label class="switch"><input type="checkbox"><span></span></label>
+              </div>
+
+              <button class="btn btn--quiet" type="button" data-note="Saved. C. Vasseur will observe these from her next message onward." style="margin-top:1.4rem">Save preferences</button>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Security</h2><span class="pill pill--action">One step outstanding</span></div>
+              <div class="panel__body">
+                <div class="toggle-row">
+                  <div>
+                    <p class="nm">Second step at sign-in</p>
+                    <p class="ds">A code from an authenticator application. Strongly advised.</p>
+                  </div>
+                  <label class="switch"><input type="checkbox" data-note-on="Your advisor will guide you through setting this up on a call — it takes about two minutes."><span></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div>
+                    <p class="nm">Tell me when this account is opened from a new device</p>
+                    <p class="ds">Through your chosen channel, within the minute.</p>
+                  </div>
+                  <label class="switch"><input type="checkbox" checked><span></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div>
+                    <p class="nm">End the session automatically after 15 minutes</p>
+                    <p class="ds">Sensible on a device that is not only yours.</p>
+                  </div>
+                  <label class="switch"><input type="checkbox" checked><span></span></label>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel__head"><h2>Where this account is open</h2></div>
+              <div class="panel__body">
+                <div class="device device--current">
+                  <div><p class="nm">Safari · macOS</p><p class="ds">London · active now</p></div>
+                  <span class="keep"></span>
+                  <span class="pill pill--rest">Current</span>
+                </div>
+                <div class="device">
+                  <div><p class="nm">Safari · iPhone</p><p class="ds">London · 2 days ago</p></div>
+                  <span class="keep"></span>
+                  <button class="btn btn--quiet" type="button" data-note="Signed out on that device. Anyone using it will need your access reference and, once enabled, your second step.">End</button>
+                </div>
+                <div class="device">
+                  <div><p class="nm">Chrome · Windows</p><p class="ds">Geneva · 11 June</p></div>
+                  <span class="keep"></span>
+                  <button class="btn btn--quiet" type="button" data-note="Signed out on that device.">End</button>
+                </div>
+                <button class="btn btn--quiet" type="button" data-note="Every other session has been ended. You remain signed in here." style="margin-top:1.2rem">End every session but this one</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================ CREDENTIAL -->
+      <section class="view" id="view-credential" tabindex="-1" aria-label="Your verification mark">
+        <p class="lede">Your verification mark</p>
+        <p class="sub">
+          Proof that you are who you say you are, which you can place wherever you deal with people
+          who do not yet know you. It says nothing about your membership here, and nothing about
+          why you came to us.
+        </p>
+
+        <div class="panel" style="margin-top:2.6rem">
+          <div class="panel__head"><h2>How you came to hold it</h2><span class="pill pill--live">Complete</span></div>
+          <div class="panel__body">
+            <ul class="spine">
+              <li class="done"><span class="no">01</span><span>Requested — by you, at the consultation</span></li>
+              <li class="done"><span class="no">02</span><span>Appointment — documents seen in person by C. Vasseur</span></li>
+              <li class="done"><span class="no">03</span><span>Verified — 14 March 2026, recorded against her name</span></li>
+              <li class="done"><span class="no">04</span><span>Issued — your first code, 14 March 2026</span></li>
+              <li class="now"><span class="no">05</span><span>Re-confirmed each March, so the mark never goes stale</span></li>
+            </ul>
+            <div class="stack gap-s" style="margin-top:1.4rem">
+              <button class="btn btn--quiet" type="button" data-note="Requested. C. Vasseur will arrange an appointment — re-verification is done in person, like the first one. Your existing codes keep working in the meantime.">Request re-verification now</button>
+              <p class="quiet" style="margin:0">
+                A mark is never issued remotely, never from documents alone, and never renewed by
+                a reminder email. If yours lapses, it lapses — and the public page says so.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.6rem">
+
+          <div class="panel">
+            <div class="panel__head"><h2>What it confirms</h2><span class="pill pill--live">Verified 14 March 2026</span></div>
+            <div class="panel__body">
+              <dl class="kv">
+                <dt>Verified</dt><dd>In person, by C. Vasseur</dd>
+                <dt>Identity</dt><dd>Confirmed against documents</dd>
+                <dt>Circumstances</dt><dd>Confirmed as described</dd>
+                <dt>Re-confirmed</dt><dd>At each annual review — next March 2027</dd>
+              </dl>
+
+              <div class="note-inline">
+                It confirms identity, not character. We will never let it be presented as a safety
+                guarantee, and the public page says so in those words — which protects you as much
+                as the person reading it.
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>The seal</h2></div>
+            <div class="panel__body" style="text-align:center">
+              <svg class="seal" viewBox="0 0 240 240" fill="none" role="img" aria-label="Legend — identity verified" style="margin-inline:auto">
+                <defs><path id="arcP" d="M120 214a94 94 0 0 1 0-188" transform="rotate(180 120 120)"/></defs>
+                <circle cx="120" cy="120" r="112" stroke="currentColor" stroke-width="1" opacity=".35"/>
+                <circle cx="120" cy="120" r="94" stroke="currentColor" stroke-width="1" opacity=".55"/>
+                <path d="M86 112h68" stroke="currentColor" stroke-width="3" stroke-linecap="square"/>
+                <path d="M120 66v46" stroke="currentColor" stroke-width="3" stroke-linecap="square"/>
+                <path d="M104 140l11 11 22-22" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" opacity=".9"/>
+                <text font-family="Inter, Helvetica, Arial, sans-serif" font-size="11" font-weight="500" letter-spacing="4.2" fill="currentColor" opacity=".8">
+                  <textPath href="#arcP" startOffset="50%" text-anchor="middle">IDENTITY VERIFIED</textPath>
+                </text>
+                <text x="120" y="196" font-family="Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="500" letter-spacing="6" fill="currentColor" text-anchor="middle">LEGEND</text>
+              </svg>
+              <p class="quiet" style="margin-top:1.2rem">
+                For places that take an image — a banner, a signature, a website. Where only text is
+                allowed, the line below is the mark.
+              </p>
+              <button class="btn btn--quiet" type="button" data-note="The office sends the seal as SVG and PNG, sized for each platform. In the released build it downloads from here." style="margin-top:1.2rem">Get the seal</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head"><h2>Where your mark is placed</h2><span class="pill pill--rest">One code per placement</span></div>
+          <div class="panel__body">
+            <p class="quiet" style="margin-top:0">
+              Each placement carries its own code, so a profile you close can be withdrawn without
+              touching the others — and so you can see which one people are actually checking.
+            </p>
+
+            <div style="margin-top:1.6rem" id="placements">
+              <div class="placement">
+                <div>
+                  <p class="where">A professional profile</p>
+                  <p class="meta"><span class="code code--sm">7K4M-2QX9-8HTD</span> · placed 2 August · checked 14 times in 30 days</p>
+                </div>
+                <span class="pill pill--live">Active</span>
+                <button class="btn btn--quiet" type="button" data-revoke="7K4M-2QX9-8HTD">Withdraw</button>
+              </div>
+              <div class="placement">
+                <div>
+                  <p class="where">Email signature</p>
+                  <p class="meta"><span class="code code--sm">M9TC-4BJ6-2FEK</span> · placed 2 August · checked 3 times in 30 days</p>
+                </div>
+                <span class="pill pill--live">Active</span>
+                <button class="btn btn--quiet" type="button" data-revoke="M9TC-4BJ6-2FEK">Withdraw</button>
+              </div>
+              <div class="placement placement--void">
+                <div>
+                  <p class="where">A personal profile, since closed</p>
+                  <p class="meta"><span class="code code--sm">3PN7-XKD2-9RWA</span> · withdrawn by you, 11 June</p>
+                </div>
+                <span class="pill pill--rest">Withdrawn</span>
+                <span class="quiet">—</span>
+              </div>
+            </div>
+
+            <div class="stack gap-s" style="margin-top:1.6rem">
+              <button class="btn btn--quiet" type="button" data-toggle="place-box">Place it somewhere new</button>
+              <div id="place-box" hidden style="max-width:560px">
+                <div class="p-field">
+                  <label for="pl-where">Where you will place it</label>
+                  <input id="pl-where" type="text" placeholder="A profile, a website, a signature">
+                </div>
+                <button class="btn btn--solid" type="button" id="issue-code">Issue a code for it</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols cols--2" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>What a stranger sees</h2></div>
+            <div class="panel__body">
+              <p class="quiet" style="margin-top:0">
+                The date of verification is always shown. Everything else is yours to decide, and
+                you can change it without reissuing anything.
+              </p>
+              <div class="toggle-row">
+                <div>
+                  <p class="nm">My first name</p>
+                  <p class="ds">Lets them check the mark belongs to the person in front of them. Without it the mark confirms only that some verified person holds this code.</p>
+                </div>
+                <label class="switch"><input type="checkbox" checked data-reveals="first name"><span></span></label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <p class="nm">My city</p>
+                  <p class="ds">London.</p>
+                </div>
+                <label class="switch"><input type="checkbox" checked data-reveals="city"><span></span></label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <p class="nm">That I am a member of this house</p>
+                  <p class="ds">Off, and we would counsel leaving it off. It discloses that you are looking, which is nobody's business but yours.</p>
+                </div>
+                <label class="switch"><input type="checkbox" data-reveals="membership"><span></span></label>
+              </div>
+              <button class="btn btn--quiet" type="button" data-note="Saved. The change applies to every placement at once and takes effect immediately." style="margin-top:1.2rem">Save what it shows</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Who has checked it</h2><span class="pill pill--rest">Counts only</span></div>
+            <div class="panel__body">
+              <div class="figs">
+                <div><span class="n">17</span><span class="l">Checks in 30 days</span></div>
+                <div><span class="n">04</span><span class="l">In the last week</span></div>
+              </div>
+              <div class="note-inline">
+                We record that a check happened, never who made it. Nobody can find out who has been
+                looking you up — including you, and including us.
+              </div>
+              <p class="quiet" style="margin-top:1.2rem">
+                A sudden run of checks on a placement you had forgotten is usually worth a look. If
+                it looks wrong, withdraw the code and tell your advisor.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =============================================== COUNSEL -->
+      <section class="view" id="view-counsel" tabindex="-1" aria-label="Counsel">
+        <p class="lede">Counsel</p>
+        <p class="sub">
+          Work on a relationship while you are inside it. Sessions with someone retained by you,
+          separately or together — for a difficulty that has stopped resolving itself, or simply to
+          keep a good thing durable.
+        </p>
+
+        <div class="panel" style="margin-top:2.6rem">
+          <div class="panel__head"><h2>Status</h2><span class="pill pill--rest">Available — not currently running</span></div>
+          <div class="panel__body">
+            <p style="font-family:var(--serif);font-size:1.4rem;line-height:1.45;color:#EDEAE3;margin:0">
+              Nothing is running here. Counsel begins when you ask for it, and it can be asked for
+              at any point — including years after we last spoke.
+            </p>
+            <p style="font-size:.92rem;color:var(--fg-soft)">
+              It is not a course with a fixed number of sessions, and it is not something we will
+              suggest you need. You decide when it starts and when it stops.
+            </p>
+            <div class="stack gap-s" style="margin-top:1.4rem">
+              <button class="btn btn--solid" type="button" data-toggle="counsel-box">Ask for a session</button>
+              <div id="counsel-box" hidden style="max-width:640px">
+                <div class="p-field">
+                  <label>Who it is for</label>
+                  <div class="choice" style="margin-top:.8rem">
+                    <input type="radio" id="cw1" name="cwho" value="me" checked><label for="cw1">Me alone, to begin with</label>
+                    <input type="radio" id="cw2" name="cwho" value="both"><label for="cw2">Both of us</label>
+                    <input type="radio" id="cw3" name="cwho" value="unsure"><label for="cw3">I am not sure yet</label>
+                  </div>
+                  <p class="hint" style="font-size:.72rem;color:var(--fg-faint);margin-top:.8rem">
+                    If it is for both, we ask each of you separately. Either may decline, and the
+                    other is not told which.
+                  </p>
+                </div>
+                <div class="p-field">
+                  <label for="counsel-what">What you would like to work on</label>
+                  <textarea id="counsel-what" placeholder="As much or as little as you wish. A sentence is enough to begin."></textarea>
+                </div>
+                <button class="btn btn--solid" type="button" data-note="Passed to C. Vasseur. She will telephone rather than write, and will suggest who at the house is right for it — or someone outside it, if that is the honest answer.">Send to my advisor</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>What counsel covers</h2></div>
+            <div class="panel__body">
+              <div class="convo">
+                <div class="convo__item">
+                  <span class="no">01</span>
+                  <div>
+                    <p class="nm">A difficulty that has stopped moving</p>
+                    <p class="ds">The one you have each raised twice and put down twice. Almost no relationship ends suddenly — it ends after a long conversation neither person could start.</p>
+                  </div>
+                </div>
+                <div class="convo__item">
+                  <span class="no">02</span>
+                  <div>
+                    <p class="nm">The argument that recurs</p>
+                    <p class="ds">Usually because it was never about what it appeared to be about. Worth naming properly, once, with someone in the room who is not either of you.</p>
+                  </div>
+                </div>
+                <div class="convo__item">
+                  <span class="no">03</span>
+                  <div>
+                    <p class="nm">Durability</p>
+                    <p class="ds">What this relationship actually needs in order to still be here in ten years — asked while things are good, which is the only time the answer is honest.</p>
+                  </div>
+                </div>
+                <div class="convo__item">
+                  <span class="no">04</span>
+                  <div>
+                    <p class="nm">A decision taken jointly</p>
+                    <p class="ds">Money, geography, children, two sets of family, a career that moves one of you. Decisions that are hard because they are shared, not because they are complicated.</p>
+                  </div>
+                </div>
+                <div class="convo__item">
+                  <span class="no">05</span>
+                  <div>
+                    <p class="nm">Whether it should continue</p>
+                    <p class="ds">Sometimes the honest counsel is that it should not. We will say so, and we will handle the ending with the same discretion as the beginning.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>How it is held</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Form</dt><dd>Sessions, at your pace</dd>
+                  <dt>Separately</dt><dd>Always available, even where both attend</dd>
+                  <dt>Confidence</dt><dd>Nothing said by one is reported to the other</dd>
+                  <dt>Notes</dt><dd>Held by your counsel, not in your file</dd>
+                  <dt>Ending it</dt><dd>Whenever you say, without a reason</dd>
+                </dl>
+                <div class="note-inline">
+                  What is discussed in counsel does not enter your profile, your brief, or your
+                  persona. It is not used to sharpen a search, and no advisor working on an
+                  introduction ever reads it.
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel__head"><h2>Where our limit is</h2></div>
+              <div class="panel__body">
+                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                  This is advisory counsel on a relationship, not clinical treatment of a person.
+                  Where the right answer is a therapist, a psychiatrist or a mediator, we say so
+                  plainly and introduce you to someone qualified — and we keep working alongside
+                  them if you want us to.
+                </p>
+                <p class="quiet" style="margin-top:1.1rem">
+                  If either of you is unsafe, that is not a counsel matter and we will not treat it
+                  as one.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script src="assets/js/portal.js"></script>
+</body>
+</html>

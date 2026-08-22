@@ -1,0 +1,17 @@
+# legendpartner.com
+# A private practice. The public pages may be indexed; nothing behind
+# member or staff access ever should be.
+
+User-agent: *
+Allow: /
+Disallow: /portal.html
+Disallow: /advisor.html
+Disallow: /admin.html
+Disallow: /site-preview.html
+Disallow: /portal-preview.html
+Disallow: /src/
+
+# Verification lookups must not be crawled or enumerated.
+Disallow: /verify.html?
+
+Sitemap: https://legendpartner.com/sitemap.xml
