@@ -72,6 +72,7 @@
   <!-- RAIL -->
   <aside class="rail">
     <div>
+      <div class="rail__top">
       <a class="rail__brand" href="index.html">
         <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
           <circle cx="20" cy="20" r="18.4" stroke="currentColor" stroke-width=".9" opacity=".5"/>
@@ -80,6 +81,14 @@
         </svg>
         <span><b>Legend</b><span>Private Client Portal</span></span>
       </a>
+      <button class="rail__toggle" type="button" id="rail-toggle"
+              aria-expanded="true" aria-controls="rail-nav" title="Collapse the rail">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      </div>
 
       <div class="rail__member">
         <p class="name">A. Marchand</p>
@@ -87,35 +96,36 @@
       </div>
 
       <nav class="rail__nav" id="rail-nav" aria-label="Portal">
-        <a href="#overview" data-view="overview"><i class="mk"></i><span>Overview</span></a>
-        <p class="group">The search</p>
-        <a href="#proposed" data-view="proposed"><i class="mk"></i><span>Proposed for you</span><span class="count">2</span></a>
-        <a href="#requests" data-view="requests"><i class="mk"></i><span>Asked of you</span><span class="count">2</span></a>
-        <a href="#introductions" data-view="introductions"><i class="mk"></i><span>Introductions</span><span class="count">1</span></a>
-        <a href="#appointments" data-view="appointments"><i class="mk"></i><span>Appointments</span></a>
-        <a href="#messages" data-view="messages"><i class="mk"></i><span>Messages</span></a>
-        <p class="group">Your file</p>
-        <a href="#persona" data-view="persona"><i class="mk"></i><span>Persona</span></a>
-        <a href="#profile" data-view="profile"><i class="mk"></i><span>Private profile</span></a>
-        <a href="#preferences" data-view="preferences"><i class="mk"></i><span>The brief</span></a>
-        <a href="#intentions" data-view="intentions"><i class="mk"></i><span>Intentions</span></a>
-        <a href="#reflections" data-view="reflections"><i class="mk"></i><span>Reflections &amp; standing</span></a>
-        <a href="#insights" data-view="insights"><i class="mk"></i><span>What we have learned</span></a>
-        <p class="group">The relationship</p>
-        <a href="#formation" data-view="formation"><i class="mk"></i><span>Formation</span></a>
-        <a href="#counsel" data-view="counsel"><i class="mk"></i><span>Counsel</span></a>
-        <a href="#continuity" data-view="continuity"><i class="mk"></i><span>Continuity</span></a>
-        <p class="group">The house</p>
-        <a href="#parties" data-view="parties"><i class="mk"></i><span>Private gatherings</span></a>
-        <a href="#assistant" data-view="assistant"><i class="mk"></i><span>Assistant</span></a>
-        <a href="#mandate" data-view="mandate"><i class="mk"></i><span>Mandate &amp; agreement</span></a>
-        <a href="#documents" data-view="documents"><i class="mk"></i><span>Documents</span></a>
-        <p class="group">Privacy &amp; account</p>
-        <a href="#consent" data-view="consent"><i class="mk"></i><span>Consent ledger</span></a>
-        <a href="#data" data-view="data"><i class="mk"></i><span>What we hold</span></a>
-        <a href="#credential" data-view="credential"><i class="mk"></i><span>Verification mark</span></a>
-        <a href="#safety" data-view="safety"><i class="mk"></i><span>Safety &amp; conduct</span></a>
-        <a href="#account" data-view="account"><i class="mk"></i><span>Account &amp; security</span></a>
+        <a class="cat cat--home" href="#overview" data-view="overview" data-label="Overview">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>
+          <span>Overview<span class="cat__n">What is waiting, at a glance</span></span>
+        </a>
+        <hr class="rail__rule">
+        <a class="cat" href="#long" data-view="long" data-label="Long partner">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"/></svg></span>
+          <span>Long partner<span class="cat__n">The search, and all of it</span></span>
+          <span class="count">3</span>
+        </a>
+        <a class="cat" href="#short" data-view="short" data-label="Short partner">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><polyline points="12 6.6 12 12 15.8 14"/></svg></span>
+          <span>Short partner<span class="cat__n">Companionship, on stated terms</span></span>
+        </a>
+        <a class="cat" href="#events" data-view="events" data-label="Party and event">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/></svg></span>
+          <span>Party &amp; event<span class="cat__n">Gatherings of the house</span></span>
+        </a>
+        <a class="cat" href="#management" data-view="management" data-label="Relationship management">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="M16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88Z"/></svg></span>
+          <span>Relationship management<span class="cat__n">Formation, counsel, continuity</span></span>
+        </a>
+        <a class="cat" href="#me" data-view="me" data-label="Profile">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4.6"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></span>
+          <span>Profile<span class="cat__n">Who you are, as we hold it</span></span>
+        </a>
+        <a class="cat" href="#settings" data-view="settings" data-label="Settings">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4h-7"/><path d="M10 4H3"/><path d="M21 12h-9"/><path d="M8 12H3"/><path d="M21 20h-5"/><path d="M12 20H3"/><path d="M14 2v4"/><path d="M8 10v4"/><path d="M16 18v4"/></svg></span>
+          <span>Settings<span class="cat__n">Privacy, consent, account</span></span>
+        </a>
       </nav>
     </div>
 
@@ -132,6 +142,10 @@
   <div>
     <header class="topbar">
       <h1 id="view-title">Overview</h1>
+      <div class="topbar__util">
+          <a href="#messages" data-go="messages"><span class="t">Correspondence</span><span class="n">1</span></a>
+          <a href="#assistant" data-go="assistant"><span class="t">Assistant</span></a>
+        </div>
       <div class="meta">
         <span class="date" id="today"></span>
         <span class="confidential">Confidential</span>
@@ -146,19 +160,128 @@
     <main class="canvas" id="canvas">
 
       <!-- ============================================= OVERVIEW -->
-      <section class="view is-active" id="view-overview" tabindex="-1" aria-label="Overview">
-        <p class="lede" id="greeting">Good afternoon.</p>
-        <p class="sub">Two matters are waiting for you: an introduction to consider, and a dinner to confirm for the 28th.</p>
+      <section class="view is-active dash" id="view-overview" tabindex="-1" aria-label="Overview">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:1.4rem;flex-wrap:wrap">
+          <div>
+            <p class="lede" id="greeting">Good afternoon.</p>
+            <p class="sub" style="margin-top:.6rem">
+              Two things want an answer from you. Everything else is running.
+            </p>
+          </div>
+          <div class="palette-switch" role="group" aria-label="Preview palette">
+            <span>Palette</span>
+            <button type="button" data-palette-set="legend" aria-pressed="true">Legend</button>
+            <button type="button" data-palette-set="reference" aria-pressed="false">Reference</button>
+          </div>
+        </div>
 
-        <div class="cols cols--7-5" style="margin-top:2.6rem">
+        <!-- the tile row -->
+        <div class="tiles" style="margin-top:2.2rem">
+          <a class="tile" href="#proposed" data-go="proposed">
+            <span class="tile__act" aria-hidden="true"></span>
+            <span class="tile__n">2</span>
+            <span class="tile__l">Proposed<br>for you</span>
+          </a>
+          <a class="tile" href="#requests" data-go="requests">
+            <span class="tile__act" aria-hidden="true"></span>
+            <span class="tile__n">2</span>
+            <span class="tile__l">Asked<br>of you</span>
+          </a>
+          <a class="tile" href="#introductions" data-go="introductions">
+            <span class="tile__n">1</span>
+            <span class="tile__l">Introduction<br>awaiting</span>
+          </a>
+          <a class="tile" href="#appointments" data-go="appointments">
+            <span class="tile__n">28<span style="font-size:.42em;letter-spacing:.06em"> Aug</span></span>
+            <span class="tile__l">Next<br>appointment</span>
+          </a>
+          <a class="tile" href="#persona" data-go="persona">
+            <span class="tile__n">72<span style="font-size:.42em">%</span></span>
+            <span class="tile__l">Persona<br>complete</span>
+          </a>
+          <a class="tile" href="#reflections" data-go="reflections">
+            <span class="tile__n">4.6</span>
+            <span class="tile__l">Your standing<br>out of five</span>
+          </a>
+        </div>
 
-          <div class="panel panel--accent">
+        <!-- the card grid -->
+        <div class="dash-grid">
+
+          <div class="panel span-2 ask">
+            <div class="panel__head">
+              <h2>Ask the house</h2>
+              <span class="pill pill--rest">Assistant &middot; reads your file only</span>
+            </div>
+
+            <div class="thread ask__thread" id="ask-thread">
+              <div class="msg msg--ai">
+                <p class="who">Legend &middot; Assistant</p>
+                <div class="bubble">
+                  Good afternoon. I can tell you where anything on your engagement stands &mdash;
+                  what is waiting on you, what has been arranged, what your advisor has written.
+                  What I cannot tell you is anything about another member that has not been
+                  disclosed to you yet.
+                </div>
+              </div>
+            </div>
+
+            <div class="ask__chips" id="ask-chips" role="group" aria-label="Suggested questions">
+              <button type="button" data-ask="What is waiting on me?">What is waiting on me?</button>
+              <button type="button" data-ask="When is my next appointment?">Next appointment</button>
+              <button type="button" data-ask="Who is the person in Introduction No. 07?">Who is No. 07?</button>
+              <button type="button" data-ask="What has my advisor written since we last spoke?">From my advisor</button>
+              <button type="button" data-ask="What is my standing out of five?">My standing</button>
+            </div>
+
+            <form class="composer" id="ask-form">
+              <textarea id="ask-input" rows="1" placeholder="Ask about your engagement" aria-label="Ask the assistant"></textarea>
+              <button class="btn btn--quiet" type="submit">Send</button>
+            </form>
+
+            <div class="panel__foot">
+              <p class="quiet" style="margin:0">
+                In this preview the replies are written rules rather than a language model, and
+                nothing you type leaves this page. In service, what you ask sits on your file and
+                your advisor can read it &mdash; we would rather tell you that than let you assume
+                otherwise.
+              </p>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>What it will and will not do</h2></div>
+            <div class="panel__body">
+              <p class="ask__lbl">It will</p>
+              <ul class="includes">
+                <li>Answer about your own file &mdash; appointments, cases, the brief, fees, whatever is outstanding.</li>
+                <li>Draft a note to your advisor and leave it for you to send.</li>
+                <li>Say it does not know, and hand the question to a person by name.</li>
+              </ul>
+              <p class="ask__lbl">It will not</p>
+              <ul class="includes includes--not">
+                <li>Disclose a name, profession or photograph that is still withheld from you.</li>
+                <li>Accept, decline, arrange or cancel anything on your behalf.</li>
+                <li>Decide who is brought to you. That is an advisor's judgment, with their name on it.</li>
+              </ul>
+              <div class="note-inline">
+                It is not your persona. The persona is the model of you and speaks to other members
+                with your permission; this answers to you and speaks to nobody.
+              </div>
+            </div>
+            <div class="panel__foot">
+              <a class="btn" href="#persona" data-go="persona"><span>Your persona</span><i class="arrow"></i></a>
+            </div>
+          </div>
+
+
+          <div class="panel span-2">
             <div class="panel__head">
               <h2>Awaiting your consideration</h2>
               <span class="pill pill--action">Action required</span>
             </div>
             <div class="panel__body">
-              <p style="font-family:var(--serif);font-size:1.5rem;line-height:1.35;color:#EDEAE3">
+              <p style="font-family:var(--serif);font-size:1.5rem;line-height:1.35;color:#EDEAE3;margin:0">
                 Introduction No. 07 — a founder in Zurich, recently returned from a decade in Singapore.
               </p>
               <p style="color:var(--fg-soft);font-size:.92rem">
@@ -184,9 +307,15 @@
               <a class="btn" href="#appointments" data-go="appointments"><span>All appointments</span><i class="arrow"></i></a>
             </div>
           </div>
-        </div>
 
-        <div class="cols cols--5-7" style="margin-top:1.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>The search, month by month</h2></div>
+            <div class="panel__body">
+              <div class="chart" id="chart-pipeline"></div>
+              <p class="quiet" style="margin-top:.9rem">Twenty-one assessed, four brought to you. The gap is the work.</p>
+            </div>
+          </div>
+
           <div class="panel">
             <div class="panel__head"><h2>Your engagement</h2></div>
             <div class="panel__body">
@@ -194,13 +323,13 @@
                 <li class="done"><span class="no">01</span><span>Private consultation</span></li>
                 <li class="done"><span class="no">02</span><span>Personal profile</span></li>
                 <li class="done"><span class="no">03</span><span>Curation</span></li>
-                <li class="now"><span class="no">04</span><span>Assessment &amp; introduction</span></li>
+                <li class="now"><span class="no">04</span><span>Assessment</span></li>
                 <li><span class="no">05</span><span>Introduction</span></li>
                 <li><span class="no">06</span><span>Ongoing advisory</span></li>
               </ul>
             </div>
             <div class="panel__foot">
-              <p class="quiet" style="margin:0">Signature engagement · commenced 14 March 2026 · no fixed term</p>
+              <p class="quiet" style="margin:0">Signature · commenced 14 March 2026 · no fixed term</p>
             </div>
           </div>
 
@@ -210,41 +339,14 @@
               <span class="pill pill--rest">2 days ago</span>
             </div>
             <div class="panel__body">
-              <p style="font-family:var(--serif);font-size:1.24rem;line-height:1.6;font-style:italic;color:#EDEAE3">
+              <p style="font-family:var(--serif);font-size:1.18rem;line-height:1.6;font-style:italic;color:#EDEAE3">
                 &ldquo;I would rather you read the case twice and take the week than answer me tonight.
                 There is nothing being lost by considering it properly.&rdquo;
               </p>
-              <p class="quiet" style="margin-top:1.2rem">C. Vasseur · London</p>
+              <p class="quiet" style="margin-top:1rem">C. Vasseur · London</p>
             </div>
             <div class="panel__foot">
               <a class="btn" href="#messages" data-go="messages"><span>Open correspondence</span><i class="arrow"></i></a>
-            </div>
-          </div>
-        </div>
-
-        <div class="cols cols--3" style="margin-top:1.6rem">
-          <div class="panel">
-            <div class="panel__head"><h2>Proposed for you</h2><span class="pill pill--action">2 waiting</span></div>
-            <div class="panel__body">
-              <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
-                Two candidates your advisor believes are worth a full case. Both cleared a persona
-                exchange first.
-              </p>
-            </div>
-            <div class="panel__foot">
-              <a class="btn" href="#proposed" data-go="proposed"><span>Consider them</span><i class="arrow"></i></a>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel__head"><h2>Your persona</h2><span class="pill pill--rest">72% complete</span></div>
-            <div class="panel__body">
-              <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
-                Four sessions so far. Another conversation would sharpen what it says on your behalf.
-              </p>
-            </div>
-            <div class="panel__foot">
-              <a class="btn" href="#persona" data-go="persona"><span>Continue the conversation</span><i class="arrow"></i></a>
             </div>
           </div>
 
@@ -252,21 +354,52 @@
             <div class="panel__head"><h2>Outstanding</h2><span class="pill pill--action">1 reflection</span></div>
             <div class="panel__body">
               <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
-                Your advisor is waiting on your account of the 28th. It shapes what comes next.
+                Your advisor is waiting on your account of the 28th. It shapes what comes next, and
+                it is the single most useful thing a member does.
               </p>
             </div>
             <div class="panel__foot">
               <a class="btn" href="#reflections" data-go="reflections"><span>Record it</span><i class="arrow"></i></a>
             </div>
           </div>
-        </div>
 
-        <div class="panel panel--plain" style="margin-top:1.6rem">
-          <div class="figs">
-            <div><span class="n">04</span><span class="l">Introductions to date</span></div>
-            <div><span class="n">02</span><span class="l">Met in person</span></div>
-            <div><span class="n">4.6</span><span class="l">Your standing, out of five</span></div>
-            <div><span class="n">17</span><span class="l">Candidates assessed, not brought to you</span></div>
+          <div class="panel">
+            <div class="panel__head"><h2>Introductions by outcome</h2></div>
+            <div class="panel__body">
+              <div class="chart" id="chart-outcomes"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Persona, across sessions</h2></div>
+            <div class="panel__body">
+              <div class="chart" id="chart-persona"></div>
+              <p class="quiet" style="margin-top:.9rem">Around six sessions is where it stops changing much.</p>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head"><h2>Your standing, meeting by meeting</h2></div>
+            <div class="panel__body">
+              <div class="chart" id="chart-standing"></div>
+              <p class="quiet" style="margin-top:.9rem">Never shown to anyone you meet, and never attributed.</p>
+            </div>
+          </div>
+
+          <div class="panel span-2">
+            <div class="panel__head"><h2>The work behind it</h2><span class="pill pill--rest">Eleven months</span></div>
+            <div class="panel__body">
+              <div class="figs" style="margin:0">
+                <div><span class="n">21</span><span class="l">Candidates assessed</span></div>
+                <div><span class="n">04</span><span class="l">Brought to you</span></div>
+                <div><span class="n">02</span><span class="l">Met in person</span></div>
+                <div><span class="n">17</span><span class="l">Assessed, not brought to you</span></div>
+              </div>
+              <div class="note-inline">
+                The last figure is the one that matters. Seventeen people were considered properly
+                and did not reach you — that is what the mandate is actually buying.
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -1601,7 +1734,6 @@
               </dl>
             </div>
           </div>
-          </div>
         </div>
       </section>
 
@@ -2575,10 +2707,240 @@
           </div>
         </div>
       </section>
+
+      <!-- ============================================ LONG PARTNER -->
+      <section class="view" id="view-long" tabindex="-1" aria-label="Long partner">
+        <p class="lede">Long partner</p>
+        <div class="cf" data-label="Introductions" data-slides="[{&quot;subtitle&quot;:&quot;A founder in Zurich&quot;,&quot;sealed&quot;:&quot;Face withheld until you accept&quot;,&quot;open&quot;:false,&quot;meta&quot;:[{&quot;value&quot;:&quot;C. Vasseur, twice&quot;,&quot;label&quot;:&quot;Met by&quot;},{&quot;value&quot;:&quot;Advanced · 14 turns&quot;,&quot;label&quot;:&quot;Persona exchange&quot;},{&quot;value&quot;:&quot;90 minutes&quot;,&quot;label&quot;:&quot;Distance&quot;},{&quot;value&quot;:&quot;Name, employer, photograph&quot;,&quot;label&quot;:&quot;Withheld&quot;}],&quot;tag&quot;:&quot;Awaiting you&quot;,&quot;title&quot;:&quot;Introduction No. 07&quot;},{&quot;subtitle&quot;:&quot;Marguerite&quot;,&quot;open&quot;:true,&quot;meta&quot;:[{&quot;value&quot;:&quot;Dinner on the 28th&quot;,&quot;label&quot;:&quot;Status&quot;},{&quot;value&quot;:&quot;5 August&quot;,&quot;label&quot;:&quot;Names exchanged&quot;},{&quot;value&quot;:&quot;Marylebone, London&quot;,&quot;label&quot;:&quot;Where&quot;},{&quot;value&quot;:&quot;First name, sector&quot;,&quot;label&quot;:&quot;Shared with her&quot;}],&quot;tint&quot;:&quot;#62C3E7&quot;,&quot;tag&quot;:&quot;You accepted&quot;,&quot;title&quot;:&quot;Introduction No. 06&quot;},{&quot;subtitle&quot;:&quot;Concluded at your request&quot;,&quot;open&quot;:true,&quot;meta&quot;:[{&quot;value&quot;:&quot;Two&quot;,&quot;label&quot;:&quot;Meetings&quot;},{&quot;value&quot;:&quot;Life stage&quot;,&quot;label&quot;:&quot;Reason&quot;},{&quot;value&quot;:&quot;4 of 5, both ways&quot;,&quot;label&quot;:&quot;Reflection&quot;},{&quot;value&quot;:&quot;Yes — 11 June&quot;,&quot;label&quot;:&quot;Brief changed&quot;}],&quot;tint&quot;:&quot;#89809B&quot;,&quot;tag&quot;:&quot;Concluded&quot;,&quot;title&quot;:&quot;Introduction No. 05&quot;},{&quot;subtitle&quot;:&quot;Declined before introduction&quot;,&quot;sealed&quot;:&quot;Never disclosed to either side&quot;,&quot;open&quot;:false,&quot;meta&quot;:[{&quot;value&quot;:&quot;Geography&quot;,&quot;label&quot;:&quot;Reason&quot;},{&quot;value&quot;:&quot;None&quot;,&quot;label&quot;:&quot;Approach made&quot;},{&quot;value&quot;:&quot;Nothing&quot;,&quot;label&quot;:&quot;They were told&quot;},{&quot;value&quot;:&quot;Never appeared&quot;,&quot;label&quot;:&quot;Your name&quot;}],&quot;tag&quot;:&quot;Declined&quot;,&quot;title&quot;:&quot;Introduction No. 04&quot;}]"></div>
+        <p class="sub">
+          The search for a partnership meant to last, and everything that hangs off it — what is
+          proposed to you, what is asked of you, and the introductions themselves.
+        </p>
+        <div class="hub">
+          <a href="#proposed" data-go="proposed">
+            <span class="no">01</span>
+            <span><span class="nm">Proposed for you</span><span class="ds">Candidates your advisor believes are worth a full case. Nothing approached, nobody told you exist.</span></span>
+            <span class="go">2 waiting</span>
+          </a>
+          <a href="#requests" data-go="requests">
+            <span class="no">02</span>
+            <span><span class="nm">Asked of you</span><span class="ds">You are also someone another advisor may believe is right for their member. Nothing moves without your answer.</span></span>
+            <span class="go">2 waiting</span>
+          </a>
+          <a href="#introductions" data-go="introductions">
+            <span class="no">03</span>
+            <span><span class="nm">Introductions</span><span class="ds">Each written case, the reasoning behind it, and what remains withheld.</span></span>
+            <span class="go">1 awaiting you</span>
+          </a>
+          <a href="#appointments" data-go="appointments">
+            <span class="no">04</span>
+            <span><span class="nm">Appointments</span><span class="ds">Arranged around your calendar. Moveable without an explanation.</span></span>
+            <span class="go">Next 28 Aug</span>
+          </a>
+          <a href="#preferences" data-go="preferences">
+            <span class="no">05</span>
+            <span><span class="nm">The brief</span><span class="ds">What we are actually searching against, with the reasoning recorded for each revision.</span></span>
+            <span class="go">Revised 11 Jun</span>
+          </a>
+          <a href="#reflections" data-go="reflections">
+            <span class="no">06</span>
+            <span><span class="nm">Reflections &amp; standing</span><span class="ds">What you write after each meeting, and the figure others gave you.</span></span>
+            <span class="go">1 outstanding</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- =========================================== SHORT PARTNER -->
+      <section class="view" id="view-short" tabindex="-1" aria-label="Short partner">
+        <p class="lede">Short partner</p>
+        <div class="cf" data-label="Proposals" data-slides="[{&quot;subtitle&quot;:&quot;Companionship, unhurried&quot;,&quot;sealed&quot;:&quot;Nothing shown before consent&quot;,&quot;open&quot;:false,&quot;meta&quot;:[{&quot;value&quot;:&quot;Matches yours&quot;,&quot;label&quot;:&quot;Stated intention&quot;},{&quot;value&quot;:&quot;An advisor, once&quot;,&quot;label&quot;:&quot;Met by&quot;},{&quot;value&quot;:&quot;Same as yours&quot;,&quot;label&quot;:&quot;City&quot;},{&quot;value&quot;:&quot;Everything identifying&quot;,&quot;label&quot;:&quot;Withheld&quot;}],&quot;tag&quot;:&quot;Awaiting you&quot;,&quot;title&quot;:&quot;Proposal A&quot;},{&quot;subtitle&quot;:&quot;Companionship, unhurried&quot;,&quot;sealed&quot;:&quot;Nothing shown before consent&quot;,&quot;open&quot;:false,&quot;meta&quot;:[{&quot;value&quot;:&quot;Matches yours&quot;,&quot;label&quot;:&quot;Stated intention&quot;},{&quot;value&quot;:&quot;An advisor, twice&quot;,&quot;label&quot;:&quot;Met by&quot;},{&quot;value&quot;:&quot;Two hours away&quot;,&quot;label&quot;:&quot;City&quot;},{&quot;value&quot;:&quot;Everything identifying&quot;,&quot;label&quot;:&quot;Withheld&quot;}],&quot;tag&quot;:&quot;Awaiting you&quot;,&quot;title&quot;:&quot;Proposal B&quot;},{&quot;subtitle&quot;:&quot;Nothing is proposed until you do&quot;,&quot;open&quot;:true,&quot;meta&quot;:[{&quot;value&quot;:&quot;The same stated intention only&quot;,&quot;label&quot;:&quot;You are matched with&quot;},{&quot;value&quot;:&quot;Asked for each introduction&quot;,&quot;label&quot;:&quot;Consent&quot;},{&quot;value&quot;:&quot;Not available, by design&quot;,&quot;label&quot;:&quot;Browsing&quot;},{&quot;value&quot;:&quot;At any time&quot;,&quot;label&quot;:&quot;Changeable&quot;}],&quot;tint&quot;:&quot;#66C2AD&quot;,&quot;tag&quot;:&quot;Required&quot;,&quot;title&quot;:&quot;Set your intention&quot;}]"></div>
+        <p class="sub">
+          Companionship without the expectation of permanence — an arrangement some members want
+          and say so. It runs on exactly the same machinery as the long search, and differs in one
+          respect only: what both people have stated they are looking for.
+        </p>
+
+        <div class="panel panel--accent" style="margin-top:2.2rem">
+          <div class="panel__head"><h2>How this works, and what it is not</h2></div>
+          <div class="panel__body">
+            <ul class="includes">
+              <li><strong style="color:#EDEAE3">Matched only where the stated intention is the same on both sides.</strong> Nobody is offered to you who is looking for something else, and you are never offered to them.</li>
+              <li>Consent is asked separately, of each person, for every introduction — the same as the long search.</li>
+              <li>The same verification: every candidate met in person, circumstances confirmed.</li>
+              <li>No browsing, no gallery, no list of people to choose between. There is nothing here to scroll.</li>
+              <li>Applied identically to every member, whoever they are.</li>
+            </ul>
+            <div class="note-inline">
+              A shorter horizon changes what two people are agreeing to. It does not change who
+              decides, how they are found, or what is verified — and it never turns anyone into
+              something to be selected from a page.
+            </div>
+          </div>
+        </div>
+
+        <div class="hub">
+          <a href="#intentions" data-go="intentions">
+            <span class="no">01</span>
+            <span><span class="nm">Your stated intention</span><span class="ds">Set here. Marriage in view, a long partnership, companionship unhurried, or social introductions only.</span></span>
+            <span class="go">Set it</span>
+          </a>
+          <a href="#proposed" data-go="proposed">
+            <span class="no">02</span>
+            <span><span class="nm">Proposed for you</span><span class="ds">Filtered to members whose stated intention matches yours.</span></span>
+            <span class="go">Open</span>
+          </a>
+          <a href="#introductions" data-go="introductions">
+            <span class="no">03</span>
+            <span><span class="nm">Introductions</span><span class="ds">Written cases, consent, and the arrangement of a first meeting.</span></span>
+            <span class="go">Open</span>
+          </a>
+          <a href="#safety" data-go="safety">
+            <span class="no">04</span>
+            <span><span class="nm">Safety &amp; conduct</span><span class="ds">Reporting, exclusions, and what the house does about behaviour. Unchanged whatever the horizon.</span></span>
+            <span class="go">Open</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- =========================================== PARTY & EVENT -->
+      <section class="view" id="view-events" tabindex="-1" aria-label="Party and event">
+        <p class="lede">Party &amp; event</p>
+        <div class="cf" data-label="Gatherings" data-slides="[{&quot;subtitle&quot;:&quot;12 September · Mayfair, London&quot;,&quot;open&quot;:true,&quot;meta&quot;:[{&quot;value&quot;:&quot;Fourteen&quot;,&quot;label&quot;:&quot;Places&quot;},{&quot;value&quot;:&quot;Black tie optional&quot;,&quot;label&quot;:&quot;Dress&quot;},{&quot;value&quot;:&quot;Arranged by the house&quot;,&quot;label&quot;:&quot;Seating&quot;},{&quot;value&quot;:&quot;None, by anyone&quot;,&quot;label&quot;:&quot;Photography&quot;}],&quot;tint&quot;:&quot;#D38340&quot;,&quot;tag&quot;:&quot;Open&quot;,&quot;title&quot;:&quot;A dinner for fourteen&quot;},{&quot;subtitle&quot;:&quot;4 October · Geneva&quot;,&quot;open&quot;:true,&quot;meta&quot;:[{&quot;value&quot;:&quot;Twenty&quot;,&quot;label&quot;:&quot;Places&quot;},{&quot;value&quot;:&quot;Smart&quot;,&quot;label&quot;:&quot;Dress&quot;},{&quot;value&quot;:&quot;Ask your advisor first&quot;,&quot;label&quot;:&quot;Guests&quot;},{&quot;value&quot;:&quot;Closed viewing&quot;,&quot;label&quot;:&quot;Collection&quot;}],&quot;tint&quot;:&quot;#5B8BDA&quot;,&quot;tag&quot;:&quot;Open&quot;,&quot;title&quot;:&quot;A private view, then supper&quot;},{&quot;subtitle&quot;:&quot;21 November · Paris&quot;,&quot;open&quot;:true,&quot;meta&quot;:[{&quot;value&quot;:&quot;Thirty&quot;,&quot;label&quot;:&quot;Places&quot;},{&quot;value&quot;:&quot;Two&quot;,&quot;label&quot;:&quot;Speakers&quot;},{&quot;value&quot;:&quot;No programme&quot;,&quot;label&quot;:&quot;After nine&quot;},{&quot;value&quot;:&quot;By a principal&quot;,&quot;label&quot;:&quot;Entry&quot;}],&quot;tint&quot;:&quot;#5EAD7E&quot;,&quot;tag&quot;:&quot;By invitation&quot;,&quot;title&quot;:&quot;The winter salon&quot;},{&quot;subtitle&quot;:&quot;14 May · London&quot;,&quot;open&quot;:true,&quot;meta&quot;:[{&quot;value&quot;:&quot;Yes&quot;,&quot;label&quot;:&quot;You attended&quot;},{&quot;value&quot;:&quot;Two conversations to follow&quot;,&quot;label&quot;:&quot;Advisor note&quot;},{&quot;value&quot;:&quot;Never circulated&quot;,&quot;label&quot;:&quot;Guest list&quot;},{&quot;value&quot;:&quot;Sixteen&quot;,&quot;label&quot;:&quot;Places&quot;}],&quot;tint&quot;:&quot;#89809B&quot;,&quot;tag&quot;:&quot;Attended&quot;,&quot;title&quot;:&quot;Spring supper&quot;}]"></div>
+        <p class="sub">
+          A small number of dinners and salons each season, hosted by the house. Attending is never
+          a condition of anything, and declining is never noted.
+        </p>
+        <div class="hub">
+          <a href="#parties" data-go="parties">
+            <span class="no">01</span>
+            <span><span class="nm">This season</span><span class="ds">Three gatherings between September and November, in London, Geneva and Paris.</span></span>
+            <span class="go">3 open</span>
+          </a>
+          <a href="#parties" data-go="parties">
+            <span class="no">02</span>
+            <span><span class="nm">Your reservations</span><span class="ds">What you have requested and what you attended, with your advisor's notes.</span></span>
+            <span class="go">1 confirmed</span>
+          </a>
+          <a href="#assistant" data-go="assistant">
+            <span class="no">03</span>
+            <span><span class="nm">Arrangements</span><span class="ds">Transport, a private room, a table held under our name — asked for and handled.</span></span>
+            <span class="go">Ask</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- ================================== RELATIONSHIP MANAGEMENT -->
+      <section class="view" id="view-management" tabindex="-1" aria-label="Relationship management">
+        <p class="lede">Relationship management</p>
+        <p class="sub">
+          The work that happens inside a relationship rather than before it. Three of the five areas
+          of the practice sit here, and none of them requires that we introduced you.
+        </p>
+        <div class="hub">
+          <a href="#formation" data-go="formation">
+            <span class="no">III</span>
+            <span><span class="nm">Formation</span><span class="ds">The first year — the conversations most couples postpone, and the merging of two established lives.</span></span>
+            <span class="go">Retained</span>
+          </a>
+          <a href="#counsel" data-go="counsel">
+            <span class="no">IV</span>
+            <span><span class="nm">Counsel</span><span class="ds">A difficulty that has stopped resolving itself, and what a good relationship needs to stay durable.</span></span>
+            <span class="go">Available</span>
+          </a>
+          <a href="#continuity" data-go="continuity">
+            <span class="no">V</span>
+            <span><span class="nm">Continuity</span><span class="ds">A standing retainer with an advisor who holds the whole history, across the years.</span></span>
+            <span class="go">Not retained</span>
+          </a>
+          <a href="#insights" data-go="insights">
+            <span class="no">—</span>
+            <span><span class="nm">What we have learned</span><span class="ds">Observations recorded by your advisor across the engagement, written so you can disagree with them.</span></span>
+            <span class="go">Read</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- ================================================= PROFILE -->
+      <section class="view" id="view-me" tabindex="-1" aria-label="Profile">
+        <p class="lede">Profile</p>
+        <p class="sub">
+          Who you are, as this house holds it. Built from four directions — what you write, what a
+          conversation surfaces, what you tell us after a meeting, and what your advisor observes.
+        </p>
+        <div class="hub">
+          <a href="#profile" data-go="profile">
+            <span class="no">01</span>
+            <span><span class="nm">Private profile</span><span class="ds">Eighteen fields across four sections. Facts save directly; judgments are discussed before the search changes.</span></span>
+            <span class="go">72% complete</span>
+          </a>
+          <a href="#persona" data-go="persona">
+            <span class="no">02</span>
+            <span><span class="nm">Persona</span><span class="ds">Built from conversation, not a questionnaire. With your permission it speaks first, so you do not spend an evening finding an incompatibility.</span></span>
+            <span class="go">72% built</span>
+          </a>
+          <a href="#preferences" data-go="preferences">
+            <span class="no">03</span>
+            <span><span class="nm">The brief</span><span class="ds">What we search against, and how it has changed since March.</span></span>
+            <span class="go">4 revisions</span>
+          </a>
+          <a href="#intentions" data-go="intentions">
+            <span class="no">04</span>
+            <span><span class="nm">Intentions</span><span class="ds">What you are seeking, on the record. Matched only against members who stated the same.</span></span>
+            <span class="go">Set</span>
+          </a>
+          <a href="#reflections" data-go="reflections">
+            <span class="no">05</span>
+            <span><span class="nm">Reflections &amp; standing</span><span class="ds">Private to you and your advisor. Never shown to anyone you meet, never attributed.</span></span>
+            <span class="go">4.6 of 5</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- ================================================ SETTINGS -->
+      <section class="view" id="view-settings" tabindex="-1" aria-label="Settings">
+        <p class="lede">Settings</p>
+        <p class="sub">
+          Privacy, consent, the papers behind your engagement, and how this account is protected.
+        </p>
+        <div class="hub">
+          <a href="#consent" data-go="consent">
+            <span class="no">01</span>
+            <span><span class="nm">Consent ledger</span><span class="ds">Every time we asked to disclose something, what we would have said, and what you answered — including the times you said no.</span></span>
+            <span class="go">14 entries</span>
+          </a>
+          <a href="#data" data-go="data">
+            <span class="no">02</span>
+            <span><span class="nm">What we hold</span><span class="ds">Everything the house has about you, why it exists, how long it is kept, and how to have it destroyed.</span></span>
+            <span class="go">7 records</span>
+          </a>
+          <a href="#account" data-go="account">
+            <span class="no">03</span>
+            <span><span class="nm">Account &amp; security</span><span class="ds">How we reach you, whether our name appears in your inbox, and where this account is open.</span></span>
+            <span class="go">1 step outstanding</span>
+          </a>
+          <a href="#safety" data-go="safety">
+            <span class="no">04</span>
+            <span><span class="nm">Safety &amp; conduct</span><span class="ds">Reporting, first-meeting arrangements, and people you will never be shown.</span></span>
+            <span class="go">Open</span>
+          </a>
+          <a href="#mandate" data-go="mandate">
+            <span class="no">05</span>
+            <span><span class="nm">Mandate &amp; agreement</span><span class="ds">What you retained us to do, on what terms, and for how long. Fees and verification.</span></span>
+            <span class="go">Signature</span>
+          </a>
+          <a href="#documents" data-go="documents">
+            <span class="no">06</span>
+            <span><span class="nm">Documents</span><span class="ds">Engagement papers and the written record of each introduction.</span></span>
+            <span class="go">6 held</span>
+          </a>
+        </div>
+      </section>
     </main>
   </div>
 </div>
 
 <script src="assets/js/portal.js"></script>
+<script src="assets/js/charts.js"></script>
+<script src="assets/js/coverflow.js"></script>
 </body>
 </html>

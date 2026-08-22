@@ -10,7 +10,14 @@
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Six categories in the rail; everything else is a section beneath one of them.
   var TITLES = {
+    long:       'Long partner',
+    short:      'Short partner',
+    events:     'Party & event',
+    management: 'Relationship management',
+    me:         'Profile',
+    settings:   'Settings',
     overview: 'Overview',
     proposed: 'Proposed for you',
     requests: 'Asked of you',
@@ -79,6 +86,18 @@
     });
   }
 
+  // Which category a section belongs to, so the rail still shows where you are
+  // once you have gone one level down.
+  var PARENT = {
+    proposed: 'long', requests: 'long', introductions: 'long', appointments: 'long',
+    preferences: 'me', reflections: 'me', intentions: 'me', persona: 'me', profile: 'me',
+    insights: 'management', formation: 'management', counsel: 'management', continuity: 'management',
+    parties: 'events',
+    consent: 'settings', data: 'settings', account: 'settings', safety: 'settings',
+    mandate: 'settings', documents: 'settings',
+    messages: null, assistant: null, overview: null
+  };
+
   /* --- Routing ------------------------------------------------------------ */
   function route() {
     var name = (location.hash || '#overview').replace('#', '');
@@ -87,10 +106,24 @@
     $$('.view').forEach(function (v) {
       v.classList.toggle('is-active', v.id === 'view-' + name);
     });
+
+    // A section highlights the category it sits under.
+    var mark = TITLES[name] && PARENT[name] !== undefined ? (PARENT[name] || name) : name;
     $$('#rail-nav a').forEach(function (a) {
-      var on = a.getAttribute('data-view') === name;
+      var on = a.getAttribute('data-view') === mark;
       if (on) { a.setAttribute('aria-current', 'page'); } else { a.removeAttribute('aria-current'); }
     });
+
+    // Give every section a way back up to its category, without editing 23 views.
+    var view = $('#view-' + name);
+    var parent = PARENT[name];
+    if (view && parent && !$('.up', view)) {
+      var up = document.createElement('a');
+      up.className = 'up';
+      up.href = '#' + parent;
+      up.textContent = TITLES[parent];
+      view.insertBefore(up, view.firstChild);
+    }
 
     var title = $('#view-title');
     if (title) title.textContent = TITLES[name];
@@ -264,6 +297,353 @@
       var bar = $('#persona-bar'), label = $('#persona-pct');
       if (bar) bar.style.width = pct + '%';
       if (label) label.innerHTML = pct + '<small style="font-size:.4em">%</small>';
+    });
+  }
+
+
+  /* --- The rail as a dock -------------------------------------------------
+     A vertical port of the client's framer-motion Dock. Same model: an item's
+     target scale is interpolated from its distance to the pointer over
+     [-distance, 0, distance] -> [1, magnification, 1], and the value is chased
+     by a spring rather than a tween.
+
+     framer's useSpring(mass, stiffness, damping) is a damped harmonic
+     oscillator; integrated directly here so no library is needed:
+
+        a = (-k(x - target) - c·v) / m
+        v += a·dt ,  x += v·dt
+
+     with the original's mass .1 / stiffness 150 / damping 12. Magnification is
+     pulled back from 2× to 1.42× — a lift, not a bounce.
+
+     Live only while the rail is collapsed on desktop: expanded, the rows carry
+     text and nothing should move under the reader.
+     -------------------------------------------------------------------- */
+  (function dock() {
+    var nav = $('#rail-nav');
+    var shell = $('.portal');
+    if (!nav || !shell || reduced) return;
+
+    var MASS = 0.1, STIFF = 150, DAMP = 12;
+
+    // The oscillator is solved in closed form rather than integrated. At these
+    // parameters the fast mode has a time constant of about 8ms — shorter than
+    // a frame — and stepping it with forward Euler diverges outright. The exact
+    // solution is also frame-rate independent, so a 144Hz screen and a stuttering
+    // one settle identically.
+    var W0 = Math.sqrt(STIFF / MASS);                        // natural frequency
+    var ZETA = DAMP / (2 * Math.sqrt(STIFF * MASS));         // damping ratio
+
+    function advance(item, dt) {
+      var x0 = item.x - item.target, v0 = item.v;
+      var a = ZETA * W0, e = Math.exp(-a * dt), x, v;
+      if (ZETA < 1) {                                        // underdamped
+        var wd = W0 * Math.sqrt(1 - ZETA * ZETA);
+        var c2 = (v0 + a * x0) / wd;
+        var cos = Math.cos(wd * dt), sin = Math.sin(wd * dt);
+        x = e * (x0 * cos + c2 * sin);
+        v = e * ((c2 * wd - a * x0) * cos - (x0 * wd + a * c2) * sin);
+      } else {                                               // over / critical
+        var wo = W0 * Math.sqrt(Math.max(ZETA * ZETA - 1, 1e-9));
+        var c2o = (v0 + a * x0) / wo;
+        var ch = Math.cosh(wo * dt), sh = Math.sinh(wo * dt);
+        x = e * (x0 * ch + c2o * sh);
+        v = e * ((c2o * wo - a * x0) * ch + (x0 * wo - a * c2o) * sh);
+      }
+      item.x = item.target + x;
+      item.v = v;
+    }
+    var MAG = 1.42;          // the original's 2x is a launcher; this is a rail
+    var DISTANCE = 132;      // px of travel over which a neighbour responds
+
+    var items = $$('a.cat', nav).map(function (el) {
+      return { el: el, icon: $('.nav-ic', el), x: 1, v: 0, target: 1 };
+    });
+    if (!items.length || !items[0].icon) return;
+
+    var pointer = null, frame = null, last = 0;
+
+    function live() {
+      return shell.getAttribute('data-rail') === 'collapsed' &&
+             window.matchMedia('(min-width: 901px)').matches;
+    }
+
+    function retarget() {
+      items.forEach(function (item) {
+        if (pointer === null || !live()) { item.target = 1; return; }
+        var box = item.el.getBoundingClientRect();
+        var d = Math.abs(pointer - (box.top + box.height / 2));
+        // linear interpolation over the falloff, clamped at the far end
+        item.target = d >= DISTANCE ? 1 : 1 + (MAG - 1) * (1 - d / DISTANCE);
+      });
+    }
+
+    function step(now) {
+      var dt = Math.min((now - last) / 1000, 1 / 30);   // clamp a tab that slept
+      last = now;
+      var moving = false;
+
+      items.forEach(function (item) {
+        advance(item, dt);
+        if (Math.abs(item.x - item.target) > 0.0006 || Math.abs(item.v) > 0.0006) moving = true;
+        else { item.x = item.target; item.v = 0; }
+        item.icon.style.setProperty('--dock', item.x.toFixed(4));
+      });
+
+      frame = moving ? requestAnimationFrame(step) : null;
+    }
+
+    function run() {
+      retarget();
+      if (frame === null) { last = performance.now(); frame = requestAnimationFrame(step); }
+    }
+
+    // DockLabel. One element on <body>, placed against whichever row is under
+    // the pointer: the collapsed nav scrolls, and a scrolling box clips a child
+    // that tries to sit outside it.
+    var tip = document.createElement('div');
+    tip.className = 'rail__tip';
+    tip.setAttribute('role', 'presentation');
+    document.body.appendChild(tip);
+
+    function label(el) {
+      if (!el || !live()) { tip.classList.remove('is-on'); return; }
+      var box = el.getBoundingClientRect();
+      tip.textContent = el.getAttribute('data-label') || '';
+      tip.style.left = Math.round(box.right + 10) + 'px';
+      tip.style.top = Math.round(box.top + box.height / 2) + 'px';
+      tip.classList.add('is-on');
+    }
+
+    nav.addEventListener('pointermove', function (e) {
+      if (e.pointerType === 'touch' || !live()) return;
+      pointer = e.clientY;
+      label(e.target.closest ? e.target.closest('a.cat') : null);
+      run();
+    });
+    nav.addEventListener('pointerleave', function () {
+      pointer = null;
+      tip.classList.remove('is-on');
+      run();
+    });
+    // A scroll moves the row out from under a label that is already showing.
+    nav.addEventListener('scroll', function () { tip.classList.remove('is-on'); });
+
+    // Collapsing or expanding the rail settles every icon back to rest.
+    new MutationObserver(function () {
+      pointer = null;
+      tip.classList.remove('is-on');
+      run();
+    }).observe(shell, { attributes: true, attributeFilter: ['data-rail'] });
+
+    // Keyboard users get the same lift, and the same label.
+    items.forEach(function (item) {
+      item.el.addEventListener('focus', function () {
+        if (!live()) return;
+        var box = item.el.getBoundingClientRect();
+        pointer = box.top + box.height / 2;
+        label(item.el);
+        run();
+      });
+      item.el.addEventListener('blur', function () {
+        pointer = null;
+        tip.classList.remove('is-on');
+        run();
+      });
+    });
+  })();
+
+  /* --- Ask the house: the assistant on the Overview ------------------------
+     Distinct from the persona. The persona is the model of the member and
+     speaks to other members; this answers to the member and speaks to nobody.
+
+     No language model is connected in this build. Replies are matched against
+     a fixed rule set drawn from the same figures the dashboard already shows,
+     so the shape of the exchange — including what it refuses — can be reviewed
+     honestly. The panel says so in plain sight rather than implying otherwise.
+     When a model is connected, replace pick() and keep everything else: the
+     refusal on withheld identity is a rule of the house, not of the model, and
+     belongs on the server side of it.
+     -------------------------------------------------------------------- */
+  var ASK_RULES = [
+    { k: ['waiting', 'outstanding', 'need', 'todo', 'to do', 'action', 'answer', 'pending', 'anything from me'],
+      r: 'Two things. Introduction No. 07 is written and waiting on your acceptance, and your ' +
+         'advisor is still owed your account of the meeting on the 28th. Nothing else this week ' +
+         'needs you at all.',
+      a: ['Read the case', 'introductions'] },
+
+    { k: ['appointment', 'appointments', 'meeting', 'dinner', 'calendar', 'diary', 'when am i', 'schedule', 'next'],
+      r: 'Friday 28 August, 20:00, in Marylebone. Dinner following Introduction No. 06, and the ' +
+         'table is held in our name rather than yours. It can be moved without you giving a ' +
+         'reason — tell me and I will put it to your advisor tonight.',
+      a: ['All appointments', 'appointments'] },
+
+    { k: ['who is', 'their name', 'her name', 'his name', 'photograph', 'photo', 'picture', 'identity',
+          'no. 07', 'no 07', 'number 07', 'what do they do', 'where do they work', 'surname', 'show me'],
+      r: 'I cannot tell you. Their name, profession and photograph stay withheld until you accept ' +
+         'the case — and they have not been told who you are either. That is the same protection ' +
+         'running in your direction. What I can give you is the whole of the written case: ' +
+         'circumstances, the reasoning, and what your advisor made of them across two meetings.',
+      a: ['Read the case', 'introductions'] },
+
+    { k: ['proposed', 'candidate', 'candidates', 'matches', 'match', 'suggested', 'options', 'shortlist'],
+      r: 'Two are proposed for you and neither has been approached; nobody has been told you ' +
+         'exist. Twenty-one were assessed this year and seventeen did not reach you. That ' +
+         'seventeen is the part of the mandate you are actually paying for.',
+      a: ['Open proposed', 'proposed'] },
+
+    { k: ['reflection', 'reflections', 'feedback', 'how did it go', 'after the meeting', 'write up', 'account of'],
+      r: 'One is outstanding — your account of the 28th. It is the single most useful thing a ' +
+         'member does, because it changes what your advisor searches for next rather than sitting ' +
+         'in a file. Five minutes, in your own words, however blunt.',
+      a: ['Record it', 'reflections'] },
+
+    { k: ['standing', 'my score', 'out of five', 'out of 5', 'rating', 'rated', '4.6', 'how am i seen'],
+      r: 'Four point six of five, from the two people you have met. It is never shown to anyone ' +
+         'you are introduced to and never attributed — you cannot see who gave what, and neither ' +
+         'can they. It exists so conduct has a consequence, not so anyone is ranked.',
+      a: ['Open standing', 'reflections'] },
+
+    { k: ['persona', 'model of me', 'my profile ai', 'screening', 'speaks first', 'first stage'],
+      r: 'Seventy-two per cent built, over four sessions; around six is where it stops changing ' +
+         'much. It is a different thing from me — the persona is the model of you and, with your ' +
+         'permission, holds a first exchange with another member’s persona. I only answer to ' +
+         'you. Neither of us has ever decided anything.',
+      a: ['Open persona', 'persona'] },
+
+    { k: ['fee', 'fees', 'cost', 'price', 'pay', 'payment', 'invoice', 'mandate', 'contract', 'agreement', 'terms', 'tier'],
+      r: 'Signature tier, commenced 14 March, no fixed term. The full schedule and the ' +
+         'countersigned agreement are on your mandate — I will not quote you a figure from memory ' +
+         'when the paper itself is one click away.',
+      a: ['Mandate & agreement', 'mandate'] },
+
+    { k: ['party', 'parties', 'event', 'events', 'gathering', 'salon', 'season', 'guest list'],
+      r: 'Three this season — London in September, Geneva in October, Paris in November. You have ' +
+         'one confirmed. Attending is never a condition of anything, and a decline is not recorded ' +
+         'against you anywhere.',
+      a: ['This season', 'parties'] },
+
+    { k: ['advisor', 'vasseur', 'a person', 'human', 'speak to someone', 'call', 'talk to', 'message her', 'write to'],
+      r: 'C. Vasseur, in London. She wrote to you two days ago and deliberately did not ask you ' +
+         'for an answer. I can leave a note at the top of her morning with the wording you have ' +
+         'used here.',
+      a: ['Open correspondence', 'messages'] },
+
+    { k: ['consent', 'privacy', 'my data', 'what do you hold', 'who knows', 'discretion', 'delete', 'erase', 'ledger'],
+      r: 'Fourteen entries in your consent ledger, including every time you said no. Each one ' +
+         'records what we proposed to disclose, in the exact wording we would have used, and what ' +
+         'you answered. What we hold beyond that, and how to have it destroyed, sits under ' +
+         'Settings.',
+      a: ['Consent ledger', 'consent'] },
+
+    { k: ['brief', 'looking for', 'criteria', 'preferences', 'search for', 'what are you searching', 'requirements'],
+      r: 'Revised four times since March, last on 11 June. Every revision has the reasoning ' +
+         'recorded beside it, so you can see what changed your mind as well as what changed on ' +
+         'the page.',
+      a: ['The brief', 'preferences'] },
+
+    { k: ['short partner', 'short term', 'companionship', 'intention', 'intentions'],
+      r: 'Your stated intention is what everything is matched against, and you are only ever put ' +
+         'to members who have stated the same one. There is no list to browse and nobody is shown ' +
+         'to you as a choice — the horizon changes what two people are agreeing to, not how they ' +
+         'are found.',
+      a: ['Your intentions', 'intentions'] },
+
+    { k: ['thank', 'thanks', 'hello', 'hi ', 'good morning', 'good evening', 'salam'],
+      r: 'At your service. Ask me anything on your file — or tell me to put something to your ' +
+         'advisor and I will draft it for you to send.' }
+  ];
+
+  var ASK_FALLBACK = {
+    r: 'I do not know that, and I would rather say so than construct something plausible. I have ' +
+       'put the question to C. Vasseur in the words you used; she reads everything before anyone ' +
+       'else does and will come back to you directly.',
+    a: ['Open correspondence', 'messages']
+  };
+
+  function askPick(text) {
+    var q = ' ' + text.toLowerCase().replace(/[^\w\s.]/g, ' ').replace(/\s+/g, ' ') + ' ';
+    var best = null, bestScore = 0;
+    ASK_RULES.forEach(function (rule) {
+      var score = 0;
+      rule.k.forEach(function (word) { if (q.indexOf(word) > -1) score += word.length; });
+      if (score > bestScore) { bestScore = score; best = rule; }
+    });
+    return best || ASK_FALLBACK;
+  }
+
+  var askThread = $('#ask-thread');
+  var askForm = $('#ask-form');
+
+  function askSay(cls, who, text, action) {
+    var wrap = document.createElement('div');
+    wrap.className = 'msg ' + cls;
+    var w = document.createElement('p');
+    w.className = 'who';
+    w.textContent = who;
+    var b = document.createElement('div');
+    b.className = 'bubble';
+    b.textContent = text;                    // never innerHTML for member input
+    if (action) {
+      var go = document.createElement('button');
+      go.type = 'button';
+      go.className = 'act';
+      go.textContent = action[0];
+      go.addEventListener('click', function () { location.hash = '#' + action[1]; });
+      b.appendChild(go);
+    }
+    wrap.appendChild(w); wrap.appendChild(b);
+    askThread.appendChild(wrap);
+    askThread.scrollTop = askThread.scrollHeight;
+    return wrap;
+  }
+
+  function askWait() {
+    var wrap = document.createElement('div');
+    wrap.className = 'msg msg--ai';
+    wrap.innerHTML = '<p class="who">Legend &middot; Assistant</p>' +
+      '<div class="bubble"><span class="ask__wait" aria-label="Composing"><i></i><i></i><i></i></span></div>';
+    askThread.appendChild(wrap);
+    askThread.scrollTop = askThread.scrollHeight;
+    return wrap;
+  }
+
+  function askSend(text) {
+    if (!text) return;
+    askSay('msg--me', 'You', text);
+    var rule = askPick(text);
+    if (reduced) { askSay('msg--ai', 'Legend · Assistant', rule.r, rule.a); return; }
+    var beat = askWait();
+    setTimeout(function () {
+      beat.remove();
+      askSay('msg--ai', 'Legend · Assistant', rule.r, rule.a);
+    }, 620);
+  }
+
+  if (askForm && askThread) {
+    askForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var input = $('#ask-input');
+      var text = input.value.trim();
+      if (!text) { input.focus(); return; }
+      input.value = '';
+      askSend(text);
+    });
+
+    // Enter sends; shift+enter keeps the paragraph going.
+    $('#ask-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        askForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      }
+    });
+
+    // Openings retire as they are used, so the row does not become wallpaper.
+    $$('#ask-chips button').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        askSend(chip.getAttribute('data-ask'));
+        chip.remove();
+      });
     });
   }
 
@@ -493,6 +873,45 @@
           ? 'Now shown to anyone who checks one of your codes.'
           : 'No longer shown. The date of verification is always shown; everything else is yours.');
       }
+    });
+  });
+
+  /* --- Collapsing the rail ------------------------------------------------ */
+  // A category that is waiting on the member has to say so even when the rail
+  // is a 62px strip, so the count is mirrored onto the link as a class.
+  $$('#rail-nav a.cat').forEach(function (a) {
+    if ($('.count', a)) a.classList.add('has-count');
+  });
+
+  var railToggle = $('#rail-toggle');
+  if (railToggle) {
+    var setRail = function (collapsed) {
+      portal.setAttribute('data-rail', collapsed ? 'collapsed' : 'open');
+      railToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      railToggle.setAttribute('title', collapsed ? 'Expand the rail' : 'Collapse the rail');
+      try { localStorage.setItem('legend.rail', collapsed ? 'collapsed' : 'open'); } catch (e) {}
+      // Card widths change with the column, and the decks measure off them.
+      window.dispatchEvent(new Event('resize'));
+    };
+    railToggle.addEventListener('click', function () {
+      setRail(portal.getAttribute('data-rail') !== 'collapsed');
+    });
+    var remembered = null;
+    try { remembered = localStorage.getItem('legend.rail'); } catch (e) {}
+    setRail(remembered === 'collapsed');
+  }
+
+  /* --- Palette switch (preview only) -------------------------------------- */
+  // The dashboard architecture is palette-agnostic: the same markup renders in
+  // Legend's own colours or in the reference palette, by swapping tokens.
+  $$('[data-palette-set]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var set = btn.getAttribute('data-palette-set');
+      if (set === 'reference') { document.documentElement.setAttribute('data-palette', 'reference'); }
+      else { document.documentElement.removeAttribute('data-palette'); }
+      $$('[data-palette-set]').forEach(function (b) {
+        b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+      });
     });
   });
 

@@ -942,3 +942,50 @@ body.menu-open .menu__links a{ opacity:1; transform:none; }
 @media (max-width:700px){
   .footer__aside{ grid-template-columns:1fr; gap:.7rem; }
 }
+
+/* ============================================================================
+   16 — CORNER RADIUS
+   The system was built on square corners and hairlines. Softening them is a
+   change to the language, so it is done once, from tokens, rather than by
+   sprinkling radii — that way the whole thing stays consistent and one edit
+   changes it back.
+   ========================================================================== */
+:root{
+  --r-xs:   3px;   /* tags, chips, the smallest controls */
+  --r-sm:   6px;   /* buttons, inputs, pills */
+  --r:     10px;   /* panels, cards, plates */
+  --r-lg:  16px;   /* large surfaces and imagery */
+  --r-full: 999px; /* dots and round controls */
+}
+
+/* Public site */
+.plate,
+.panel-lite,
+.verify-box,
+.principle,
+.aside-note{ border-radius:var(--r); }
+
+.btn--framed,
+.btn--solid,
+.btn--quiet{ border-radius:var(--r-sm); }
+
+.choice label,
+.code,
+.tier__spec > div,
+.badge-line span::before{ border-radius:var(--r-xs); }
+
+.tier__spec{ border-radius:var(--r-sm); overflow:hidden; }
+.principles{ border-radius:var(--r); overflow:hidden; }
+
+/* An input with only a bottom rule has no corners to soften; give the ones
+   that carry a full border the same treatment as buttons. */
+.field select,
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="tel"]{ border-radius:0; }
+
+.nav__cta{ border-radius:var(--r-sm); }
+.nav__access::after{ border-radius:var(--r-full); }
+
+.hero__veil,
+.cta-band__glow{ border-radius:0; }

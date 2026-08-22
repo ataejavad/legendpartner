@@ -820,3 +820,664 @@ body.portal-body{
 @media (max-width:1080px){
   .cols--2,.cols--3,.cols--7-5,.cols--5-7{ grid-template-columns:minmax(0,1fr); }
 }
+
+/* ============================================================================
+   14 — DASHBOARD LAYOUT
+   The architecture taken from the client's reference: a coloured tile row
+   above a three-column card grid. Rendered through tokens so the same
+   structure can wear either palette — see [data-palette] below.
+   ========================================================================== */
+.dash{ --tile-h:118px; }
+
+/* Legend palette: the tile row is the one place colour is admitted, and it is
+   admitted quietly — six steps of the same champagne, not six hues. */
+.dash{
+  --t1:#685A44; --t2:#645C4C; --t3:#605C52; --t4:#595D5B; --t5:#54595C; --t6:#4A5058;
+  --tile-ink:#F4F1EA;
+  --card:var(--ink-2);
+  --card-line:var(--line);
+}
+/* The reference palette, for comparison. */
+[data-palette="reference"] .dash{
+  --t1:#D38340; --t2:#89809B; --t3:#5B8BDA; --t4:#62C3E7; --t5:#66C2AD; --t6:#5EAD7E;
+  --tile-ink:#12131A;
+  --card:#3A394A;
+  --card-line:rgba(255,255,255,.09);
+}
+[data-palette="reference"] .canvas{ background:#2B2B38; }
+[data-palette="reference"] .rail{ background:#3F4458; border-right-color:rgba(255,255,255,.08); }
+/* That ground is far lighter than the Legend rail, so every ink tuned for a
+   near-black surface loses contrast on it: the category notes measured 3.45:1,
+   the category names 4.20:1, and the champagne on the active row 3.81:1. All
+   three are lifted for this palette only — the Legend rail is untouched. */
+[data-palette="reference"] .rail{
+  --fg-faint:rgba(237,234,227,.74);
+  --fg-soft:rgba(237,234,227,.78);
+  --champagne:#CFC4B0;
+}
+[data-palette="reference"] .topbar{ background:rgba(25,26,28,.92); }
+
+/* The tile row */
+.tiles{
+  display:grid; grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:clamp(.6rem,1vw,1rem);
+}
+.tile{
+  min-height:var(--tile-h);
+  padding:1.1rem 1.2rem;
+  display:flex; flex-direction:column; justify-content:space-between;
+  color:var(--tile-ink);
+  position:relative; overflow:hidden;
+  transition:transform .5s var(--ease);
+}
+.tile:nth-child(1){ background:var(--t1) } .tile:nth-child(2){ background:var(--t2) }
+.tile:nth-child(3){ background:var(--t3) } .tile:nth-child(4){ background:var(--t4) }
+.tile:nth-child(5){ background:var(--t5) } .tile:nth-child(6){ background:var(--t6) }
+a.tile:hover{ transform:translateY(-2px); }
+.tile__n{
+  font-family:var(--serif); font-size:2.3rem; line-height:1; font-weight:300;
+  font-variant-numeric:tabular-nums;
+}
+.tile__l{
+  font-size:.56rem; letter-spacing:.2em; text-transform:uppercase;
+  opacity:.82; line-height:1.5;
+}
+.tile__act{
+  position:absolute; top:1rem; right:1.1rem;
+  width:6px; height:6px; border:1px solid currentColor; transform:rotate(45deg);
+  opacity:.9;
+}
+@media (max-width:1200px){ .tiles{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media (max-width:640px){ .tiles{ grid-template-columns:repeat(2,minmax(0,1fr)); } .dash{ --tile-h:104px; } }
+
+/* The card grid beneath */
+.dash-grid{
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:clamp(.8rem,1.2vw,1.2rem);
+  margin-top:clamp(.8rem,1.2vw,1.2rem);
+}
+.dash-grid .panel{ background:var(--card); border-color:var(--card-line); }
+/* The card sits lighter than the page, so the faint ink loses contrast against
+   it — .52 measures 3.80:1 there, under AA for body-sized text. Lifted to .64
+   (4.90:1) inside cards only; everywhere else the token is unchanged. */
+.dash-grid .panel{ --fg-faint:rgba(237,234,227,.64); }
+.dash-grid .span-2{ grid-column:span 2; }
+@media (max-width:1080px){
+  .dash-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .dash-grid .span-2{ grid-column:span 2; }
+}
+@media (max-width:720px){
+  .dash-grid{ grid-template-columns:minmax(0,1fr); }
+  .dash-grid .span-2{ grid-column:span 1; }
+}
+
+/* Palette switch — a preview control, not a member feature */
+.palette-switch{
+  display:inline-flex; align-items:center; gap:.7rem;
+  font-size:.56rem; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--fg-faint);
+}
+.palette-switch button{
+  border:1px solid var(--line); padding:.34rem .7rem;
+  font-size:.56rem; letter-spacing:.18em; text-transform:uppercase; color:var(--fg-soft);
+  transition:all .4s var(--ease);
+}
+.palette-switch button[aria-pressed="true"]{ border-color:var(--champagne); color:var(--champagne); }
+
+/* ============================================================================
+   15 — THE REFERENCE GRAPHIC TREATMENT
+   Measured from the client's screenshot: ~6px radius, a soft drop shadow, a
+   subtle vertical gradient on each tile, indigo ground. The reference palette
+   is now the default; the quiet Legend palette remains as [data-palette="legend"].
+   Tile colour is decoration, not encoding — every tile carries its own number
+   and label, and each was checked for 4.5:1 text contrast against the LIGHTEST
+   band of its own gradient (worst: reference 4.96, Legend 4.61). The Legend
+   ramp was darkened for this: the light ink over the original warm steps
+   measured 3.09:1 on the first tile.
+   ========================================================================== */
+.dash{
+  --t1:#D38340; --t2:#89809B; --t3:#5B8BDA; --t4:#62C3E7; --t5:#66C2AD; --t6:#5EAD7E;
+  --tile-ink:#12131A;
+  --card:#3A394A;
+  --card-line:rgba(255,255,255,.09);
+  --dash-bg:#2B2B38;
+  --r:6px;
+  --shadow:0 6px 18px rgba(0,0,0,.34);
+}
+[data-palette="legend"] .dash{
+  --t1:#685A44; --t2:#645C4C; --t3:#605C52; --t4:#595D5B; --t5:#54595C; --t6:#4A5058;
+  --tile-ink:#F4F1EA;
+  --card:var(--ink-2);
+  --card-line:var(--line);
+  --dash-bg:transparent;
+  --r:0px;
+  --shadow:none;
+}
+
+.dash{ background:var(--dash-bg); }
+.canvas:has(.dash.is-active){ background:var(--dash-bg); }
+
+.dash .tile{
+  border-radius:var(--r);
+  box-shadow:var(--shadow);
+  /* the reference tiles lighten at the top and fall ~12% by the bottom */
+  background-image:linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.10));
+}
+.dash .tile__n,.dash .tile__l{ position:relative; }
+
+.dash .panel{
+  border-radius:var(--r);
+  box-shadow:var(--shadow);
+}
+.dash .panel__head{ border-bottom-color:var(--card-line); }
+.dash .panel__foot{ border-top-color:var(--card-line); }
+
+/* --- charts ------------------------------------------------------------- */
+/* Series colour is a real encoding here, so this palette was validated:
+   #4F8DE0 / #E08A3C / #3FBEA0 pass every check on the card surface. */
+.dash{ --s1:#4F8DE0; --s2:#E08A3C; --s3:#3FBEA0; }
+[data-palette="legend"] .dash{ --s1:#B7A98F; --s2:#8C816C; --s3:#6E6A5E; }
+
+.chart{ position:relative; width:100%; }
+.chart svg{ width:100%; height:auto; display:block; overflow:visible; }
+.chart .grid line{ stroke:rgba(255,255,255,.07); stroke-width:1; }
+.chart .axis text{
+  font-family:var(--sans); font-size:9px; letter-spacing:.12em; text-transform:uppercase;
+  fill:var(--fg-faint);
+}
+.chart .val{ font-family:var(--sans); font-size:10px; fill:var(--fg-soft); font-variant-numeric:tabular-nums; }
+.chart .line{ fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.chart .dot{ r:4.5; stroke:var(--card); stroke-width:2; }
+.chart .bar{ rx:4; }
+.chart .hit{ fill:transparent; cursor:crosshair; }
+.chart .cross{ stroke:rgba(255,255,255,.28); stroke-width:1; stroke-dasharray:2 3; opacity:0; }
+
+.chart__tip{
+  position:absolute; pointer-events:none; opacity:0;
+  transform:translate(-50%,-115%);
+  background:rgba(12,12,16,.96); border:1px solid rgba(255,255,255,.14);
+  border-radius:4px; padding:.5rem .65rem; min-width:96px;
+  font-size:.7rem; line-height:1.5; color:#EDEAE3;
+  transition:opacity .15s ease;
+  z-index:5; white-space:nowrap;
+}
+.chart__tip b{ display:block; font-size:.56rem; letter-spacing:.18em; text-transform:uppercase; color:var(--fg-faint); margin-bottom:.3rem; font-weight:500; }
+.chart__tip span{ display:flex; align-items:center; gap:.45rem; font-variant-numeric:tabular-nums; }
+.chart__tip i{ width:8px; height:8px; border-radius:2px; flex:none; }
+
+.legend-row{ display:flex; gap:1.1rem; flex-wrap:wrap; margin-top:.9rem; }
+.legend-row span{ display:flex; align-items:center; gap:.45rem; font-size:.66rem; color:var(--fg-soft); }
+.legend-row i{ width:10px; height:10px; border-radius:2px; flex:none; }
+
+.chart-toggle{
+  font-size:.54rem; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--fg-faint); border:1px solid var(--card-line);
+  padding:.28rem .55rem; border-radius:3px; transition:color .35s var(--ease);
+}
+.chart-toggle:hover{ color:var(--champagne); }
+.chart-table{ width:100%; border-collapse:collapse; font-size:.76rem; margin-top:.6rem; }
+.chart-table th,.chart-table td{ text-align:left; padding:.4rem .7rem .4rem 0; border-bottom:1px solid var(--card-line); }
+.chart-table th{ font-size:.54rem; letter-spacing:.18em; text-transform:uppercase; color:var(--fg-faint); font-weight:500; }
+.chart-table td{ color:var(--fg-soft); font-variant-numeric:tabular-nums; }
+
+/* ============================================================================
+   16 — SIX CATEGORIES, RAIL ON THE RIGHT
+   The rail carries six categories rather than twenty-three destinations; each
+   opens a hub that lists what sits under it. Cross-cutting utilities that are
+   not categories — correspondence and the assistant — move to the top bar.
+   ========================================================================== */
+@media (min-width:901px){
+  .portal{ grid-template-columns:minmax(0,1fr) 274px; }
+  .portal > div:first-of-type{ order:1; }   /* main content, left */
+  .rail{ order:2; border-right:0; border-left:1px solid var(--line); }
+}
+
+/* Category items sit larger and further apart than a destination list did */
+.rail__nav a.cat{
+  grid-template-columns:auto 1fr auto;
+  padding:.9rem 1.7rem;
+  font-size:.82rem; letter-spacing:.06em;
+}
+.rail__nav a.cat .cat__n{
+  font-size:.54rem; letter-spacing:.2em; color:var(--fg-faint);
+  display:block; margin-top:.3rem;
+}
+.rail__nav a.cat[aria-current="page"] .cat__n{ color:var(--champagne); }
+
+/* Utilities in the top bar */
+.topbar__util{ display:flex; align-items:center; gap:1.1rem; }
+.topbar__util a{
+  font-size:.6rem; letter-spacing:.18em; text-transform:uppercase; color:var(--fg-faint);
+  display:inline-flex; align-items:center; gap:.45rem;
+  transition:color .35s var(--ease);
+}
+.topbar__util a:hover{ color:#EDEAE3; }
+.topbar__util a .n{
+  font-size:.54rem; border:1px solid var(--champagne); color:var(--champagne);
+  padding:.12rem .38rem; line-height:1;
+}
+@media (max-width:900px){ .topbar__util a span.t{ display:none; } }
+
+/* A hub: the sections that live under a category */
+.hub{ border-top:1px solid var(--line); margin-top:2.2rem; }
+.hub a{
+  display:grid; grid-template-columns:auto minmax(0,1fr) auto;
+  gap:clamp(1rem,2.4vw,2.2rem); align-items:baseline;
+  padding:1.25rem 0; border-bottom:1px solid var(--line-soft);
+  transition:padding-left .5s var(--ease), background .35s var(--ease);
+}
+.hub a:hover{ padding-left:.7rem; }
+.hub .no{ font-size:.6rem; letter-spacing:.2em; color:var(--champagne); }
+.hub .nm{ font-family:var(--serif); font-size:1.24rem; color:#EDEAE3; }
+.hub .ds{ font-size:.86rem; color:var(--fg-soft); margin-top:.4rem; max-width:62ch; }
+.hub .go{ font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--fg-faint); white-space:nowrap; }
+.hub a:hover .go{ color:var(--champagne); }
+@media (max-width:760px){
+  .hub a{ grid-template-columns:auto minmax(0,1fr); }
+  .hub .go{ grid-column:2; }
+}
+
+/* Breadcrumb back to the parent category */
+.up{
+  display:inline-flex; align-items:center; gap:.6rem;
+  font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--fg-faint);
+  margin-bottom:1.2rem; transition:color .35s var(--ease);
+}
+.up:hover{ color:var(--champagne); }
+.up::before{ content:""; width:14px; height:1px; background:currentColor; }
+
+/* ============================================================================
+   17 — COVERFLOW
+   A vanilla port of the client's React component. The physics are unchanged:
+   distance folded onto the shorter way round the ring, ramp = d^falloff so the
+   rake eases off, tilt capped short of edge-on, drag with a velocity throw.
+   What differs is the payload — a card carries a sealed face until consent is
+   given, because this house does not publish photographs of anyone.
+   ========================================================================== */
+.cf{ --cf-card:clamp(150px,20vw,240px); width:100%; }
+.cf__frame{
+  position:relative; overflow:hidden; padding:2.4rem 0;
+  cursor:grab; outline:none; touch-action:pan-y;
+  perspective:calc(var(--cf-card) * 3);
+}
+.cf__frame:active{ cursor:grabbing; }
+.cf__frame:focus-visible{ outline:1px solid var(--champagne); outline-offset:-2px; }
+.cf__stage{ position:relative; height:var(--cf-card); transform-style:preserve-3d; user-select:none; }
+
+.cf__card{
+  position:absolute; left:50%; top:0;
+  width:var(--cf-card); aspect-ratio:1/1;
+  overflow:hidden; border-radius:var(--r,6px);
+  background:var(--ink-2); border:1px solid var(--line);
+  box-shadow:0 14px 34px rgba(0,0,0,.5);
+  will-change:transform,opacity;
+}
+.cf__card img,.cf__card svg{ width:100%; height:100%; object-fit:cover; display:block; }
+
+/* A card whose face is withheld: the seal, not a blur of a person */
+.cf__sealed{
+  width:100%; height:100%; display:grid; place-items:center;
+  background:linear-gradient(160deg,#191A1E,#0D0D10);
+  position:relative;
+}
+.cf__sealed .mk{ width:46px; height:46px; color:var(--champagne); opacity:.85; }
+.cf__sealed .cap{
+  position:absolute; left:0; right:0; bottom:1rem; text-align:center;
+  font-size:.52rem; letter-spacing:.24em; text-transform:uppercase; color:var(--fg-faint);
+}
+.cf__card--open{ border-color:rgba(183,169,143,.42); }
+
+.cf__tag{
+  position:absolute; top:.7rem; left:.7rem; z-index:2;
+  font-size:.5rem; letter-spacing:.2em; text-transform:uppercase;
+  padding:.24rem .5rem; border-radius:3px;
+  background:rgba(11,11,12,.72); border:1px solid var(--line); color:var(--fg-soft);
+  backdrop-filter:blur(6px);
+}
+.cf__card--open .cf__tag{ border-color:var(--champagne); color:var(--champagne); }
+
+/* Caption below the deck */
+.cf__cap{ margin-top:.6rem; text-align:center; padding-inline:1.5rem; }
+.cf__cap h4{ font-family:var(--serif); font-weight:300; font-size:1.5rem; color:#EDEAE3; line-height:1.2; }
+.cf__cap p{ font-size:.78rem; color:var(--fg-faint); margin-top:.4rem; letter-spacing:.06em; }
+.cf__meta{ margin:1.4rem auto 0; max-width:280px; font-size:.76rem; }
+.cf__meta div{ display:flex; justify-content:space-between; padding:.34rem 0; border-bottom:1px solid var(--line-soft); }
+.cf__meta dt{ color:var(--fg-faint); }
+.cf__meta dd{ margin:0; color:#EDEAE3; }
+
+.cf__nav{
+  position:absolute; top:50%; transform:translateY(-50%); z-index:200;
+  width:38px; height:38px; display:grid; place-items:center;
+  border:1px solid var(--line); border-radius:999px;
+  background:rgba(11,11,12,.62); backdrop-filter:blur(8px);
+  color:var(--fg-soft); transition:all .35s var(--ease);
+}
+.cf__nav:hover{ color:#EDEAE3; border-color:var(--champagne); }
+.cf__nav--prev{ left:.6rem; } .cf__nav--next{ right:.6rem; }
+.cf__nav svg{ width:16px; height:16px; }
+
+.cf__dots{ display:flex; justify-content:center; gap:.5rem; margin-top:1.4rem; }
+.cf__dots button{
+  width:7px; height:7px; border-radius:999px; background:var(--fg);
+  opacity:.28; transition:opacity .35s var(--ease);
+}
+.cf__dots button[aria-current="true"]{ opacity:1; background:var(--champagne); }
+
+@media (prefers-reduced-motion:reduce){
+  .cf__card{ transition:none !important; }
+}
+
+/* ============================================================================
+   18 — RAIL BACK ON THE LEFT, AND COLLAPSIBLE
+   Collapsed it keeps a 62px strip: the mark, six roman numerals, the toggle.
+   Numerals rather than icons — this system has no icon set, and inventing one
+   for six items would be the first decorative thing in it.
+   ========================================================================== */
+@media (min-width:901px){
+  /* undo the right-hand ordering from section 16 */
+  .portal > div:first-of-type{ order:2; }
+  .rail{ order:1; border-left:0; border-right:1px solid var(--line); }
+
+  .portal{ grid-template-columns:274px minmax(0,1fr); }
+  .portal[data-rail="collapsed"]{ grid-template-columns:62px minmax(0,1fr); }
+}
+/* The rail itself fades and slides; the grid track snaps, because animating
+   a track list is unreliable and leaves it stuck at the start value. */
+.rail{ transition:opacity .3s var(--ease); }
+
+/* the toggle sits with the brand */
+.rail__top{ display:flex; align-items:flex-start; justify-content:space-between; gap:.5rem; padding-right:1rem; }
+.rail__toggle{
+  flex:none; width:26px; height:26px; margin-top:.1rem;
+  display:grid; place-items:center;
+  border:1px solid var(--line); border-radius:3px;
+  color:var(--fg-faint); transition:color .35s var(--ease), border-color .35s var(--ease);
+}
+.rail__toggle:hover{ color:var(--champagne); border-color:var(--champagne); }
+.rail__toggle svg{ width:12px; height:12px; transition:transform .45s var(--ease); }
+.portal[data-rail="collapsed"] .rail__toggle svg{ transform:rotate(180deg); }
+
+/* numerals, generated rather than authored */
+.rail__nav{ counter-reset:cat; }
+.rail__nav a.cat{ counter-increment:cat; }
+.rail__nav a.cat .num{
+  display:none;
+  font-family:var(--serif); font-size:.9rem; letter-spacing:.12em;
+  color:var(--fg-faint);
+}
+.rail__nav a.cat .num::before{ content:counter(cat, upper-roman); }
+.rail__nav a.cat[aria-current="page"] .num{ color:var(--champagne); }
+
+/* --- the collapsed state ------------------------------------------------- */
+@media (min-width:901px){
+  .portal[data-rail="collapsed"] .rail{ padding-inline:0; }
+  .portal[data-rail="collapsed"] .rail__brand{ justify-content:center; padding:0 0 1.2rem; }
+  .portal[data-rail="collapsed"] .rail__brand > span,
+  .portal[data-rail="collapsed"] .rail__member,
+  .portal[data-rail="collapsed"] .rail__nav a.cat > span,
+  .portal[data-rail="collapsed"] .rail__nav a.cat .count,
+  .portal[data-rail="collapsed"] .rail__nav a.cat i.mk,
+  .portal[data-rail="collapsed"] .advisor .who,
+  .portal[data-rail="collapsed"] .rail__foot .out{ display:none; }
+
+  .portal[data-rail="collapsed"] .rail__top{ padding-right:0; flex-direction:column; align-items:center; gap:.9rem; }
+  .portal[data-rail="collapsed"] .rail__nav a.cat{
+    grid-template-columns:1fr; justify-items:center; padding:.75rem 0;
+  }
+  .portal[data-rail="collapsed"] .rail__nav a.cat .num{ display:block; }
+  .portal[data-rail="collapsed"] .rail__nav .group{ display:none; }
+  .portal[data-rail="collapsed"] .rail__foot{ padding-inline:0; }
+  .portal[data-rail="collapsed"] .advisor{ justify-content:center; }
+
+  /* a waiting category still declares itself when collapsed */
+  .portal[data-rail="collapsed"] .rail__nav a.cat.has-count .num::after{
+    content:""; position:absolute; top:.55rem; right:1rem;
+    width:5px; height:5px; border-radius:999px; background:var(--champagne);
+  }
+  .portal[data-rail="collapsed"] .rail__nav a.cat{ position:relative; }
+}
+
+/* On tablet and phone the rail is already a horizontal strip; collapsing it
+   there would take away the only navigation, so the control is hidden. */
+@media (max-width:900px){ .rail__toggle{ display:none; } }
+
+/* ============================================================================
+   19 — OVERVIEW IN THE RAIL
+   The dashboard is the home, not a seventh category, so it sits above the rule
+   and carries no numeral. Collapsed it shows the house's own diamond — the
+   device already used for the confidential mark — rather than a new icon.
+   ========================================================================== */
+.rail__nav a.cat--home{ counter-increment:none; }
+.rail__nav a.cat--home .num::before{ content:none; }
+.rail__rule{
+  height:1px; border:0; background:var(--line-soft);
+  margin:.7rem 1.7rem;
+}
+@media (min-width:901px){
+  .portal[data-rail="collapsed"] .rail__rule{ margin-inline:1rem; }
+  .portal[data-rail="collapsed"] .rail__nav a.cat--home .num{
+    width:7px; height:7px; border:1px solid var(--fg-faint);
+    transform:rotate(45deg); background:transparent;
+  }
+  .portal[data-rail="collapsed"] .rail__nav a.cat--home[aria-current="page"] .num{
+    border-color:var(--champagne); background:var(--champagne);
+  }
+}
+
+/* ============================================================================
+   20 — CORNER RADIUS ACROSS THE APPLICATIONS
+   Same tokens as the site (main.css §16). The dashboard already carried its
+   own --r; that is now folded into the scale so the quiet palette softens too
+   rather than staying square.
+   ========================================================================== */
+.dash{ --r:10px; }
+[data-palette="legend"] .dash{ --r:10px; }   /* was 0 — the language changed */
+
+/* Surfaces */
+.panel,
+.case,
+.request,
+.proposal,
+.decision,
+.queue__item,
+.empty,
+.persona-state,
+.note-inline,
+.verify-box{ border-radius:var(--r); }
+
+.panel__head{ border-top-left-radius:var(--r); border-top-right-radius:var(--r); }
+.panel__foot{ border-bottom-left-radius:var(--r); border-bottom-right-radius:var(--r); }
+
+/* Controls */
+.pill,
+.chart-toggle,
+.cf__tag,
+.tile,
+.btn--quiet,
+.preview-note button,
+.palette-switch button,
+.rail__toggle{ border-radius:var(--r-sm); }
+
+.switch span{ border-radius:var(--r-full); }
+.switch span::after{ border-radius:var(--r-full); }
+.rate label{ border-radius:var(--r-sm); }
+.cf__nav{ border-radius:var(--r-full); }
+.cf__card{ border-radius:var(--r-lg); }
+.chart .bar{ rx:4; }
+
+/* Small marks */
+.advisor .seal,
+.doc .ic,
+.tile__act{ border-radius:var(--r-xs); }
+.chart__tip{ border-radius:var(--r-sm); }
+.chart__tip i{ border-radius:2px; }
+.legend-row i{ border-radius:2px; }
+
+/* Grouped surfaces need clipping so children do not square off the corner */
+.perms,
+.tier__spec,
+.figs{ border-radius:var(--r-sm); overflow:hidden; }
+
+/* The rail is a full-height edge, not a card — softening only its inner side
+   keeps the shell from looking like a floating panel. */
+@media (min-width:901px){
+  .rail{ border-top-right-radius:0; border-bottom-right-radius:0; }
+}
+
+/* The lock screen's fields carry a full border, unlike the portal's */
+.lock .p-field input{ border-radius:0; }
+
+/* ============================================================================
+   21 · ASK THE HOUSE — the assistant on the Overview
+   A conversation, not a search box. It sits in the dashboard grid, so it is
+   shorter than the persona thread and scrolls inside its own panel rather than
+   pushing the cards below it down the page.
+   ========================================================================== */
+
+.ask{ display:flex; flex-direction:column; }
+
+/* The thread takes the slack in the panel and scrolls within it, so the card
+   grid keeps its rhythm however long the conversation runs. */
+.ask__thread{
+  flex:1 1 auto; min-height:210px; max-height:340px; overflow-y:auto;
+  padding:1.4rem 1.5rem; gap:1.3rem;
+  scroll-behavior:smooth;
+}
+.ask .msg{ max-width:54ch; }
+.ask .msg .bubble{ font-size:.94rem; line-height:1.66; }
+
+/* A reply may carry one place to go. It is a link, never an action taken. */
+.ask .act{
+  display:inline-flex; align-items:center; gap:.5rem; margin-top:.9rem;
+  font-size:.6rem; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--champagne); text-decoration:none; border:0; background:none;
+  padding:0; cursor:pointer; font-family:inherit;
+}
+.ask .act::after{ content:"\2192"; opacity:.7; transition:transform .3s var(--ease); }
+.ask .act:hover::after{ transform:translateX(4px); }
+
+/* Openings, so the member is not handed an empty box */
+.ask__chips{
+  display:flex; flex-wrap:wrap; gap:.5rem;
+  padding:0 1.5rem 1.1rem;
+}
+.ask__chips button{
+  font-family:inherit; font-size:.72rem; letter-spacing:.02em; line-height:1;
+  color:var(--fg-soft); background:rgba(237,234,227,.03);
+  border:1px solid var(--line-soft); border-radius:var(--r-full);
+  padding:.55rem .9rem; cursor:pointer;
+  transition:color .3s var(--ease), border-color .3s var(--ease), background .3s var(--ease);
+}
+.ask__chips button:hover{
+  color:#EDEAE3; border-color:rgba(183,169,143,.4); background:rgba(183,169,143,.06);
+}
+.ask__chips:empty{ display:none; }
+
+.ask .composer{ padding:1.1rem 1.5rem; }
+.ask .composer textarea{ min-height:2.4rem; }
+
+/* The thinking beat — three marks, not a spinner */
+.ask__wait{ display:flex; gap:.34rem; padding:.2rem 0; }
+.ask__wait i{
+  width:4px; height:4px; border-radius:var(--r-full);
+  background:var(--champagne); opacity:.35;
+  animation:askwait 1.25s var(--ease) infinite;
+}
+.ask__wait i:nth-child(2){ animation-delay:.16s; }
+.ask__wait i:nth-child(3){ animation-delay:.32s; }
+@keyframes askwait{ 0%,60%,100%{ opacity:.22; } 30%{ opacity:.85; } }
+
+/* Column headings inside the boundaries card */
+.ask__lbl{
+  font-size:.58rem; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--fg-faint); margin:0 0 .7rem;
+}
+.ask__lbl + .includes{ margin:0 0 1.6rem; }
+.includes--not li::before{ color:var(--fg-faint); opacity:.55; }
+
+@media (prefers-reduced-motion:reduce){
+  .ask__thread{ scroll-behavior:auto; }
+  .ask__wait i{ animation:none; opacity:.5; }
+  .ask .act::after{ transition:none; }
+}
+
+@media (max-width:720px){
+  .ask__thread{ max-height:none; padding:1.2rem 1.2rem; }
+  .ask__chips{ padding:0 1.2rem 1rem; }
+  .ask .composer{ padding:1rem 1.2rem; }
+}
+
+/* ============================================================================
+   22 · THE RAIL AS A DOCK — icons, magnification, labels
+   A vertical port of the client's Apple-style Dock. The physics are the
+   original's: neighbours scale by their distance from the pointer, settled by
+   a spring at mass .1 / stiffness 150 / damping 12. Two things were changed on
+   purpose.
+
+   · It magnifies only when the rail is collapsed. Collapsed, the rail IS a
+     dock — a column of icons — and the lift is how you read it. Expanded, the
+     rows carry text, and a bouncing word is a toy. This is a private office.
+   · The scale is carried on the icon, not the row, so a magnifying neighbour
+     never reflows a scrolling list.
+
+   DockLabel becomes the collapsed tooltip, which is the one state where the
+   rail genuinely needs one: it reads data-label off the link itself.
+   ========================================================================== */
+
+.rail__nav a.cat .nav-ic{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:20px; height:20px; flex:none;
+  opacity:.62;
+  transform:scale(var(--dock, 1));
+  transform-origin:center;
+  transition:opacity .4s var(--ease);
+  will-change:transform;
+}
+.rail__nav a.cat .nav-ic svg{ width:100%; height:100%; display:block; }
+.rail__nav a.cat:hover .nav-ic{ opacity:1; }
+.rail__nav a.cat[aria-current="page"] .nav-ic{ opacity:1; color:var(--champagne); }
+
+/* --- collapsed: the dock proper ----------------------------------------- */
+@media (min-width:901px){
+  /* the icon replaces the numeral as the collapsed identity */
+  .portal[data-rail="collapsed"] .rail__nav a.cat .nav-ic{ display:inline-flex; }
+  .portal[data-rail="collapsed"] .rail__nav a.cat{
+    grid-template-columns:1fr; justify-items:center;
+    padding:.62rem 0;
+  }
+  .portal[data-rail="collapsed"] .rail__nav a.cat .nav-ic{ width:22px; height:22px; }
+
+  /* the standing dot moves off the retired numeral onto the row itself */
+  .portal[data-rail="collapsed"] .rail__nav a.cat.has-count::after{
+    content:""; position:absolute; top:.5rem; right:.85rem;
+    width:5px; height:5px; border-radius:var(--r-full); background:var(--champagne);
+  }
+
+}
+
+/* DockLabel — the name, beside the icon, only while pointed at.
+   It is a single fixed element parked on <body> rather than a ::before on the
+   row, because the collapsed nav has to keep scrolling: its content runs to
+   613px and a short window would otherwise spill the rail over the page. A
+   scrolling box clips its own children, so the label is placed outside it and
+   positioned against the row by the dock. */
+.rail__tip{
+  position:fixed; z-index:80; pointer-events:none;
+  white-space:nowrap;
+  font-size:.62rem; letter-spacing:.12em; color:#EDEAE3;
+  background:#141416; border:1px solid var(--line);
+  border-radius:var(--r-sm); padding:.42rem .7rem;
+  opacity:0; transform:translate(-6px, -50%);
+  transition:opacity .22s var(--ease), transform .22s var(--ease);
+}
+.rail__tip.is-on{ opacity:1; transform:translate(0, -50%); }
+
+/* Expanded, and on every touch layout, the magnification is off — the scale
+   variable is simply never written, so this needs no override. The retired
+   numeral column is what has to go. */
+.rail__nav a.cat .num{ display:none; }
+
+@media (prefers-reduced-motion:reduce){
+  .rail__nav a.cat .nav-ic{ transform:none; }
+  .rail__tip{ transition:none; }
+}
