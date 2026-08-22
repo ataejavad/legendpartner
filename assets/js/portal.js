@@ -1410,5 +1410,696 @@
     });
   })();
 
+  /* --- Long-term relationship: discovery and matching ----------------------
+     A matching surface rather than a list of people. Every figure on this page
+     is computed here, in the page, from the sample below: the weights are data
+     so they can be retuned without touching the logic, and the explanations are
+     written from the same factors the score is, so the number and the sentence
+     can never disagree.
+
+     Preview only: no network, no storage beyond this tab, nothing leaves the
+     page.                                                                    */
+  var ltrView = $('#view-find-long');
+  if (ltrView) (function () {
+
+    /* -- what the score is made of. Data, not literals in the maths. ------- */
+    var WEIGHTS = {
+      goals: 30, lifestyle: 15, communication: 15,
+      interests: 10, values: 15, age: 5, location: 5, activity: 5
+    };
+    var FACTOR_LABELS = {
+      goals: 'Relationship goals', lifestyle: 'Lifestyle',
+      communication: 'Communication style', interests: 'Interests',
+      values: 'Values', age: 'Age', location: 'Location', activity: 'Activity'
+    };
+
+    /* -- the member, as this page needs them ------------------------------- */
+    var ME = {
+      goal: 'Long-Term Partner',
+      city: 'London', country: 'United Kingdom',
+      ageMin: 32, ageMax: 46,
+      interests: ['Travel', 'Art', 'Sailing', 'Wine', 'Architecture'],
+      social: 'Small rooms', style: 'Direct', wantsChildren: 'Open'
+    };
+
+    /* -- sample members ---------------------------------------------------- */
+    var PEOPLE = [
+      { id:'p1', name:'Sophia', age:36, city:'Zurich', country:'Switzerland', verified:true,
+        goal:'Marriage', occupation:'Founder, medical devices', active:2, joined:210,
+        interests:['Travel','Art','Sailing','Languages'],
+        smoking:'No', children:'None', wantsChildren:'Yes', education:'MSc',
+        languages:['German','English','French'], social:'Small rooms', style:'Direct',
+        relocate:'Open to relocating',
+        about:'Built one company, sold it, and is deliberately taking the year more slowly. Sails badly and often.',
+        f:{ goals:96, lifestyle:91, communication:89, interests:84, values:88 },
+        diff:['Prefers to stay within Switzerland','Wants children sooner than most'] },
+
+      { id:'p2', name:'Isabelle', age:41, city:'Paris', country:'France', verified:true,
+        goal:'Life Partner', occupation:'Barrister', active:1, joined:640,
+        interests:['Architecture','Wine','Opera','Riding'],
+        smoking:'No', children:'One, grown', wantsChildren:'No', education:'Doctorate',
+        languages:['French','English'], social:'Small rooms', style:'Direct',
+        relocate:'Not relocating',
+        about:'Reads three papers a day and will tell you when you are wrong, which is the point.',
+        f:{ goals:92, lifestyle:88, communication:94, interests:87, values:90 },
+        diff:['Does not want more children','Will not leave Paris'] },
+
+      { id:'p3', name:'Marguerite', age:39, city:'London', country:'United Kingdom', verified:true,
+        goal:'Long-Term Partner', occupation:'Curator', active:1, joined:95,
+        interests:['Art','Architecture','Travel','Wine'],
+        smoking:'No', children:'None', wantsChildren:'Open', education:'MA',
+        languages:['English','Italian'], social:'Small rooms', style:'Considered',
+        relocate:'Open to relocating',
+        about:'Spends her working life deciding what deserves a wall, and is careful about it elsewhere too.',
+        f:{ goals:94, lifestyle:93, communication:86, interests:96, values:89 },
+        diff:['Works most evenings in the season'] },
+
+      { id:'p4', name:'Beatrice', age:34, city:'Milan', country:'Italy', verified:true,
+        goal:'Serious Relationship', occupation:'Architect', active:4, joined:40,
+        interests:['Architecture','Sailing','Food','Cycling'],
+        smoking:'Occasionally', children:'None', wantsChildren:'Yes', education:'MArch',
+        languages:['Italian','English','Spanish'], social:'Large rooms', style:'Warm',
+        relocate:'Open to relocating',
+        about:'Draws buildings that get built. Talks with her hands and does not apologise for it.',
+        f:{ goals:83, lifestyle:79, communication:81, interests:88, values:80 },
+        diff:['Smokes occasionally','Much more social than you are'] },
+
+      { id:'p5', name:'Helena', age:44, city:'Geneva', country:'Switzerland', verified:true,
+        goal:'Long-Term Partner', occupation:'Private banker', active:6, joined:800,
+        interests:['Sailing','Wine','Skiing','Travel'],
+        smoking:'No', children:'Two, teenage', wantsChildren:'No', education:'MBA',
+        languages:['French','English','German'], social:'Small rooms', style:'Direct',
+        relocate:'Not relocating',
+        about:'Has arranged other people’s lives for twenty years and is candid that hers came second.',
+        f:{ goals:88, lifestyle:85, communication:90, interests:82, values:86 },
+        diff:['Two teenage children at home','Will not leave Geneva'] },
+
+      { id:'p6', name:'Anouk', age:37, city:'Amsterdam', country:'Netherlands', verified:false,
+        goal:'Exclusive Relationship', occupation:'Documentary producer', active:1, joined:18,
+        interests:['Travel','Film','Cycling','Food'],
+        smoking:'No', children:'None', wantsChildren:'Open', education:'BA',
+        languages:['Dutch','English','German'], social:'Large rooms', style:'Warm',
+        relocate:'Open to relocating',
+        about:'Away four months of the year and honest that this is the thing to discuss first.',
+        f:{ goals:76, lifestyle:71, communication:84, interests:70, values:79 },
+        diff:['Travels four months a year','Verification not yet complete'] },
+
+      { id:'p7', name:'Clara', age:43, city:'Vienna', country:'Austria', verified:true,
+        goal:'Marriage', occupation:'Orchestral conductor', active:3, joined:300,
+        interests:['Opera','Art','Wine','Languages'],
+        smoking:'No', children:'None', wantsChildren:'No', education:'Doctorate',
+        languages:['German','English','Italian'], social:'Small rooms', style:'Considered',
+        relocate:'Open to relocating',
+        about:'Rehearses in the morning, reads in the afternoon, and keeps her evenings.',
+        f:{ goals:90, lifestyle:87, communication:88, interests:79, values:92 },
+        diff:['Does not want children','Season runs September to June'] },
+
+      { id:'p8', name:'Rosalind', age:33, city:'London', country:'United Kingdom', verified:true,
+        goal:'Long-Term Partner', occupation:'Surgeon', active:5, joined:150,
+        interests:['Travel','Cycling','Wine','Art'],
+        smoking:'No', children:'None', wantsChildren:'Yes', education:'MD',
+        languages:['English','French'], social:'Small rooms', style:'Direct',
+        relocate:'Not relocating',
+        about:'Operates three days a week and is unromantic about how little time that leaves.',
+        f:{ goals:91, lifestyle:82, communication:87, interests:83, values:85 },
+        diff:['On call most weekends','Will not leave London'] },
+
+      { id:'p9', name:'Ingrid', age:46, city:'Copenhagen', country:'Denmark', verified:true,
+        goal:'Open to Exploring', occupation:'Novelist', active:9, joined:520,
+        interests:['Art','Languages','Sailing','Food'],
+        smoking:'No', children:'One, grown', wantsChildren:'No', education:'MA',
+        languages:['Danish','English','German'], social:'Small rooms', style:'Considered',
+        relocate:'Open to relocating',
+        about:'Not certain she wants this, and would rather say so than perform certainty.',
+        f:{ goals:64, lifestyle:83, communication:85, interests:80, values:82 },
+        diff:['Not yet decided what she is looking for'] },
+
+      { id:'p10', name:'Camille', age:35, city:'Brussels', country:'Belgium', verified:false,
+        goal:'Serious Relationship', occupation:'Diplomat', active:12, joined:9,
+        interests:['Languages','Travel','Food','Opera'],
+        smoking:'No', children:'None', wantsChildren:'Open', education:'MA',
+        languages:['French','English','Arabic','Dutch'], social:'Large rooms', style:'Warm',
+        relocate:'Posted every three years',
+        about:'Moves country on a schedule she does not control, and says so before anything else.',
+        f:{ goals:80, lifestyle:68, communication:83, interests:74, values:81 },
+        diff:['Posted to a new country every three years','Verification not yet complete'] },
+
+      { id:'p11', name:'Freya', age:38, city:'Edinburgh', country:'United Kingdom', verified:true,
+        goal:'Life Partner', occupation:'Distiller', active:2, joined:60,
+        interests:['Wine','Sailing','Food','Travel'],
+        smoking:'No', children:'None', wantsChildren:'Yes', education:'BSc',
+        languages:['English'], social:'Small rooms', style:'Direct',
+        relocate:'Open to relocating',
+        about:'Runs a distillery her grandmother started and is the fourth to do it.',
+        f:{ goals:93, lifestyle:89, communication:85, interests:86, values:87 },
+        diff:['One language','Rarely in London'] },
+
+      { id:'p12', name:'Livia', age:40, city:'Rome', country:'Italy', verified:true,
+        goal:'Long-Term Partner', occupation:'Restorer', active:7, joined:410,
+        interests:['Art','Architecture','Food','Languages'],
+        smoking:'No', children:'None', wantsChildren:'Open', education:'MA',
+        languages:['Italian','English','Latin'], social:'Small rooms', style:'Considered',
+        relocate:'Not relocating',
+        about:'Spends months on a single square metre of fresco and finds that a reasonable pace.',
+        f:{ goals:89, lifestyle:86, communication:84, interests:91, values:88 },
+        diff:['Will not leave Rome'] }
+    ];
+
+    /* -- derived factors: the ones we can actually compute ------------------ */
+    function ageFit(p) {
+      if (p.age >= ME.ageMin && p.age <= ME.ageMax) return 100;
+      var out = p.age < ME.ageMin ? ME.ageMin - p.age : p.age - ME.ageMax;
+      return Math.max(0, 100 - out * 12);
+    }
+    function locationFit(p) {
+      if (p.city === ME.city) return 100;
+      if (p.country === ME.country) return 88;
+      return /Open to relocating/.test(p.relocate) ? 74 : 58;
+    }
+    function activityFit(p) { return Math.max(40, 100 - p.active * 5); }
+    function interestFit(p) {
+      var shared = p.interests.filter(function (i) { return ME.interests.indexOf(i) > -1; });
+      return { pct: Math.round(shared.length / Math.max(3, ME.interests.length) * 100), shared: shared };
+    }
+
+    function factorsOf(p) {
+      return {
+        goals: p.f.goals, lifestyle: p.f.lifestyle, communication: p.f.communication,
+        interests: p.f.interests, values: p.f.values,
+        age: ageFit(p), location: locationFit(p), activity: activityFit(p)
+      };
+    }
+    function scoreOf(p) {
+      var f = factorsOf(p), total = 0, sum = 0;
+      Object.keys(WEIGHTS).forEach(function (k) { total += WEIGHTS[k]; sum += WEIGHTS[k] * (f[k] || 0); });
+      return Math.round(sum / total);
+    }
+    PEOPLE.forEach(function (p) { p.factors = factorsOf(p); p.score = scoreOf(p); });
+
+    /* -- an abstract plate per member. Not a photograph, and not pretending
+          to be one: the house does not publish faces.                        */
+    function plate(p) {
+      var h = 0; for (var i = 0; i < p.id.length + p.name.length; i++) h = (h * 31 + (p.id + p.name).charCodeAt(i)) % 360;
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">' +
+        '<defs><linearGradient id="a" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0" stop-color="hsl(' + h + ',12%,26%)"/>' +
+        '<stop offset="1" stop-color="hsl(' + h + ',14%,11%)"/></linearGradient>' +
+        '<radialGradient id="b" cx=".62" cy=".34" r=".55">' +
+        '<stop offset="0" stop-color="#E4D6B6" stop-opacity=".30"/>' +
+        '<stop offset="1" stop-color="#E4D6B6" stop-opacity="0"/></radialGradient></defs>' +
+        '<rect width="400" height="300" fill="url(#a)"/><rect width="400" height="300" fill="url(#b)"/>' +
+        '<path d="M248 300c0-38-24-62-58-62s-58 24-58 62Z" fill="#E4D6B6" fill-opacity=".13"/>' +
+        '<circle cx="190" cy="196" r="30" fill="#E4D6B6" fill-opacity=".13"/></svg>';
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    /* -- per-visit state ---------------------------------------------------- */
+    var STATE = {
+      goal: ME.goal, q: '', verifiedOnly: false, savedOnly: false,
+      section: 'recommended', shown: 6,
+      basic: {}, advanced: {}, prefs: {}
+    };
+    var SAVED = {};                       // id -> true
+    var STATUS = {};                      // id -> 'sent' | 'connected'
+
+    var GOALS = ['Serious Relationship','Long-Term Partner','Life Partner','Marriage',
+                 'Exclusive Relationship','Open to Exploring'];
+    var SECTIONS = [
+      { id:'recommended', label:'Recommended for you', note:'Best overall, on your weights' },
+      { id:'compatible',  label:'Highly compatible',   note:'Ninety per cent and above' },
+      { id:'new',         label:'New to Legend',       note:'Joined in the last three months' },
+      { id:'active',      label:'Recently active',     note:'Seen in the last three days' },
+      { id:'persona',     label:'Similar to your persona', note:'Your social and communication style' },
+      { id:'saved',       label:'Saved',               note:'Kept for later' }
+    ];
+
+    /* -- filter definitions. Rendered from data, read back from data. ------- */
+    var BASIC = [
+      { k:'ageMin', label:'Minimum age', type:'number', value:ME.ageMin },
+      { k:'ageMax', label:'Maximum age', type:'number', value:ME.ageMax },
+      { k:'country', label:'Country', type:'select', options:['Any'] },
+      { k:'city', label:'City', type:'select', options:['Any'] },
+      { k:'relocate', label:'Willing to relocate', type:'select', options:['Any','Open to relocating','Not relocating'] },
+      { k:'goal', label:'Their relationship goal', type:'select', options:['Any'].concat(GOALS) }
+    ];
+    var ADVANCED = [
+      { k:'smoking', label:'Smoking', type:'select', options:['Any','No','Occasionally'] },
+      { k:'children', label:'Has children', type:'select', options:['Any','None','Has children'] },
+      { k:'wantsChildren', label:'Wants children', type:'select', options:['Any','Yes','No','Open'] },
+      { k:'education', label:'Education', type:'select', options:['Any','BA','BSc','MA','MSc','MBA','MArch','MD','Doctorate'] },
+      { k:'language', label:'Speaks', type:'select', options:['Any'] },
+      { k:'social', label:'Social style', type:'select', options:['Any','Small rooms','Large rooms'] },
+      { k:'style', label:'Communication style', type:'select', options:['Any','Direct','Considered','Warm'] }
+    ];
+    var PREFS = [
+      { k:'pAgeMin', label:'Age from', type:'number', value:ME.ageMin },
+      { k:'pAgeMax', label:'Age to', type:'number', value:ME.ageMax },
+      { k:'pCountry', label:'Countries', type:'select', options:['Any'] },
+      { k:'pGoal', label:'Relationship', type:'select', options:GOALS, value:ME.goal },
+      { k:'pSmoking', label:'Smoking', type:'select', options:['Any','No'] },
+      { k:'pChildren', label:'Children', type:'select', options:['Any','Wants children','Does not want children'] }
+    ];
+    // the option lists that come from the data itself
+    var countries = ['Any'].concat(PEOPLE.map(function (p) { return p.country; })
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }).sort());
+    var cities = ['Any'].concat(PEOPLE.map(function (p) { return p.city; })
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }).sort());
+    var langs = ['Any'].concat(PEOPLE.reduce(function (a, p) { return a.concat(p.languages); }, [])
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }).sort());
+    BASIC[2].options = countries; BASIC[3].options = cities;
+    ADVANCED[4].options = langs;  PREFS[2].options = countries;
+
+    /* -- filtering ---------------------------------------------------------- */
+    function matches(p) {
+      var b = STATE.basic, a = STATE.advanced;
+      if (STATE.verifiedOnly && !p.verified) return false;
+      if (STATE.savedOnly && !SAVED[p.id]) return false;
+      if (b.ageMin && p.age < +b.ageMin) return false;
+      if (b.ageMax && p.age > +b.ageMax) return false;
+      if (b.country && b.country !== 'Any' && p.country !== b.country) return false;
+      if (b.city && b.city !== 'Any' && p.city !== b.city) return false;
+      if (b.relocate && b.relocate !== 'Any' && p.relocate.indexOf(b.relocate) !== 0) return false;
+      if (b.goal && b.goal !== 'Any' && p.goal !== b.goal) return false;
+      if (a.smoking && a.smoking !== 'Any' && p.smoking !== a.smoking) return false;
+      if (a.children && a.children !== 'Any') {
+        var has = p.children !== 'None';
+        if (a.children === 'None' && has) return false;
+        if (a.children === 'Has children' && !has) return false;
+      }
+      if (a.wantsChildren && a.wantsChildren !== 'Any' && p.wantsChildren !== a.wantsChildren) return false;
+      if (a.education && a.education !== 'Any' && p.education !== a.education) return false;
+      if (a.language && a.language !== 'Any' && p.languages.indexOf(a.language) < 0) return false;
+      if (a.social && a.social !== 'Any' && p.social !== a.social) return false;
+      if (a.style && a.style !== 'Any' && p.style !== a.style) return false;
+      if (STATE.q) {
+        var hay = (p.name + ' ' + p.occupation + ' ' + p.city + ' ' + p.country + ' ' +
+                   p.interests.join(' ') + ' ' + p.languages.join(' ')).toLowerCase();
+        if (hay.indexOf(STATE.q.toLowerCase()) < 0) return false;
+      }
+      return true;
+    }
+    function inSection(p) {
+      switch (STATE.section) {
+        case 'compatible': return p.score >= 90;
+        case 'new':        return p.joined <= 90;
+        case 'active':     return p.active <= 3;
+        case 'persona':    return p.social === ME.social && p.style === ME.style;
+        case 'saved':      return !!SAVED[p.id];
+        default:           return true;
+      }
+    }
+    function results() {
+      return PEOPLE.filter(function (p) { return matches(p) && inSection(p); })
+                   .sort(function (x, y) { return y.score - x.score; });
+    }
+
+    /* -- why the number is the number --------------------------------------- */
+    function strengths(p) {
+      return Object.keys(p.factors)
+        .filter(function (k) { return p.factors[k] >= 85; })
+        .sort(function (a, b) { return p.factors[b] - p.factors[a]; })
+        .map(function (k) { return FACTOR_LABELS[k]; });
+    }
+    function insight(p) {
+      var s = strengths(p), fit = interestFit(p);
+      var lead = 'You and ' + p.name + ' ';
+      if (s.length >= 2) lead += 'line up most on ' + s[0].toLowerCase() + ' and ' + s[1].toLowerCase() + '.';
+      else if (s.length === 1) lead += 'line up most on ' + s[0].toLowerCase() + '.';
+      else lead += 'have no single factor that stands out, which is itself worth knowing.';
+      if (fit.shared.length) lead += ' You share ' + fit.shared.slice(0, 3).join(', ').toLowerCase() + '.';
+      if (p.goal === STATE.goal) lead += ' You are both asking for the same thing: ' + p.goal.toLowerCase() + '.';
+      else lead += ' She is looking for ' + p.goal.toLowerCase() + ', where you have said ' + STATE.goal.toLowerCase() + '.';
+      return lead;
+    }
+    var ASK = [
+      { q:'Why do you think we are compatible?', a:function (p) { return insight(p); } },
+      { q:'What should I know before contacting her?', a:function (p) {
+          return p.diff.length
+            ? 'The things worth raising early: ' + p.diff.join('; ').toLowerCase() + '. None of them is a reason not to meet — they are the reasons to be direct at the first meeting rather than the fourth.'
+            : 'Nothing on her file conflicts with yours in a way worth raising in advance. That is unusual, and not the same as saying it will work.'; } },
+      { q:'Where are we least alike?', a:function (p) {
+          var low = Object.keys(p.factors).sort(function (a, b) { return p.factors[a] - p.factors[b]; })[0];
+          return 'Lowest of the eight factors is ' + FACTOR_LABELS[low].toLowerCase() + ', at ' + p.factors[low] + ' per cent. ' +
+                 'It is weighted at ' + WEIGHTS[low] + ' of 100 in your score, so it moves the figure less than it may matter to you.'; } },
+      { q:'How was this figure worked out?', a:function (p) {
+          return 'Eight factors, each weighted: ' + Object.keys(WEIGHTS).map(function (k) {
+            return FACTOR_LABELS[k].toLowerCase() + ' ' + WEIGHTS[k]; }).join(', ') +
+            '. Her weighted average is ' + p.score + '. The weights are your advisor’s to change, and they are not fixed for every member.'; } }
+    ];
+
+    /* -- rendering ----------------------------------------------------------- */
+    function el(tag, cls, text) {
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    }
+    function field(def, store, onChange) {
+      var wrap = el('div', 'ltr-field');
+      var id = 'ltr-f-' + def.k;
+      var lab = el('label', null, def.label); lab.setAttribute('for', id);
+      var input;
+      if (def.type === 'select') {
+        input = el('select');
+        def.options.forEach(function (o) {
+          var opt = el('option', null, o); opt.value = o;
+          if (store[def.k] === o || (store[def.k] == null && def.value === o)) opt.selected = true;
+          input.appendChild(opt);
+        });
+      } else {
+        input = el('input'); input.type = 'number'; input.min = '18'; input.max = '99';
+        input.value = store[def.k] != null ? store[def.k] : (def.value || '');
+      }
+      input.id = id;
+      if (store[def.k] == null && def.value != null) store[def.k] = def.value;
+      input.addEventListener('change', function () { store[def.k] = input.value; onChange(); });
+      wrap.appendChild(lab); wrap.appendChild(input);
+      return wrap;
+    }
+
+    function card(p) {
+      var a = el('article', 'ltr-card' + (SAVED[p.id] ? ' is-saved' : ''));
+      var img = el('img', 'ltr-card__plate');
+      img.src = plate(p); img.alt = ''; img.setAttribute('aria-hidden', 'true'); img.loading = 'lazy';
+      a.appendChild(img);
+
+      var body = el('div', 'ltr-card__body');
+      if (p.verified) {
+        var v = el('span', 'ltr-vfd'); v.appendChild(el('i', null, '✓'));
+        v.appendChild(el('span', null, 'Legend Verified')); body.appendChild(v);
+      } else {
+        body.appendChild(el('span', 'ltr-vfd ltr-vfd--no', 'Verification in progress'));
+      }
+      body.appendChild(el('h3', 'ltr-card__name', p.name + ', ' + p.age));
+      body.appendChild(el('p', 'ltr-card__where', p.city + ', ' + p.country));
+      body.appendChild(el('p', 'ltr-card__goal', p.goal));
+
+      var sc = el('div', 'ltr-score');
+      sc.appendChild(el('span', 'ltr-score__n', p.score + '%'));
+      sc.appendChild(el('span', 'ltr-score__l', 'Compatibility'));
+      var bar = el('span', 'ltr-score__bar');
+      var fill = el('span'); fill.style.width = p.score + '%'; bar.appendChild(fill);
+      sc.appendChild(bar);
+      body.appendChild(sc);
+
+      body.appendChild(el('p', 'ltr-card__occ', p.occupation));
+      var tags = el('p', 'ltr-card__tags', p.interests.slice(0, 4).join(' · '));
+      body.appendChild(tags);
+      body.appendChild(el('p', 'ltr-card__seen',
+        (STATUS[p.id] === 'connected' ? 'Connected · ' : STATUS[p.id] === 'sent' ? 'Request sent · ' : '') +
+        (p.active <= 1 ? 'Active today' : 'Active ' + p.active + ' days ago')));
+
+      var acts = el('div', 'ltr-card__acts');
+      var view = el('button', 'btn', null); view.type = 'button';
+      view.appendChild(el('span', null, 'View profile')); view.appendChild(el('i', 'arrow'));
+      view.addEventListener('click', function () { openSheet(p); });
+      var save = el('button', 'ltr-heart'); save.type = 'button';
+      save.setAttribute('aria-pressed', SAVED[p.id] ? 'true' : 'false');
+      save.setAttribute('aria-label', (SAVED[p.id] ? 'Remove ' : 'Save ') + p.name);
+      save.textContent = SAVED[p.id] ? '♥' : '♡';
+      save.addEventListener('click', function () {
+        SAVED[p.id] = !SAVED[p.id]; render();
+        announce((SAVED[p.id] ? 'Saved ' : 'Removed ') + p.name + '.');
+      });
+      acts.appendChild(view); acts.appendChild(save);
+      body.appendChild(acts);
+
+      a.appendChild(body);
+      return a;
+    }
+
+    var grid = $('#ltr-grid'), empty = $('#ltr-empty'), moreBtn = $('#ltr-more'), shownP = $('#ltr-shown');
+    var live = el('p', 'sr-only'); live.setAttribute('role', 'status'); live.setAttribute('aria-live', 'polite');
+    ltrView.appendChild(live);
+    function announce(t) { live.textContent = t; }
+
+    function render() {
+      var all = results();
+      var page = all.slice(0, STATE.shown);
+      grid.textContent = '';
+      page.forEach(function (p) { grid.appendChild(card(p)); });
+      empty.hidden = all.length > 0;
+      moreBtn.hidden = all.length <= STATE.shown;
+      shownP.textContent = all.length
+        ? 'Showing ' + page.length + ' of ' + all.length + ' in this group.'
+        : '';
+      $('#ltr-count').textContent = PEOPLE.filter(matches).length;
+      $('#ltr-where').textContent = (STATE.basic.city && STATE.basic.city !== 'Any')
+        ? STATE.basic.city : (STATE.basic.country && STATE.basic.country !== 'Any' ? STATE.basic.country : 'Anywhere');
+      $('#ltr-goal').textContent = STATE.goal;
+      $('#ltr-verified').textContent = STATE.verifiedOnly ? 'Verified only' : 'All members';
+      $$('#ltr-sections button').forEach(function (b) {
+        var on = b.getAttribute('data-section') === STATE.section;
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+
+    /* -- the profile, opened over the page ---------------------------------- */
+    var sheet = $('#ltr-sheet'), sheetBody = $('#ltr-sheet-body'), lastFocus = null;
+
+    function bars(p) {
+      var wrap = el('div', 'ltr-bars');
+      Object.keys(p.factors).forEach(function (k) {
+        var row = el('div', 'ltr-bars__row');
+        row.appendChild(el('span', 'k', FACTOR_LABELS[k]));
+        var b = el('span', 'b'); var f = el('i'); f.style.width = p.factors[k] + '%'; b.appendChild(f);
+        row.appendChild(b);
+        row.appendChild(el('span', 'v', p.factors[k] + '%'));
+        wrap.appendChild(row);
+      });
+      return wrap;
+    }
+
+    function openSheet(p) {
+      lastFocus = document.activeElement;
+      sheetBody.textContent = '';
+
+      var head = el('div', 'ltr-sheet__head');
+      var img = el('img', 'ltr-sheet__plate'); img.src = plate(p); img.alt = ''; img.setAttribute('aria-hidden','true');
+      head.appendChild(img);
+      var hb = el('div');
+      if (p.verified) {
+        var v = el('span', 'ltr-vfd'); v.appendChild(el('i', null, '✓'));
+        v.appendChild(el('span', null, 'Legend Verified')); hb.appendChild(v);
+      }
+      var h = el('h2', null, p.name + ', ' + p.age); h.id = 'ltr-sheet-name'; hb.appendChild(h);
+      hb.appendChild(el('p', 'ltr-sheet__where', p.city + ', ' + p.country + ' · ' + p.occupation));
+      hb.appendChild(el('p', 'ltr-sheet__score', p.score + '% compatible'));
+      head.appendChild(hb);
+      sheetBody.appendChild(head);
+
+      // actions, and the connect flow
+      var acts = el('div', 'ltr-sheet__acts');
+      var connect = el('button', 'btn btn--solid'); connect.type = 'button';
+      var msg = el('button', 'btn'); msg.type = 'button'; msg.appendChild(el('span', null, 'Message'));
+      var save2 = el('button', 'btn'); save2.type = 'button';
+      var report = el('button', 'btn btn--quiet', 'Report'); report.type = 'button';
+      var block = el('button', 'btn btn--quiet', 'Block'); block.type = 'button';
+
+      function paintActions() {
+        connect.textContent = STATUS[p.id] === 'connected' ? 'Connected'
+          : STATUS[p.id] === 'sent' ? 'Request sent' : 'Connect';
+        connect.disabled = !!STATUS[p.id];
+        msg.hidden = STATUS[p.id] !== 'connected';
+        save2.textContent = SAVED[p.id] ? '♥ Saved' : '♡ Save';
+      }
+      connect.addEventListener('click', function () { openConnect(p, paintActions); });
+      save2.addEventListener('click', function () { SAVED[p.id] = !SAVED[p.id]; paintActions(); render(); });
+      msg.addEventListener('click', function () { location.hash = '#messages'; });
+      report.addEventListener('click', function () { openReport(p); });
+      block.addEventListener('click', function () {
+        STATUS[p.id] = 'blocked'; note(block, p.name + ' is blocked. She is not shown to you again, is not told, and any request between you is withdrawn.');
+      });
+      [connect, msg, save2, report, block].forEach(function (b) { acts.appendChild(b); });
+      paintActions();
+      sheetBody.appendChild(acts);
+
+      var connectBox = el('div', 'ltr-connect'); connectBox.hidden = true;
+      sheetBody.appendChild(connectBox);
+      function openConnect(person, done) {
+        connectBox.hidden = false; connectBox.textContent = '';
+        connectBox.appendChild(el('p', 'ask__lbl', 'Connect with ' + person.name));
+        connectBox.appendChild(el('p', 'quiet', 'Why would you like to connect? A sentence is enough, and it is optional.'));
+        var ta = el('textarea'); ta.rows = 3; ta.placeholder = 'Optional message';
+        ta.setAttribute('aria-label', 'Optional message to ' + person.name);
+        connectBox.appendChild(ta);
+        var send = el('button', 'btn btn--solid', 'Send connection request'); send.type = 'button';
+        send.addEventListener('click', function () {
+          STATUS[person.id] = 'sent';
+          connectBox.textContent = '';
+          connectBox.appendChild(el('p', 'ltr-sent', 'Request sent. She decides whether to answer, and is told nothing about you beyond what you have agreed to disclose.'));
+          done(); render(); announce('Connection request sent to ' + person.name + '.');
+        });
+        connectBox.appendChild(send);
+        ta.focus();
+      }
+      function openReport(person) {
+        connectBox.hidden = false; connectBox.textContent = '';
+        connectBox.appendChild(el('p', 'ask__lbl', 'Report ' + person.name));
+        var sel = el('select');
+        ['Fake profile','Misrepresentation','Harassment','Inappropriate behaviour','Scam or fraud','Safety concern','Other']
+          .forEach(function (o) { var op = el('option', null, o); op.value = o; sel.appendChild(op); });
+        sel.setAttribute('aria-label', 'Reason for reporting');
+        connectBox.appendChild(sel);
+        var ta = el('textarea'); ta.rows = 3; ta.placeholder = 'Anything you would like the house to know';
+        ta.setAttribute('aria-label', 'Details');
+        connectBox.appendChild(ta);
+        var send = el('button', 'btn btn--solid', 'Send to the house'); send.type = 'button';
+        send.addEventListener('click', function () {
+          connectBox.textContent = '';
+          connectBox.appendChild(el('p', 'ltr-sent', 'Read by a person today, not a queue. You are told what was done, and she is never told who reported her.'));
+        });
+        connectBox.appendChild(send);
+      }
+
+      // about, and the persona note
+      var about = el('div', 'panel');
+      about.appendChild(headOf('About ' + p.name));
+      var ab = el('div', 'panel__body');
+      ab.appendChild(el('p', 'ltr-about', p.about));
+      ab.appendChild(el('p', 'ask__lbl', 'Persona note'));
+      ab.appendChild(el('p', 'quiet', 'Shown with her permission. ' + p.name + ' reads as ' +
+        p.style.toLowerCase() + ' in conversation and prefers ' + p.social.toLowerCase() + '. ' +
+        'Her persona is her own; it is not a judgement, and it is not shown to anyone she has not agreed to.'));
+      about.appendChild(ab);
+      sheetBody.appendChild(about);
+
+      // why the score is the score
+      var why = el('div', 'panel');
+      why.appendChild(headOf('Why you are compatible', p.score + '% overall'));
+      var wb = el('div', 'panel__body');
+      wb.appendChild(bars(p));
+      var st = strengths(p);
+      if (st.length) {
+        wb.appendChild(el('p', 'ask__lbl', 'Strong compatibility in'));
+        var ul = el('ul', 'includes');
+        st.forEach(function (s) { ul.appendChild(el('li', null, s)); });
+        wb.appendChild(ul);
+      }
+      if (p.diff.length) {
+        wb.appendChild(el('p', 'ask__lbl', 'Potential differences'));
+        var ul2 = el('ul', 'includes includes--not');
+        p.diff.forEach(function (d) { ul2.appendChild(el('li', null, d)); });
+        wb.appendChild(ul2);
+      }
+      why.appendChild(wb);
+      sheetBody.appendChild(why);
+
+      // the assistant, in the context of this one person
+      var ai = el('div', 'panel');
+      ai.appendChild(headOf('Ask Legend about this match', 'Reads both files'));
+      var aib = el('div', 'panel__body');
+      aib.appendChild(el('p', 'ltr-insight', insight(p)));
+      var thread = el('div', 'ltr-ai-thread');
+      aib.appendChild(thread);
+      var chips = el('div', 'ask__chips');
+      ASK.forEach(function (item) {
+        var b = el('button', null, item.q); b.type = 'button';
+        b.addEventListener('click', function () {
+          thread.appendChild(el('p', 'ltr-ai-q', item.q));
+          thread.appendChild(el('p', 'ltr-ai-a', item.a(p)));
+          b.remove();
+        });
+        chips.appendChild(b);
+      });
+      aib.appendChild(chips);
+      aib.appendChild(el('p', 'quiet', 'Written rules over the two files, not a language model, and nothing here is sent anywhere.'));
+      ai.appendChild(aib);
+      sheetBody.appendChild(ai);
+
+      // what she is looking for, and how she lives
+      var facts = el('div', 'panel');
+      facts.appendChild(headOf('Goals, and how she lives'));
+      var fb = el('div', 'panel__body');
+      var dl = el('dl', 'kv');
+      [['Looking for', p.goal], ['Relocating', p.relocate], ['Children', p.children],
+       ['Wants children', p.wantsChildren], ['Smoking', p.smoking], ['Education', p.education],
+       ['Languages', p.languages.join(', ')], ['Social', p.social], ['Communication', p.style],
+       ['Interests', p.interests.join(', ')]].forEach(function (r) {
+        dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1]));
+      });
+      fb.appendChild(dl);
+      fb.appendChild(el('div', 'note-inline',
+        'What is withheld stays withheld: her surname, her photograph and her address are not on this page and are not ours to give. They are disclosed by her, to you, if she answers.'));
+      facts.appendChild(fb);
+      sheetBody.appendChild(facts);
+
+      sheet.hidden = false;
+      document.body.style.overflow = 'hidden';
+      $('.ltr-sheet__close', sheet).focus();
+    }
+    function headOf(title, pill) {
+      var h = el('div', 'panel__head');
+      h.appendChild(el('h2', null, title));
+      if (pill) h.appendChild(el('span', 'pill pill--rest', pill));
+      return h;
+    }
+    function closeSheet() {
+      sheet.hidden = true;
+      document.body.style.overflow = '';
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    $$('[data-ltr-close]').forEach(function (b) { b.addEventListener('click', closeSheet); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !sheet.hidden) { e.preventDefault(); closeSheet(); }
+    });
+
+    /* -- build the controls --------------------------------------------------- */
+    var goalsWrap = $('#ltr-goals');
+    GOALS.forEach(function (g) {
+      var b = el('button', 'chip' + (g === STATE.goal ? ' is-on' : ''), g);
+      b.type = 'button'; b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', g === STATE.goal ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        STATE.goal = g;
+        $$('button', goalsWrap).forEach(function (o) {
+          var on = o === b;
+          o.classList.toggle('is-on', on);
+          o.setAttribute('aria-checked', on ? 'true' : 'false');
+        });
+        render(); announce('Your goal is now ' + g + '.');
+      });
+      goalsWrap.appendChild(b);
+    });
+
+    function build(list, host, store) {
+      var wrap = $(host);
+      list.forEach(function (def) { wrap.appendChild(field(def, store, function () { STATE.shown = 6; render(); })); });
+    }
+    build(BASIC, '#ltr-basic', STATE.basic);
+    build(ADVANCED, '#ltr-advanced', STATE.advanced);
+    build(PREFS, '#ltr-prefs', STATE.prefs);
+
+    var sectionsWrap = $('#ltr-sections');
+    SECTIONS.forEach(function (s) {
+      var b = el('button'); b.type = 'button';
+      b.setAttribute('data-section', s.id);
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', s.id === STATE.section ? 'true' : 'false');
+      b.appendChild(el('span', 'ltr-tab__l', s.label));
+      b.appendChild(el('span', 'ltr-tab__n', s.note));
+      b.addEventListener('click', function () { STATE.section = s.id; STATE.shown = 6; render(); });
+      sectionsWrap.appendChild(b);
+    });
+
+    $('#ltr-q').addEventListener('input', function () { STATE.q = this.value.trim(); STATE.shown = 6; render(); });
+    $('#ltr-verified-only').addEventListener('change', function () { STATE.verifiedOnly = this.checked; render(); });
+    $('#ltr-saved-only').addEventListener('change', function () { STATE.savedOnly = this.checked; render(); });
+    moreBtn.addEventListener('click', function () { STATE.shown += 6; render(); });
+    $('#ltr-clear').addEventListener('click', function () {
+      STATE.q = ''; STATE.basic = {}; STATE.advanced = {}; STATE.verifiedOnly = false;
+      STATE.savedOnly = false; STATE.shown = 6;
+      $('#ltr-q').value = ''; $('#ltr-verified-only').checked = false; $('#ltr-saved-only').checked = false;
+      $('#ltr-basic').textContent = ''; $('#ltr-advanced').textContent = '';
+      build(BASIC, '#ltr-basic', STATE.basic); build(ADVANCED, '#ltr-advanced', STATE.advanced);
+      render(); announce('Filters cleared.');
+    });
+    $('#ltr-save-prefs').addEventListener('click', function (e) {
+      note(e.target, 'Saved to your file and sent to C. Vasseur. These are the standing instructions she works to between your visits.');
+    });
+
+    render();
+  })();
+
   route();
 })();

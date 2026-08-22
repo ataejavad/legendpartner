@@ -855,48 +855,116 @@
 
       <!-- ============================================= FIND — LONG TERM -->
       <section class="view" id="view-find-long" tabindex="-1" aria-label="Long-term relationship">
-        <p class="lede">Long-term relationship</p>
+        <p class="lede">Long-Term Relationships</p>
         <p class="sub">
-          The whole of it: establishing what a partnership must be for this particular life, finding
-          the person, and staying through the year that decides whether it holds.
+          Discover people who are looking for meaningful, long-term relationships and share your
+          relationship goals. Matched on your profile, your persona and what you have told us
+          matters — not on who happened to be online.
         </p>
 
-        <div class="cols cols--7-5" style="margin-top:2.6rem">
-          <div class="panel">
-            <div class="panel__head"><h2>How it runs</h2></div>
-            <div class="panel__body">
-              <ul class="spine">
-                <li><span class="no">01</span><span>Assessment — what this life actually needs, before a name is considered</span></li>
-                <li><span class="no">02</span><span>The brief, written and agreed with you</span></li>
-                <li><span class="no">03</span><span>Search, inside the network and beyond it</span></li>
-                <li><span class="no">04</span><span>Verification — met in person, twice, before a case is written</span></li>
-                <li><span class="no">05</span><span>Introduction, with the reasoning on the table</span></li>
-                <li><span class="no">06</span><span>Formation — the first year, and the conversations most couples postpone</span></li>
-              </ul>
-            </div>
+        <!-- header figures ------------------------------------------------- -->
+        <div class="ltr-stats" id="ltr-stats" role="status">
+          <div><span class="n" id="ltr-count">—</span><span class="l">Potential matches</span></div>
+          <div><span class="n" id="ltr-where">—</span><span class="l">Location</span></div>
+          <div><span class="n" id="ltr-goal">—</span><span class="l">Your goal</span></div>
+          <div><span class="n" id="ltr-verified">—</span><span class="l">Verification</span></div>
+        </div>
+
+        <!-- 1. the member's own goal ---------------------------------------- -->
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head">
+            <h2>What are you looking for?</h2>
+            <span class="pill pill--rest">Part of your matching profile</span>
           </div>
-          <div class="stack" style="gap:1.6rem">
-            <div class="panel">
-              <div class="panel__head"><h2>What to expect</h2></div>
-              <div class="panel__body">
-                <dl class="kv">
-                  <dt>Pace</dt><dd>Months, not weeks</dd>
-                  <dt>Introductions</dt><dd>Single figures in a year</dd>
-                  <dt>Withheld</dt><dd>Name and photograph, until you accept</dd>
-                  <dt>Ending it</dt><dd>Whenever you say, without a reason</dd>
-                </dl>
-                <div class="note-inline">
-                  The figure that matters is the one you do not see: the candidates assessed
-                  properly and not brought to you. That is what the mandate is buying.
-                </div>
-              </div>
-              <div class="panel__foot">
-                <a class="btn" href="#introductions" data-go="introductions"><span>Your introductions</span><i class="arrow"></i></a>
-              </div>
+          <div class="panel__body">
+            <div class="chips" id="ltr-goals" role="radiogroup" aria-label="Your relationship goal"></div>
+            <p class="quiet" style="margin-top:1rem">
+              Your advisor sees this, and it weights every match below. It is never shown to another
+              member, and changing it is not recorded as a change of mind.
+            </p>
+          </div>
+        </div>
+
+        <!-- 2. search and filters ------------------------------------------- -->
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head">
+            <h2>Search &amp; filters</h2>
+            <button type="button" class="btn btn--quiet" id="ltr-clear">Clear all</button>
+          </div>
+          <div class="panel__body">
+            <div class="ltr-search">
+              <input type="search" id="ltr-q" placeholder="Search a name, a profession, an interest"
+                     aria-label="Search matches">
+            </div>
+
+            <div class="ltr-filters" id="ltr-basic"></div>
+
+            <details class="ltr-adv">
+              <summary>Advanced filters</summary>
+              <div class="ltr-filters" id="ltr-advanced"></div>
+            </details>
+
+            <div class="ltr-toggles">
+              <label class="ltr-toggle">
+                <input type="checkbox" id="ltr-verified-only">
+                <span>Legend Verified only</span>
+              </label>
+              <label class="ltr-toggle">
+                <input type="checkbox" id="ltr-saved-only">
+                <span>Saved profiles only</span>
+              </label>
             </div>
           </div>
         </div>
+
+        <!-- 3. discovery ----------------------------------------------------- -->
+        <div class="ltr-sections" id="ltr-sections" role="tablist" aria-label="How matches are grouped"></div>
+
+        <p class="ltr-empty" id="ltr-empty" hidden>
+          Nothing here answers to those filters. Widen one of them, or clear them all — the network
+          is small on purpose, and an empty result is often the honest one.
+        </p>
+
+        <div class="ltr-grid" id="ltr-grid" aria-live="polite"></div>
+
+        <div class="ltr-more">
+          <button type="button" class="btn" id="ltr-more" hidden><span>Show more</span><i class="arrow"></i></button>
+          <p class="quiet" id="ltr-shown"></p>
+        </div>
+
+        <!-- 4. the member's standing preferences ----------------------------- -->
+        <div class="panel" style="margin-top:2rem">
+          <div class="panel__head">
+            <h2>My relationship preferences</h2>
+            <span class="pill pill--rest">Held on your file</span>
+          </div>
+          <div class="panel__body">
+            <div class="ltr-filters" id="ltr-prefs"></div>
+            <div class="note-inline">
+              These are the standing instructions your advisor works to. The filters above are for
+              this visit only; these persist, and they weight what is proposed to you between visits.
+            </div>
+          </div>
+          <div class="panel__foot">
+            <button class="btn btn--solid" type="button" id="ltr-save-prefs">Save preferences</button>
+          </div>
+        </div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          <b>Design preview.</b> Everyone below is illustrative sample content, and the compatibility
+          figures are computed here in the page from that sample — written rules, not a language
+          model, and nothing you do on this page leaves it.
+        </div>
       </section>
+
+      <!-- the full profile, opened over the page ---------------------------- -->
+      <div class="ltr-sheet" id="ltr-sheet" hidden>
+        <div class="ltr-sheet__scrim" data-ltr-close></div>
+        <div class="ltr-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="ltr-sheet-name">
+          <button type="button" class="ltr-sheet__close" data-ltr-close aria-label="Close">Close<span class="ask__esc">Esc</span></button>
+          <div id="ltr-sheet-body"></div>
+        </div>
+      </div>
 
       <!-- ============================================= FIND — SHORT TERM -->
       <section class="view" id="view-find-short" tabindex="-1" aria-label="Short-term relationship">
