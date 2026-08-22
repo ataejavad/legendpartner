@@ -2202,6 +2202,23 @@ a.tile:hover{ transform:translateY(-2px); }
 
 /* the toggle sits with the brand */
 .rail__top{ display:flex; align-items:flex-start; justify-content:space-between; gap:.5rem; padding-right:1rem; }
+
+/* On a phone the rail is a strip across the top of the page, and this block was
+   spending 66px of an 844px screen on the house's own name before the member
+   saw anything of theirs. The mark shrinks, and the descriptor comes up onto
+   the same line as the wordmark instead of sitting under it. The collapse
+   toggle is already hidden at this width, so the room it was reserving goes
+   back too. */
+@media (max-width:900px){
+  .rail__top{ padding-right:0; align-items:center; }
+  .rail__brand{ padding-bottom:.7rem; gap:.6rem; }
+  .rail__brand svg{ width:18px; height:18px; }
+  .rail__brand b{ font-size:.66rem; letter-spacing:.3em; }
+  .rail__brand span span{
+    display:inline; margin-top:0; font-size:.46rem; letter-spacing:.18em;
+  }
+  .rail__brand span span::before{ content:"\00B7"; margin:0 .5em; opacity:.55; }
+}
 .rail__toggle{
   flex:none; width:26px; height:26px; margin-top:.1rem;
   display:grid; place-items:center;
