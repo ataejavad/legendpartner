@@ -29,7 +29,7 @@
     short:      'Short partner',
     events:     'Party & event',
     management: 'Relationship management',
-    me:         'Profile',
+    me:         'Profile & Persona',
     settings:   'Settings',
     overview: 'Overview',
     proposed: 'Proposed for you',
