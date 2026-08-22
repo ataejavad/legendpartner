@@ -1225,7 +1225,11 @@
     function turnNext() {
       var list = tiles();
       if (!list.length) return;
-      if (paused || document.hidden) { turnTimer = setTimeout(turnNext, 1400); return; }
+      // Folded away for a question, off-screen, or held under the pointer:
+      // all three mean nobody is looking, so nothing should turn.
+      if (paused || document.hidden || tilesRow.closest('.is-asking')) {
+        turnTimer = setTimeout(turnNext, 1400); return;
+      }
       var t = list[turnIdx % list.length];
       turnIdx++;
       t.classList.add('is-flipped');
@@ -1257,6 +1261,79 @@
       }, { threshold: .25 });
       io.observe(tilesRow);
     }
+  })();
+
+  /* --- Asking clears the room ---------------------------------------------
+     At rest the assistant is one bar. The moment a question is being typed the
+     tiles stand down and the panel opens into the conversation; closing it
+     brings the tiles back as they were. The thread is kept, so returning to a
+     question already asked does not lose the answer.                        */
+  var dashView = $('#view-overview');
+  var aside = $('#dash-aside');
+  var askInput = $('#ask-input');
+  if (dashView && aside && askInput) (function () {
+    var asking = false;
+    var sent = false;                      // has the member actually asked anything?
+
+    // The collapse animates between two measured heights rather than a guess.
+    function measure() { return aside.scrollHeight; }
+
+    function setAsking(on) {
+      if (asking === on) return;
+      asking = on;
+
+      if (reduced) {
+        aside.style.maxHeight = on ? '0px' : '';
+        dashView.classList.toggle('is-asking', on);
+      } else if (on) {
+        aside.style.maxHeight = measure() + 'px';
+        void aside.offsetHeight;           // commit the start height
+        dashView.classList.add('is-asking');
+        aside.style.maxHeight = '0px';
+      } else {
+        dashView.classList.remove('is-asking');
+        aside.style.maxHeight = measure() + 'px';
+        // Let it settle back to auto, so a reorder or a resize is not capped.
+        setTimeout(function () { if (!asking) aside.style.maxHeight = ''; }, 500);
+      }
+
+      // Hidden means hidden: nothing in there should be reachable by tab or
+      // readable by a screen reader while it is folded away.
+      if ('inert' in HTMLElement.prototype) aside.inert = on;
+      aside.setAttribute('aria-hidden', on ? 'true' : 'false');
+
+      if (!on) askThread && askThread.scrollTo && askThread.scrollTo(0, askThread.scrollHeight);
+    }
+
+    askInput.addEventListener('input', function () {
+      if (askInput.value.trim() !== '') { setAsking(true); return; }
+      // Cleared without ever asking anything — treat it as never having started.
+      if (!sent) setAsking(false);
+    });
+
+    // A suggested opening is a question too.
+    $$('#ask-chips button').forEach(function (chip) {
+      chip.addEventListener('click', function () { sent = true; setAsking(true); });
+    });
+    if (askForm) askForm.addEventListener('submit', function () { sent = true; });
+
+    function close() {
+      setAsking(false);
+      askInput.value = '';
+      askInput.blur();
+    }
+
+    var closeBtn = $('#ask-close');
+    if (closeBtn) closeBtn.addEventListener('click', close);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && asking) { e.preventDefault(); close(); }
+    });
+
+    // Leaving the overview entirely puts the room back as it was.
+    window.addEventListener('hashchange', function () {
+      if (asking && location.hash.replace('#', '') !== 'overview') close();
+    });
   })();
 
   route();

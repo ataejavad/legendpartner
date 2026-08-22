@@ -175,10 +175,11 @@
           </div>
         </div>
 
-        <!-- the tile row — live tiles: each turns to a second face carrying the
-             detail behind the figure, and the row can be reordered by the member -->
+        <!-- the tile row and the assistant are one exchange: the tiles stand down
+             while a question is being asked, and come back when it is done -->
+        <div class="dash__aside" id="dash-aside">
         <div class="tiles tiles--live" id="tiles" style="margin-top:2.2rem">
-          <a class="tile" href="#proposed" data-go="proposed" data-tile="proposed" draggable="true" style="--i:0">
+          <a class="tile tile--xl" href="#proposed" data-go="proposed" data-tile="proposed" draggable="true" style="--i:0">
             <span class="tile__act" aria-hidden="true"></span>
             <span class="tile__flip">
               <span class="tile__face">
@@ -191,7 +192,7 @@
               </span>
             </span>
           </a>
-          <a class="tile" href="#requests" data-go="requests" data-tile="requests" draggable="true" style="--i:1">
+          <a class="tile tile--sm" href="#requests" data-go="requests" data-tile="requests" draggable="true" style="--i:1">
             <span class="tile__act" aria-hidden="true"></span>
             <span class="tile__flip">
               <span class="tile__face">
@@ -199,12 +200,12 @@
                 <span class="tile__l">Asked<br>of you</span>
               </span>
               <span class="tile__face tile__face--b" aria-hidden="true">
-                <span class="tile__d">One consent request, and one reflection your advisor is waiting on.</span>
+                <span class="tile__d">One consent request, one reflection.</span>
                 <span class="tile__l">Asked of you</span>
               </span>
             </span>
           </a>
-          <a class="tile" href="#introductions" data-go="introductions" data-tile="introductions" draggable="true" style="--i:2">
+          <a class="tile tile--wide" href="#introductions" data-go="introductions" data-tile="introductions" draggable="true" style="--i:2">
             <span class="tile__flip">
               <span class="tile__face">
                 <span class="tile__n"><span class="tile__num" data-count="1">1</span></span>
@@ -216,7 +217,7 @@
               </span>
             </span>
           </a>
-          <a class="tile" href="#appointments" data-go="appointments" data-tile="appointments" draggable="true" style="--i:3">
+          <a class="tile tile--wide" href="#appointments" data-go="appointments" data-tile="appointments" draggable="true" style="--i:3">
             <span class="tile__flip">
               <span class="tile__face">
                 <span class="tile__n"><span class="tile__num" data-count="28">28</span><span class="tile__suf"> Aug</span></span>
@@ -228,19 +229,19 @@
               </span>
             </span>
           </a>
-          <a class="tile" href="#persona" data-go="persona" data-tile="persona" draggable="true" style="--i:4">
+          <a class="tile tile--sm" href="#persona" data-go="persona" data-tile="persona" draggable="true" style="--i:4">
             <span class="tile__flip">
               <span class="tile__face">
                 <span class="tile__n"><span class="tile__num" data-count="72">72</span><span class="tile__suf">%</span></span>
                 <span class="tile__l">Persona<br>complete</span>
               </span>
               <span class="tile__face tile__face--b" aria-hidden="true">
-                <span class="tile__d">Six sessions in. Around six is where it stops changing much.</span>
+                <span class="tile__d">Six sessions in; it settles around six.</span>
                 <span class="tile__l">Persona complete</span>
               </span>
             </span>
           </a>
-          <a class="tile" href="#reflections" data-go="reflections" data-tile="reflections" draggable="true" style="--i:5">
+          <a class="tile tile--wide" href="#reflections" data-go="reflections" data-tile="reflections" draggable="true" style="--i:5">
             <span class="tile__flip">
               <span class="tile__face">
                 <span class="tile__n"><span class="tile__num" data-count="4.6" data-dec="1">4.6</span></span>
@@ -254,10 +255,11 @@
           </a>
         </div>
         <p class="tiles__hint" id="tiles-hint">
-          The tiles turn to show what sits behind each figure. Drag one to reorder the row, or focus
-          it and hold <kbd>Alt</kbd> with <kbd>←</kbd> / <kbd>→</kbd>. Your order is remembered on this device.
+          The tiles turn to show what sits behind each figure. Drag one to reorder them, or focus one
+          and hold <kbd>Alt</kbd> with <kbd>←</kbd> / <kbd>→</kbd>. Your order is remembered on this device.
           <button type="button" class="tiles__reset" id="tiles-reset" hidden>Reset the order</button>
         </p>
+        </div>
 
         <!-- the assistant, given the middle of the page -->
         <div class="ask-centre">
@@ -265,6 +267,7 @@
             <div class="panel__head">
               <h2>Ask the house</h2>
               <span class="pill pill--rest">Assistant &middot; reads your file only</span>
+              <button type="button" class="ask__close" id="ask-close">Close<span class="ask__esc">Esc</span></button>
             </div>
 
             <div class="thread ask__thread" id="ask-thread">
