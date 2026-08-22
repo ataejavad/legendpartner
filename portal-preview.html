@@ -1106,7 +1106,7 @@ body.portal-body{
 /* 03 — TOPBAR ============================================================== */
 .topbar{
   position:sticky; top:0; z-index:60;
-  height:74px; display:flex; align-items:center; justify-content:space-between; gap:2rem;
+  height:56px; display:flex; align-items:center; justify-content:space-between; gap:2rem;
   padding:0 clamp(1.5rem,3.4vw,4rem);
   background:rgba(11,11,12,.78);
   backdrop-filter:blur(14px) saturate(120%);
@@ -1114,7 +1114,8 @@ body.portal-body{
   border-bottom:1px solid var(--line);
 }
 .topbar h1{
-  font-family:var(--serif); font-weight:300; font-size:1.32rem; letter-spacing:-.01em;
+  font-family:var(--serif); font-weight:300; font-size:1.15rem; letter-spacing:-.01em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 .topbar .meta{
   display:flex; align-items:center; gap:1.6rem;
@@ -1356,8 +1357,11 @@ body.portal-body{
   .rail__nav a i.mk{ display:none; }
   .rail__nav a[aria-current="page"]{ background:none; border-bottom:1px solid var(--champagne); }
   .rail__foot{ display:none; }
-  .topbar{ height:64px; }
-  .topbar h1{ font-size:1.1rem; }
+  .topbar{ height:50px; }
+  .topbar h1{ font-size:1rem; }
+  /* Not enough bar for "Good afternoon, A. Marchand." — the name is the half
+     worth keeping. */
+  .title__salutation{ display:none; }
   .topbar .meta .date{ display:none; }
   .figs div{ border-right:0; border-bottom:1px solid var(--line-soft); }
   .intro-row,.appt,.doc{ grid-template-columns:1fr; gap:.6rem; }
@@ -2917,10 +2921,7 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
 
       <!-- ============================================= OVERVIEW -->
       <section class="view is-active dash" id="view-overview" tabindex="-1" aria-label="Overview">
-        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:1.4rem;flex-wrap:wrap">
-          <div>
-            <p class="lede" id="greeting">Good afternoon.</p>
-          </div>
+        <div style="display:flex;justify-content:flex-end;align-items:center;gap:1.4rem;flex-wrap:wrap">
           <div class="palette-switch" role="group" aria-label="Preview palette">
             <span>Palette</span>
             <button type="button" data-palette-set="legend" aria-pressed="true">Legend</button>
@@ -5686,11 +5687,16 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
   var el = $('#today');
   if (el) el.textContent = today;
 
+  // The greeting is the overview's title in the bar now, so it is held here and
+  // route() decides where it goes. Salutation and name are kept apart because a
+  // narrow bar has room for the name but not for both. The element lookup stays,
+  // so any view that still shows it inline keeps working.
+  var hour = now.getHours();
+  var SALUTATION = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  var MEMBER = 'A. Marchand.';
+  var GREETING = SALUTATION + ', ' + MEMBER;
   var greet = $('#greeting');
-  if (greet) {
-    var h = now.getHours();
-    greet.textContent = (h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening') + ', A. Marchand.';
-  }
+  if (greet) greet.textContent = GREETING;
 
   /* --- Lock screen -------------------------------------------------------- */
   var lock = $('#lock');
@@ -5762,7 +5768,21 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
     }
 
     var title = $('#view-title');
-    if (title) title.textContent = TITLES[name];
+    // On the overview the member is greeted; everywhere else the bar names the
+    // view, which is what carries you back out of a section. The salutation is
+    // its own span so a narrow bar can drop it and keep the name.
+    if (title) {
+      title.textContent = '';
+      if (name === 'overview') {
+        var sal = document.createElement('span');
+        sal.className = 'title__salutation';
+        sal.textContent = SALUTATION + ', ';
+        title.appendChild(sal);
+        title.appendChild(document.createTextNode(MEMBER));
+      } else {
+        title.textContent = TITLES[name];
+      }
+    }
 
     // The nav can scroll on short screens — keep the current item in sight.
     var current = $('#rail-nav a[aria-current="page"]');

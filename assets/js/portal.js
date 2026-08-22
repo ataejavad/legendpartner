@@ -50,11 +50,16 @@
   var el = $('#today');
   if (el) el.textContent = today;
 
+  // The greeting is the overview's title in the bar now, so it is held here and
+  // route() decides where it goes. Salutation and name are kept apart because a
+  // narrow bar has room for the name but not for both. The element lookup stays,
+  // so any view that still shows it inline keeps working.
+  var hour = now.getHours();
+  var SALUTATION = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  var MEMBER = 'A. Marchand.';
+  var GREETING = SALUTATION + ', ' + MEMBER;
   var greet = $('#greeting');
-  if (greet) {
-    var h = now.getHours();
-    greet.textContent = (h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening') + ', A. Marchand.';
-  }
+  if (greet) greet.textContent = GREETING;
 
   /* --- Lock screen -------------------------------------------------------- */
   var lock = $('#lock');
@@ -126,7 +131,21 @@
     }
 
     var title = $('#view-title');
-    if (title) title.textContent = TITLES[name];
+    // On the overview the member is greeted; everywhere else the bar names the
+    // view, which is what carries you back out of a section. The salutation is
+    // its own span so a narrow bar can drop it and keep the name.
+    if (title) {
+      title.textContent = '';
+      if (name === 'overview') {
+        var sal = document.createElement('span');
+        sal.className = 'title__salutation';
+        sal.textContent = SALUTATION + ', ';
+        title.appendChild(sal);
+        title.appendChild(document.createTextNode(MEMBER));
+      } else {
+        title.textContent = TITLES[name];
+      }
+    }
 
     // The nav can scroll on short screens — keep the current item in sight.
     var current = $('#rail-nav a[aria-current="page"]');

@@ -109,7 +109,7 @@ body.portal-body{
 /* 03 — TOPBAR ============================================================== */
 .topbar{
   position:sticky; top:0; z-index:60;
-  height:74px; display:flex; align-items:center; justify-content:space-between; gap:2rem;
+  height:56px; display:flex; align-items:center; justify-content:space-between; gap:2rem;
   padding:0 clamp(1.5rem,3.4vw,4rem);
   background:rgba(11,11,12,.78);
   backdrop-filter:blur(14px) saturate(120%);
@@ -117,7 +117,8 @@ body.portal-body{
   border-bottom:1px solid var(--line);
 }
 .topbar h1{
-  font-family:var(--serif); font-weight:300; font-size:1.32rem; letter-spacing:-.01em;
+  font-family:var(--serif); font-weight:300; font-size:1.15rem; letter-spacing:-.01em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 .topbar .meta{
   display:flex; align-items:center; gap:1.6rem;
@@ -359,8 +360,11 @@ body.portal-body{
   .rail__nav a i.mk{ display:none; }
   .rail__nav a[aria-current="page"]{ background:none; border-bottom:1px solid var(--champagne); }
   .rail__foot{ display:none; }
-  .topbar{ height:64px; }
-  .topbar h1{ font-size:1.1rem; }
+  .topbar{ height:50px; }
+  .topbar h1{ font-size:1rem; }
+  /* Not enough bar for "Good afternoon, A. Marchand." — the name is the half
+     worth keeping. */
+  .title__salutation{ display:none; }
   .topbar .meta .date{ display:none; }
   .figs div{ border-right:0; border-bottom:1px solid var(--line-soft); }
   .intro-row,.appt,.doc{ grid-template-columns:1fr; gap:.6rem; }
