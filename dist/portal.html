@@ -90,37 +90,53 @@
       </button>
       </div>
 
-      <div class="rail__member">
-        <p class="name">A. Marchand</p>
-        <span class="ref">Signature · SG-2411</span>
-      </div>
-
-      <nav class="rail__nav" id="rail-nav" aria-label="Portal">
+            <nav class="rail__nav" id="rail-nav" aria-label="Portal">
         <a class="cat cat--home" href="#overview" data-view="overview" data-label="Overview">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>
           <span>Overview<span class="cat__n">What is waiting, at a glance</span></span>
         </a>
         <hr class="rail__rule">
-        <a class="cat" href="#long" data-view="long" data-label="Long partner">
-          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"/></svg></span>
-          <span>Long partner<span class="cat__n">The search, and all of it</span></span>
-          <span class="count">3</span>
+        <a class="cat" href="#find" data-view="find" data-label="Find a partner"
+           aria-expanded="false" aria-controls="rail-sub-find">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.6" cy="10.6" r="6.9"/><path d="m20 20-4.5-4.5"/></svg></span>
+          <span>Find a partner<span class="cat__n">What you are looking for</span></span>
         </a>
-        <a class="cat" href="#short" data-view="short" data-label="Short partner">
-          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><polyline points="12 6.6 12 12 15.8 14"/></svg></span>
-          <span>Short partner<span class="cat__n">Companionship, on stated terms</span></span>
-        </a>
+        <div class="rail__sub" id="rail-sub-find" data-branch="find" hidden>
+          <a class="sub" href="#find-long" data-view="find-long">Long-term relationship</a>
+          <a class="sub" href="#find-short" data-view="find-short">Short-term relationship</a>
+          <a class="sub" href="#find-casual" data-view="find-casual">Casual dating</a>
+        </div>
         <a class="cat" href="#events" data-view="events" data-label="Party and event">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/></svg></span>
           <span>Party &amp; event<span class="cat__n">Gatherings of the house</span></span>
         </a>
+        <a class="cat" href="#occasions" data-view="occasions" data-label="Events"
+           aria-expanded="false" aria-controls="rail-sub-occasions">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.2" y="5" width="17.6" height="15.6" rx="2"/><path d="M3.2 9.6h17.6"/><path d="M8 3.4v3.2"/><path d="M16 3.4v3.2"/></svg></span>
+          <span>Events &amp; Companionship<span class="cat__n">Where you are seen, and with whom</span></span>
+        </a>
+        <div class="rail__sub" id="rail-sub-occasions" data-branch="occasions" hidden>
+          <a class="sub" href="#occasions-parties" data-view="occasions-parties">Parties</a>
+          <a class="sub" href="#occasions-events" data-view="occasions-events">Events</a>
+          <a class="sub" href="#occasions-business" data-view="occasions-business">Business events</a>
+          <a class="sub" href="#occasions-travel" data-view="occasions-travel">Travel companionship</a>
+          <a class="sub" href="#occasions-social" data-view="occasions-social">Social occasions</a>
+        </div>
         <a class="cat" href="#management" data-view="management" data-label="Relationship management">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="M16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88Z"/></svg></span>
           <span>Relationship management<span class="cat__n">Formation, counsel, continuity</span></span>
         </a>
-        <a class="cat" href="#me" data-view="me" data-label="Profile">
+        <a class="cat" href="#verified" data-view="verified" data-label="Legend Verified">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.9 20 6v6.1c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6Z"/><polyline points="8.8 12 11.2 14.4 15.4 10.2"/></svg></span>
+          <span>Legend Verified<span class="cat__n">Who has been checked, and how</span></span>
+        </a>
+        <a class="cat" href="#academy" data-view="academy" data-label="Legend Academy">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 8.4 12 4.2l9.2 4.2L12 12.6Z"/><path d="M6.6 10.5v4.9c0 1.6 2.4 2.9 5.4 2.9s5.4-1.3 5.4-2.9v-4.9"/><path d="M21.2 8.4v5.2"/></svg></span>
+          <span>Legend Academy<span class="cat__n">What the house has learned, taught</span></span>
+        </a>
+        <a class="cat" href="#me" data-view="me" data-label="Profile &amp; Persona">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4.6"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></span>
-          <span>Profile<span class="cat__n">Who you are, as we hold it</span></span>
+          <span>Profile &amp; Persona<span class="cat__n">Who you are, as we hold it</span></span>
         </a>
         <a class="cat" href="#settings" data-view="settings" data-label="Settings">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4h-7"/><path d="M10 4H3"/><path d="M21 12h-9"/><path d="M8 12H3"/><path d="M21 20h-5"/><path d="M12 20H3"/><path d="M14 2v4"/><path d="M8 10v4"/><path d="M16 18v4"/></svg></span>
@@ -149,25 +165,18 @@
       <div class="meta">
         <span class="date" id="today"></span>
         <span class="confidential">Confidential</span>
+        <span class="topbar__member">
+          <span class="name">A. Marchand</span>
+          <span class="ref">Signature &middot; SG-2411</span>
+        </span>
       </div>
     </header>
-
-    <p class="preview-note">
-      <span><b>Preview</b> &nbsp;All names, introductions and correspondence below are illustrative sample content.</span>
-      <button type="button" id="empty-toggle">See it as a new member</button>
-    </p>
 
     <main class="canvas" id="canvas">
 
       <!-- ============================================= OVERVIEW -->
       <section class="view is-active dash" id="view-overview" tabindex="-1" aria-label="Overview">
-        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:1.4rem;flex-wrap:wrap">
-          <div>
-            <p class="lede" id="greeting">Good afternoon.</p>
-            <p class="sub" style="margin-top:.6rem">
-              Two things want an answer from you. Everything else is running.
-            </p>
-          </div>
+        <div style="display:flex;justify-content:flex-end;align-items:center;gap:1.4rem;flex-wrap:wrap">
           <div class="palette-switch" role="group" aria-label="Preview palette">
             <span>Palette</span>
             <button type="button" data-palette-set="legend" aria-pressed="true">Legend</button>
@@ -175,229 +184,1038 @@
           </div>
         </div>
 
-        <!-- the tile row -->
-        <div class="tiles" style="margin-top:2.2rem">
-          <a class="tile" href="#proposed" data-go="proposed">
+        <!-- The mosaic. Eight tiles around the assistant, which sits in the
+             middle of the grid rather than beneath it. A tile carries a figure,
+             a photograph, a film, or any other markup: the face is a container,
+             not a fixed shape. DOM order is slot order, so a dragged tile takes
+             the geometry of the slot it lands in. -->
+        <div class="mosaic tiles tiles--live" id="tiles">
+
+          <a class="tile" href="#proposed" data-go="proposed" data-tile="proposed" draggable="true" style="--i:0">
             <span class="tile__act" aria-hidden="true"></span>
-            <span class="tile__n">2</span>
-            <span class="tile__l">Proposed<br>for you</span>
+            <span class="tile__flip">
+              <span class="tile__face">
+                <span class="tile__n"><span class="tile__num" data-count="2">2</span></span>
+                <span class="tile__l">Proposed<br>for you</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">Two cases are open. The older has been waiting nine days.</span>
+                <span class="tile__l">Proposed for you</span>
+              </span>
+            </span>
           </a>
-          <a class="tile" href="#requests" data-go="requests">
+
+          <a class="tile" href="#requests" data-go="requests" data-tile="requests" draggable="true" style="--i:1">
             <span class="tile__act" aria-hidden="true"></span>
-            <span class="tile__n">2</span>
-            <span class="tile__l">Asked<br>of you</span>
+            <span class="tile__flip">
+              <span class="tile__face">
+                <span class="tile__n"><span class="tile__num" data-count="2">2</span></span>
+                <span class="tile__l">Asked<br>of you</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">One consent request, one reflection.</span>
+                <span class="tile__l">Asked of you</span>
+              </span>
+            </span>
           </a>
-          <a class="tile" href="#introductions" data-go="introductions">
-            <span class="tile__n">1</span>
-            <span class="tile__l">Introduction<br>awaiting</span>
+
+          <a class="tile" href="#appointments" data-go="appointments" data-tile="appointments" draggable="true" style="--i:2">
+            <span class="tile__flip">
+              <span class="tile__face">
+                <span class="tile__n"><span class="tile__num" data-count="28">28</span><span class="tile__suf"> Aug</span></span>
+                <span class="tile__l">Next<br>appointment</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">Friday, 20:00 · Marylebone. The table is held in our name.</span>
+                <span class="tile__l">Next appointment</span>
+              </span>
+            </span>
           </a>
-          <a class="tile" href="#appointments" data-go="appointments">
-            <span class="tile__n">28<span style="font-size:.42em;letter-spacing:.06em"> Aug</span></span>
-            <span class="tile__l">Next<br>appointment</span>
+
+          <!-- a photograph, filling the tile -->
+          <a class="tile tile--media" href="#parties" data-go="parties" data-tile="salon" draggable="true" style="--i:3">
+            <img class="tile__img" src="assets/img/salon.svg" alt="A room at dusk, lit from one side" loading="lazy">
+            <span class="tile__flip">
+              <span class="tile__face tile__face--over">
+                <span class="tile__l">The house<br>Marylebone</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">Members are invited by their advisor. The next dinner is in September.</span>
+                <span class="tile__l">Party &amp; event</span>
+              </span>
+            </span>
           </a>
-          <a class="tile" href="#persona" data-go="persona">
-            <span class="tile__n">72<span style="font-size:.42em">%</span></span>
-            <span class="tile__l">Persona<br>complete</span>
+
+          <!-- the assistant, in the middle of the mosaic -->
+          <div class="mosaic__ask" id="ask-slot">
+            <div class="panel ask ask--centre">
+              <div class="panel__head">
+                <h2>Ask the house</h2>
+                <span class="pill pill--rest">Assistant &middot; reads your file only</span>
+                <button type="button" class="ask__close" id="ask-close">Close<span class="ask__esc">Esc</span></button>
+              </div>
+
+              <div class="thread ask__thread" id="ask-thread">
+                <div class="msg msg--ai">
+                  <p class="who">Legend &middot; Assistant</p>
+                  <div class="bubble">
+                    Good afternoon. I can tell you where anything on your engagement stands &mdash;
+                    what is waiting on you, what has been arranged, what your advisor has written.
+                    What I cannot tell you is anything about another member that has not been
+                    disclosed to you yet.
+                  </div>
+                </div>
+              </div>
+
+              <div class="ask__chips" id="ask-chips" role="group" aria-label="Suggested questions">
+                <button type="button" data-ask="What is waiting on me?">What is waiting on me?</button>
+                <button type="button" data-ask="When is my next appointment?">Next appointment</button>
+                <button type="button" data-ask="Who is the person in Introduction No. 07?">Who is No. 07?</button>
+                <button type="button" data-ask="What has my advisor written since we last spoke?">From my advisor</button>
+                <button type="button" data-ask="What is my standing out of five?">My standing</button>
+              </div>
+
+              <form class="composer" id="ask-form">
+                <textarea id="ask-input" rows="1" placeholder="Ask about your engagement" aria-label="Ask the assistant"></textarea>
+                <button class="btn btn--quiet" type="submit">Send</button>
+              </form>
+
+              <div class="panel__foot">
+                <p class="quiet" style="margin:0">
+                  In this preview the replies are written rules rather than a language model, and
+                  nothing you type leaves this page. In service, what you ask sits on your file and
+                  your advisor can read it &mdash; we would rather tell you that than let you assume
+                  otherwise.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- a film, filling the tile -->
+          <a class="tile tile--media" href="#parties" data-go="parties" data-tile="film" draggable="true" style="--i:4">
+            <video class="tile__video" src="assets/video/house.webm" poster="assets/img/house-poster.svg"
+                   autoplay muted loop playsinline preload="metadata"
+                   aria-label="The last gathering, filmed at dusk"></video>
+            <span class="tile__flip">
+              <span class="tile__face tile__face--over">
+                <span class="tile__l">The last<br>gathering</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">Filmed at dusk, in the room it was held in. Fourteen members.</span>
+                <span class="tile__l">The last gathering</span>
+              </span>
+            </span>
           </a>
-          <a class="tile" href="#reflections" data-go="reflections">
-            <span class="tile__n">4.6</span>
-            <span class="tile__l">Your standing<br>out of five</span>
+
+          <a class="tile" href="#introductions" data-go="introductions" data-tile="introductions" draggable="true" style="--i:5">
+            <span class="tile__flip">
+              <span class="tile__face">
+                <span class="tile__n"><span class="tile__num" data-count="1">1</span></span>
+                <span class="tile__l">Introduction<br>awaiting</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">No. 07 — a founder in Zurich, met twice before the case was written.</span>
+                <span class="tile__l">Introduction awaiting</span>
+              </span>
+            </span>
+          </a>
+
+          <a class="tile" href="#persona" data-go="persona" data-tile="persona" draggable="true" style="--i:6">
+            <span class="tile__flip">
+              <span class="tile__face">
+                <span class="tile__n"><span class="tile__num" data-count="72">72</span><span class="tile__suf">%</span></span>
+                <span class="tile__l">Persona<br>complete</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">Six sessions in; it settles around six.</span>
+                <span class="tile__l">Persona complete</span>
+              </span>
+            </span>
+          </a>
+
+          <a class="tile" href="#reflections" data-go="reflections" data-tile="reflections" draggable="true" style="--i:7">
+            <span class="tile__flip">
+              <span class="tile__face">
+                <span class="tile__n"><span class="tile__num" data-count="4.6" data-dec="1">4.6</span></span>
+                <span class="tile__l">Your standing<br>out of five</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">Across eleven meetings. Never shown to anyone you meet.</span>
+                <span class="tile__l">Your standing</span>
+              </span>
+            </span>
           </a>
         </div>
 
-        <!-- the card grid -->
-        <div class="dash-grid">
 
-          <div class="panel span-2 ask">
-            <div class="panel__head">
-              <h2>Ask the house</h2>
-              <span class="pill pill--rest">Assistant &middot; reads your file only</span>
+      </section>
+
+
+      <!-- ============================================= EVENTS -->
+      <section class="view" id="view-occasions" tabindex="-1" aria-label="Events">
+        <p class="lede">Events</p>
+        <p class="sub">
+          Where you are seen, and with whom. Five kinds of occasion, each arranged on terms agreed
+          in advance by both people — so nobody improvises an answer in front of a room.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>The five</h2></div>
+            <div class="panel__body">
+              <div class="convo">
+                <div class="convo__item"><span class="no">01</span><div>
+                  <p class="nm">Parties</p>
+                  <p class="ds">The house's own gatherings, and private ones you are invited to. Small, unpublished, and never photographed.</p>
+                  <a class="btn" href="#occasions-parties" data-go="occasions-parties"><span>Open</span><i class="arrow"></i></a>
+                </div></div>
+                <div class="convo__item"><span class="no">02</span><div>
+                  <p class="nm">Events</p>
+                  <p class="ds">Openings, dinners, benefits, a box at something. An evening with a host, a guest list and an hour it ends.</p>
+                  <a class="btn" href="#occasions-events" data-go="occasions-events"><span>Open</span><i class="arrow"></i></a>
+                </div></div>
+                <div class="convo__item"><span class="no">03</span><div>
+                  <p class="nm">Business events</p>
+                  <p class="ds">Where the evening is work. Someone briefed on the room, who will be useful in it and will not become the subject of it.</p>
+                  <a class="btn" href="#occasions-business" data-go="occasions-business"><span>Open</span><i class="arrow"></i></a>
+                </div></div>
+                <div class="convo__item"><span class="no">04</span><div>
+                  <p class="nm">Travel companionship</p>
+                  <p class="ds">Days rather than hours, and a different set of questions. Arranged only where both people have met beforehand.</p>
+                  <a class="btn" href="#occasions-travel" data-go="occasions-travel"><span>Open</span><i class="arrow"></i></a>
+                </div></div>
+                <div class="convo__item"><span class="no">05</span><div>
+                  <p class="nm">Social occasions</p>
+                  <p class="ds">A wedding, a family lunch, a reunion. The rooms where the questions are personal and the answers should be settled in advance.</p>
+                  <a class="btn" href="#occasions-social" data-go="occasions-social"><span>Open</span><i class="arrow"></i></a>
+                </div></div>
+              </div>
             </div>
+          </div>
 
-            <div class="thread ask__thread" id="ask-thread">
-              <div class="msg msg--ai">
-                <p class="who">Legend &middot; Assistant</p>
-                <div class="bubble">
-                  Good afternoon. I can tell you where anything on your engagement stands &mdash;
-                  what is waiting on you, what has been arranged, what your advisor has written.
-                  What I cannot tell you is anything about another member that has not been
-                  disclosed to you yet.
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>True of all five</h2></div>
+              <div class="panel__body">
+                <ul class="includes">
+                  <li>The terms of the occasion are written and agreed by both people before it, not during it.</li>
+                  <li>What is said about how you know each other is decided by you, and both are told the same words.</li>
+                  <li>No photographs, by standing agreement, unless you ask for them.</li>
+                  <li>An occasion ends the moment either person says it does, and nothing is asked afterwards.</li>
+                </ul>
+                <div class="note-inline">
+                  Company for an occasion is company for an occasion. Both people are told so in the
+                  same sentence, and neither is led to expect anything else.
                 </div>
               </div>
             </div>
-
-            <div class="ask__chips" id="ask-chips" role="group" aria-label="Suggested questions">
-              <button type="button" data-ask="What is waiting on me?">What is waiting on me?</button>
-              <button type="button" data-ask="When is my next appointment?">Next appointment</button>
-              <button type="button" data-ask="Who is the person in Introduction No. 07?">Who is No. 07?</button>
-              <button type="button" data-ask="What has my advisor written since we last spoke?">From my advisor</button>
-              <button type="button" data-ask="What is my standing out of five?">My standing</button>
-            </div>
-
-            <form class="composer" id="ask-form">
-              <textarea id="ask-input" rows="1" placeholder="Ask about your engagement" aria-label="Ask the assistant"></textarea>
-              <button class="btn btn--quiet" type="submit">Send</button>
-            </form>
-
-            <div class="panel__foot">
-              <p class="quiet" style="margin:0">
-                In this preview the replies are written rules rather than a language model, and
-                nothing you type leaves this page. In service, what you ask sits on your file and
-                your advisor can read it &mdash; we would rather tell you that than let you assume
-                otherwise.
-              </p>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel__head"><h2>What it will and will not do</h2></div>
-            <div class="panel__body">
-              <p class="ask__lbl">It will</p>
-              <ul class="includes">
-                <li>Answer about your own file &mdash; appointments, cases, the brief, fees, whatever is outstanding.</li>
-                <li>Draft a note to your advisor and leave it for you to send.</li>
-                <li>Say it does not know, and hand the question to a person by name.</li>
-              </ul>
-              <p class="ask__lbl">It will not</p>
-              <ul class="includes includes--not">
-                <li>Disclose a name, profession or photograph that is still withheld from you.</li>
-                <li>Accept, decline, arrange or cancel anything on your behalf.</li>
-                <li>Decide who is brought to you. That is an advisor's judgment, with their name on it.</li>
-              </ul>
-              <div class="note-inline">
-                It is not your persona. The persona is the model of you and speaks to other members
-                with your permission; this answers to you and speaks to nobody.
+            <div class="panel">
+              <div class="panel__head"><h2>Also here</h2></div>
+              <div class="panel__body">
+                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                  The five above are arrangements for an occasion already in your diary. If what you
+                  want is the companion rather than the occasion, that is here too.
+                </p>
+              </div>
+              <div class="panel__foot">
+                <a class="btn" href="#find-companion" data-go="find-companion"><span>Event &amp; party companion</span><i class="arrow"></i></a>
               </div>
             </div>
-            <div class="panel__foot">
-              <a class="btn" href="#persona" data-go="persona"><span>Your persona</span><i class="arrow"></i></a>
-            </div>
           </div>
+        </div>
+      </section>
 
-
-          <div class="panel span-2">
-            <div class="panel__head">
-              <h2>Awaiting your consideration</h2>
-              <span class="pill pill--action">Action required</span>
-            </div>
-            <div class="panel__body">
-              <p style="font-family:var(--serif);font-size:1.5rem;line-height:1.35;color:#EDEAE3;margin:0">
-                Introduction No. 07 — a founder in Zurich, recently returned from a decade in Singapore.
-              </p>
-              <p style="color:var(--fg-soft);font-size:.92rem">
-                Your advisor met them twice before writing the case. Their name, profession and
-                photograph remain withheld until you accept, and they have not been told who you are.
-              </p>
-            </div>
-            <div class="panel__foot">
-              <a class="btn" href="#introductions" data-go="introductions"><span>Read the case</span><i class="arrow"></i></a>
-            </div>
-          </div>
-
+      <!-- ============================================= EVENTS — PARTIES -->
+      <section class="view" id="view-occasions-parties" tabindex="-1" aria-label="Parties">
+        <p class="lede">Parties</p>
+        <p class="sub">
+          The house's own gatherings, and private ones members are invited to. Small by design:
+          fourteen to thirty people, unpublished, and never photographed.
+        </p>
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
           <div class="panel">
-            <div class="panel__head"><h2>Next appointment</h2></div>
-            <div class="panel__body">
-              <p style="font-family:var(--serif);font-size:2rem;line-height:1;color:#EDEAE3">Friday 28 August</p>
-              <p style="font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--fg-faint)">20:00 · Marylebone, London</p>
-              <p style="color:var(--fg-soft);font-size:.92rem">
-                Dinner arranged following Introduction No. 06. The table is held in our name.
-              </p>
-            </div>
-            <div class="panel__foot">
-              <a class="btn" href="#appointments" data-go="appointments"><span>All appointments</span><i class="arrow"></i></a>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel__head"><h2>The search, month by month</h2></div>
-            <div class="panel__body">
-              <div class="chart" id="chart-pipeline"></div>
-              <p class="quiet" style="margin-top:.9rem">Twenty-one assessed, four brought to you. The gap is the work.</p>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel__head"><h2>Your engagement</h2></div>
+            <div class="panel__head"><h2>How an invitation works</h2></div>
             <div class="panel__body">
               <ul class="spine">
-                <li class="done"><span class="no">01</span><span>Private consultation</span></li>
-                <li class="done"><span class="no">02</span><span>Personal profile</span></li>
-                <li class="done"><span class="no">03</span><span>Curation</span></li>
-                <li class="now"><span class="no">04</span><span>Assessment</span></li>
-                <li><span class="no">05</span><span>Introduction</span></li>
-                <li><span class="no">06</span><span>Ongoing advisory</span></li>
+                <li><span class="no">01</span><span>Your advisor proposes you to the host, not the other way round</span></li>
+                <li><span class="no">02</span><span>You are told who else is expected, in general terms, before you answer</span></li>
+                <li><span class="no">03</span><span>You accept, decline, or ask to bring someone — all three are ordinary</span></li>
+                <li><span class="no">04</span><span>Nothing about your attendance is recorded anywhere another member can see</span></li>
               </ul>
             </div>
-            <div class="panel__foot">
-              <p class="quiet" style="margin:0">Signature · commenced 14 March 2026 · no fixed term</p>
+          </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2><span class="pill pill--rest">Next: September</span></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Size</dt><dd>Fourteen to thirty</dd>
+                  <dt>Notice</dt><dd>Three to six weeks</dd>
+                  <dt>Photographs</dt><dd>None, by standing agreement</dd>
+                  <dt>Declining</dt><dd>Without a reason, and without a mark on your file</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <a class="btn" href="#parties" data-go="parties"><span>Private gatherings</span><i class="arrow"></i></a>
+              </div>
             </div>
           </div>
+        </div>
+      </section>
 
+      <!-- ============================================= EVENTS — EVENTS -->
+      <section class="view" id="view-occasions-events" tabindex="-1" aria-label="Events">
+        <p class="lede">Events</p>
+        <p class="sub">
+          An opening, a benefit, a dinner, a box at something. An evening with a host, a guest list,
+          and an hour at which it ends.
+        </p>
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
           <div class="panel">
-            <div class="panel__head">
-              <h2>From your advisor</h2>
-              <span class="pill pill--rest">2 days ago</span>
-            </div>
+            <div class="panel__head"><h2>What we agree beforehand</h2></div>
             <div class="panel__body">
-              <p style="font-family:var(--serif);font-size:1.18rem;line-height:1.6;font-style:italic;color:#EDEAE3">
-                &ldquo;I would rather you read the case twice and take the week than answer me tonight.
-                There is nothing being lost by considering it properly.&rdquo;
-              </p>
-              <p class="quiet" style="margin-top:1rem">C. Vasseur · London</p>
-            </div>
-            <div class="panel__foot">
-              <a class="btn" href="#messages" data-go="messages"><span>Open correspondence</span><i class="arrow"></i></a>
+              <ul class="includes">
+                <li>The occasion, the host, and who else will be in the room.</li>
+                <li>Dress, and whether the evening has a form anyone is expected to know.</li>
+                <li>What is said about how you know each other, in the same words to both of you.</li>
+                <li>The hours, and who leaves first.</li>
+              </ul>
+              <div class="note-inline">
+                Written and agreed before the evening. Neither of you improvises an answer to a
+                question in front of other people.
+              </div>
             </div>
           </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Notice</dt><dd>Ten days is comfortable; three is possible</dd>
+                  <dt>Languages</dt><dd>Stated per companion, verified</dd>
+                  <dt>Afterwards</dt><dd>Nothing is asked of either of you</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will telephone for the details of the evening rather than ask you to write them out.">Describe the evening</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
+      <!-- ============================================= EVENTS — BUSINESS -->
+      <section class="view" id="view-occasions-business" tabindex="-1" aria-label="Business events">
+        <p class="lede">Business events</p>
+        <p class="sub">
+          Where the evening is work. Someone briefed on the room, who will be useful in it and will
+          not become the subject of it.
+        </p>
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
           <div class="panel">
-            <div class="panel__head"><h2>Outstanding</h2><span class="pill pill--action">1 reflection</span></div>
+            <div class="panel__head"><h2>The brief we take</h2></div>
             <div class="panel__body">
-              <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
-                Your advisor is waiting on your account of the 28th. It shapes what comes next, and
-                it is the single most useful thing a member does.
-              </p>
-            </div>
-            <div class="panel__foot">
-              <a class="btn" href="#reflections" data-go="reflections"><span>Record it</span><i class="arrow"></i></a>
+              <ul class="spine">
+                <li><span class="no">01</span><span>The industry, the company, and what the evening is for</span></li>
+                <li><span class="no">02</span><span>Who will be there that matters, and what they should come away thinking</span></li>
+                <li><span class="no">03</span><span>Subjects to carry, and subjects to leave alone</span></li>
+                <li><span class="no">04</span><span>Whether anyone in the room knows you personally</span></li>
+              </ul>
+              <div class="note-inline">
+                A companion at a business evening is briefed, not scripted. They will not claim an
+                expertise they do not have, and they will not pretend to be a colleague.
+              </div>
             </div>
           </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Notice</dt><dd>Two weeks, for a proper briefing</dd>
+                  <dt>Confidentiality</dt><dd>Signed per engagement, by the companion</dd>
+                  <dt>Languages</dt><dd>Stated and verified</dd>
+                  <dt>Afterwards</dt><dd>No account of the evening is written</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will ask for the brief before proposing anyone, and will say plainly if the evening is not one we can help with.">Give the brief</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
+      <!-- ============================================= EVENTS — TRAVEL -->
+      <section class="view" id="view-occasions-travel" tabindex="-1" aria-label="Travel companionship">
+        <p class="lede">Travel companionship</p>
+        <p class="sub">
+          Days rather than hours, and a different set of questions. Arranged only where both people
+          have already met, at least once, somewhere neither of them had to travel to.
+        </p>
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
           <div class="panel">
-            <div class="panel__head"><h2>Introductions by outcome</h2></div>
+            <div class="panel__head"><h2>Settled before departure</h2></div>
             <div class="panel__body">
-              <div class="chart" id="chart-outcomes"></div>
+              <ul class="includes">
+                <li>Separate rooms unless both people have said otherwise, in writing, in advance.</li>
+                <li>Who holds the tickets, and that either person can leave at any point without discussion.</li>
+                <li>How much of the day is together and how much is not.</li>
+                <li>A named person at the house reachable by both, for the whole of it.</li>
+              </ul>
+              <div class="note-inline">
+                We do not arrange a first meeting abroad. If you have not met, we will introduce you
+                at home first and take the trip as a second question.
+              </div>
             </div>
           </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Prerequisite</dt><dd>One prior meeting, at minimum</dd>
+                  <dt>Notice</dt><dd>Three weeks</dd>
+                  <dt>Documents</dt><dd>Verified by us, never held by us</dd>
+                  <dt>Ending it</dt><dd>Either person, at any point, return arranged by the house</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will check first whether you have met, and will propose a meeting at home if you have not.">Propose a trip</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
+      <!-- ============================================= EVENTS — SOCIAL -->
+      <section class="view" id="view-occasions-social" tabindex="-1" aria-label="Social occasions">
+        <p class="lede">Social occasions</p>
+        <p class="sub">
+          A wedding, a family lunch, a reunion. The rooms where the questions are personal, asked by
+          people who have known you a long time, and the answers should be settled in advance.
+        </p>
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
           <div class="panel">
-            <div class="panel__head"><h2>Persona, across sessions</h2></div>
+            <div class="panel__head"><h2>The difficult part, handled first</h2></div>
             <div class="panel__body">
-              <div class="chart" id="chart-persona"></div>
-              <p class="quiet" style="margin-top:.9rem">Around six sessions is where it stops changing much.</p>
+              <ul class="spine">
+                <li><span class="no">01</span><span>Who will ask, and what they will ask — usually two or three people you can name</span></li>
+                <li><span class="no">02</span><span>The account of how you met, agreed by both and true enough to repeat</span></li>
+                <li><span class="no">03</span><span>What is not said, and what to do if someone presses</span></li>
+                <li><span class="no">04</span><span>Whether anyone in the family already knows</span></li>
+              </ul>
+              <div class="note-inline">
+                We will not build an account that requires either of you to lie to someone's face.
+                Where the honest answer is awkward, we would rather help you say the awkward thing
+                well.
+              </div>
             </div>
           </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Notice</dt><dd>Three weeks, and a conversation before</dd>
+                  <dt>Photographs</dt><dd>Yours to decide, agreed by both</dd>
+                  <dt>Family</dt><dd>Never contacted by us, for any reason</dd>
+                  <dt>Afterwards</dt><dd>Nothing is asked of either of you</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will want the conversation before the arrangement, and will be honest if she thinks the occasion is one to attend alone.">Talk it through</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
+
+      <!-- ============================================= LEGEND VERIFIED -->
+      <section class="view" id="view-verified" tabindex="-1" aria-label="Legend Verified">
+        <p class="lede">Legend Verified</p>
+        <p class="sub">
+          Nobody reaches you unchecked. Verification is done by a person, in person, and an advisor
+          puts their name to it — which is the only reason it is worth anything.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
           <div class="panel">
-            <div class="panel__head"><h2>Your standing, meeting by meeting</h2></div>
+            <div class="panel__head"><h2>What is checked</h2></div>
             <div class="panel__body">
-              <div class="chart" id="chart-standing"></div>
-              <p class="quiet" style="margin-top:.9rem">Never shown to anyone you meet, and never attributed.</p>
+              <div class="convo">
+                <div class="convo__item"><span class="no">01</span><div>
+                  <p class="nm">Identity</p>
+                  <p class="ds">Government documents seen in person by an advisor — never remotely, and never from a scan. We verify them and do not keep them.</p>
+                </div></div>
+                <div class="convo__item"><span class="no">02</span><div>
+                  <p class="nm">Marital standing</p>
+                  <p class="ds">Asked directly, and checked where it can be. A member who is attached and has not said so is removed, not warned.</p>
+                </div></div>
+                <div class="convo__item"><span class="no">03</span><div>
+                  <p class="nm">Profession and means</p>
+                  <p class="ds">Confirmed to the level a member has agreed to disclose. We state what has been confirmed and what has only been claimed.</p>
+                </div></div>
+                <div class="convo__item"><span class="no">04</span><div>
+                  <p class="nm">Conduct</p>
+                  <p class="ds">Two references, and what previous introductions reported. Recorded as fact, not as a rating anyone can see.</p>
+                </div></div>
+                <div class="convo__item"><span class="no">05</span><div>
+                  <p class="nm">The meeting itself</p>
+                  <p class="ds">Twice, in person, before anyone is proposed to a member. The part no document replaces.</p>
+                </div></div>
+              </div>
             </div>
           </div>
 
-          <div class="panel span-2">
-            <div class="panel__head"><h2>The work behind it</h2><span class="pill pill--rest">Eleven months</span></div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Your own mark</h2><span class="pill pill--rest">Not yet issued</span></div>
+              <div class="panel__body">
+                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                  A mark is issued only after an advisor has seen your documents in person. Ask for
+                  one at your consultation, or request it here and an appointment is arranged.
+                </p>
+                <dl class="kv" style="margin-top:1.2rem">
+                  <dt>Issued</dt><dd>In person, same day</dd>
+                  <dt>Renewed</dt><dd>Annually, in person</dd>
+                  <dt>Shown to</dt><dd>Only those you are introduced to</dd>
+                  <dt>Withdrawn</dt><dd>Immediately, if anything checked proves untrue</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <a class="btn" href="#credential" data-go="credential"><span>Your verification mark</span><i class="arrow"></i></a>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>What verification is not</h2></div>
+              <div class="panel__body">
+                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                  It is not a score, and it is not a promise about how someone will behave. It says
+                  that what they told us was checked, by whom, and on what date. Judgment about a
+                  person remains an advisor's, with their name on it.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= LEGEND ACADEMY -->
+      <section class="view" id="view-academy" tabindex="-1" aria-label="Legend Academy">
+        <p class="lede">Legend Academy</p>
+        <p class="sub">
+          What the house has learned across eleven hundred introductions, taught properly. Private
+          sessions and small rooms — never a course you watch alone.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>What is taught</h2></div>
             <div class="panel__body">
-              <div class="figs" style="margin:0">
-                <div><span class="n">21</span><span class="l">Candidates assessed</span></div>
-                <div><span class="n">04</span><span class="l">Brought to you</span></div>
-                <div><span class="n">02</span><span class="l">Met in person</span></div>
-                <div><span class="n">17</span><span class="l">Assessed, not brought to you</span></div>
+              <div class="convo">
+                <div class="convo__item"><span class="no">01</span><div>
+                  <p class="nm">Reading a first meeting</p>
+                  <p class="ds">What is worth noticing in the first hour, and what almost everyone mistakes for a signal and should not.</p>
+                </div></div>
+                <div class="convo__item"><span class="no">02</span><div>
+                  <p class="nm">The postponed conversations</p>
+                  <p class="ds">Money, children, geography, family. How to raise each of them early, which is the only time it is easy.</p>
+                </div></div>
+                <div class="convo__item"><span class="no">03</span><div>
+                  <p class="nm">Presence</p>
+                  <p class="ds">How to be in a room. Delivered privately, and honestly, by someone who will tell you the thing your friends will not.</p>
+                </div></div>
+                <div class="convo__item"><span class="no">04</span><div>
+                  <p class="nm">Ending things well</p>
+                  <p class="ds">How to say no, and how to be told no. The skill that decides what people say about you afterwards.</p>
+                </div></div>
               </div>
               <div class="note-inline">
-                The last figure is the one that matters. Seventeen people were considered properly
-                and did not reach you — that is what the mandate is actually buying.
+                Nothing taught here is used to assess you. Sessions do not enter your file, your
+                brief or your persona, and no advisor working on an introduction reads them.
+              </div>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>How it is held</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Form</dt><dd>Private sessions, or rooms of six</dd>
+                  <dt>Length</dt><dd>Ninety minutes</dd>
+                  <dt>Where</dt><dd>London, New York, Geneva; or your own house</dd>
+                  <dt>Included</dt><dd>Two sessions a year under a Signature mandate</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will suggest which session is worth your time first, and will say if she thinks none of them are.">Ask about a session</button>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Who teaches</h2></div>
+              <div class="panel__body">
+                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                  Advisors of the house, and a small number of people from outside it — a
+                  negotiator, a former diplomat, a psychotherapist. Named to you before you agree
+                  to a session, never after.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= FIND A PARTNER -->
+      <section class="view" id="view-find" tabindex="-1" aria-label="Find a partner">
+        <p class="lede">Find a partner</p>
+        <p class="sub">
+          What you are looking for decides how we look. Four tracks, retained singly, and you may
+          be on more than one — or move between them without explaining yourself.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>The four tracks</h2></div>
+            <div class="panel__body">
+              <div class="convo">
+                <div class="convo__item">
+                  <span class="no">01</span>
+                  <div>
+                    <p class="nm">Long-term relationship</p>
+                    <p class="ds">The full search: what a partnership must be for this life, then the person, verified in
+                      person, then the first year. Months rather than weeks.</p>
+                    <a class="btn" href="#find-long" data-go="find-long"><span>Open</span><i class="arrow"></i></a>
+                  </div>
+                </div>
+                <div class="convo__item">
+                  <span class="no">02</span>
+                  <div>
+                    <p class="nm">Short-term relationship</p>
+                    <p class="ds">Companionship on stated terms, for a period both people name at the outset. Nothing
+                      about it is provisional except its length.</p>
+                    <a class="btn" href="#find-short" data-go="find-short"><span>Open</span><i class="arrow"></i></a>
+                  </div>
+                </div>
+                <div class="convo__item">
+                  <span class="no">03</span>
+                  <div>
+                    <p class="nm">Casual dating</p>
+                    <p class="ds">Lighter, and without an intention attached. The same verification and the same
+                      discretion — we simply do not ask where it is going.</p>
+                    <a class="btn" href="#find-casual" data-go="find-casual"><span>Open</span><i class="arrow"></i></a>
+                  </div>
+                </div>
+                <div class="convo__item">
+                  <span class="no">04</span>
+                  <div>
+                    <p class="nm">Event &amp; party companion</p>
+                    <p class="ds">Someone for a particular evening, who will be at ease in the room and will not be
+                      the thing anyone remembers about it.</p>
+                    <a class="btn" href="#find-companion" data-go="find-companion"><span>Open</span><i class="arrow"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>True of all four</h2></div>
+              <div class="panel__body">
+                <ul class="includes">
+                  <li>Every candidate is met in person by an advisor before they are considered for you.</li>
+                  <li>Nothing about you is disclosed to anyone until you have agreed to it, in writing, case by case.</li>
+                  <li>An advisor's name is on every recommendation. Nothing is decided by a system.</li>
+                </ul>
+                <div class="note-inline">
+                  Which track you are on is held on your file and seen by your advisor. It is never
+                  shown to another member, and moving between tracks is not recorded as a change of
+                  mind.
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Not sure which</h2></div>
+              <div class="panel__body">
+                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                  Most members are not, at first. Say so and your advisor will begin with the
+                  assessment rather than a track — the answer usually arrives on its own.
+                </p>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will begin with the assessment and will not ask you to choose a track before it.">Begin with the assessment</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= FIND — LONG TERM -->
+      <section class="view" id="view-find-long" tabindex="-1" aria-label="Long-term relationship">
+        <p class="lede">Long-Term Relationships</p>
+        <p class="sub">
+          Discover people who are looking for meaningful, long-term relationships and share your
+          relationship goals. Matched on your profile, your persona and what you have told us
+          matters — not on who happened to be online.
+        </p>
+
+        <!-- header figures ------------------------------------------------- -->
+        <div class="ltr-stats" id="ltr-stats" role="status">
+          <div><span class="n" id="ltr-count">—</span><span class="l">Potential matches</span></div>
+          <div><span class="n" id="ltr-where">—</span><span class="l">Location</span></div>
+          <div><span class="n" id="ltr-goal">—</span><span class="l">Your goal</span></div>
+          <div><span class="n" id="ltr-verified">—</span><span class="l">Verification</span></div>
+        </div>
+
+        <!-- 1. the member's own goal ---------------------------------------- -->
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head">
+            <h2>What are you looking for?</h2>
+            <span class="pill pill--rest">Part of your matching profile</span>
+          </div>
+          <div class="panel__body">
+            <div class="chips" id="ltr-goals" role="radiogroup" aria-label="Your relationship goal"></div>
+            <p class="quiet" style="margin-top:1rem">
+              Your advisor sees this, and it weights every match below. It is never shown to another
+              member, and changing it is not recorded as a change of mind.
+            </p>
+          </div>
+        </div>
+
+        <!-- 2. search and filters ------------------------------------------- -->
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head">
+            <h2>Search &amp; filters</h2>
+            <button type="button" class="btn btn--quiet" id="ltr-clear">Clear all</button>
+          </div>
+          <div class="panel__body">
+            <div class="ltr-search">
+              <input type="search" id="ltr-q" placeholder="Search a name, a profession, an interest"
+                     aria-label="Search matches">
+            </div>
+
+            <div class="ltr-filters" id="ltr-basic"></div>
+
+            <details class="ltr-adv">
+              <summary>Advanced filters</summary>
+              <div class="ltr-filters" id="ltr-advanced"></div>
+            </details>
+
+            <div class="ltr-toggles">
+              <label class="ltr-toggle">
+                <input type="checkbox" id="ltr-verified-only">
+                <span>Legend Verified only</span>
+              </label>
+              <label class="ltr-toggle">
+                <input type="checkbox" id="ltr-saved-only">
+                <span>Saved profiles only</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. discovery ----------------------------------------------------- -->
+        <div class="ltr-sections" id="ltr-sections" role="tablist" aria-label="How matches are grouped"></div>
+
+        <p class="ltr-empty" id="ltr-empty" hidden>
+          Nothing here answers to those filters. Widen one of them, or clear them all — the network
+          is small on purpose, and an empty result is often the honest one.
+        </p>
+
+        <div class="ltr-grid" id="ltr-grid" aria-live="polite"></div>
+
+        <div class="ltr-more">
+          <button type="button" class="btn" id="ltr-more" hidden><span>Show more</span><i class="arrow"></i></button>
+          <p class="quiet" id="ltr-shown"></p>
+        </div>
+
+        <!-- 4. the member's standing preferences ----------------------------- -->
+        <div class="panel" style="margin-top:2rem">
+          <div class="panel__head">
+            <h2>My relationship preferences</h2>
+            <span class="pill pill--rest">Held on your file</span>
+          </div>
+          <div class="panel__body">
+            <div class="ltr-filters" id="ltr-prefs"></div>
+            <div class="note-inline">
+              These are the standing instructions your advisor works to. The filters above are for
+              this visit only; these persist, and they weight what is proposed to you between visits.
+            </div>
+          </div>
+          <div class="panel__foot">
+            <button class="btn btn--solid" type="button" id="ltr-save-prefs">Save preferences</button>
+          </div>
+        </div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          <b>Design preview.</b> Everyone below is illustrative sample content, and the compatibility
+          figures are computed here in the page from that sample — written rules, not a language
+          model, and nothing you do on this page leaves it.
+        </div>
+      </section>
+
+      <!-- the full profile, opened over the page ---------------------------- -->
+      <div class="ltr-sheet" id="ltr-sheet" hidden>
+        <div class="ltr-sheet__scrim" data-ltr-close></div>
+        <div class="ltr-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="ltr-sheet-name">
+          <button type="button" class="ltr-sheet__close" data-ltr-close aria-label="Close">Close<span class="ask__esc">Esc</span></button>
+          <div id="ltr-sheet-body"></div>
+        </div>
+      </div>
+
+      <!-- ============================================= FIND — SHORT TERM -->
+      <section class="view" id="view-find-short" tabindex="-1" aria-label="Short-term relationship">
+        <p class="lede">Short-Term Relationships</p>
+        <p class="sub">
+          Discover verified people looking for short-term connections, companionship and shared
+          experiences. Three questions decide everything here — what, when, and where — so they are
+          asked first and answered before anyone is shown to you.
+        </p>
+
+        <div class="ltr-stats" id="stm-stats" role="status">
+          <div><span class="n" id="stm-count">—</span><span class="l">Potential matches</span></div>
+          <div><span class="n" id="stm-where">—</span><span class="l">Location</span></div>
+          <div><span class="n" id="stm-when">—</span><span class="l">Your availability</span></div>
+          <div><span class="n" id="stm-verified">—</span><span class="l">Verification</span></div>
+        </div>
+
+        <!-- what, when, where — the three that decide the rest -------------- -->
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head">
+            <h2>My short-term preferences</h2>
+            <span class="pill pill--action" id="stm-intent-pill">Intent required</span>
+          </div>
+          <div class="panel__body">
+            <p class="ask__lbl">What are you looking for?</p>
+            <div class="chips" id="stm-intents" role="radiogroup" aria-label="Your short-term intent"></div>
+
+            <p class="ask__lbl" style="margin-top:1.6rem">How long?</p>
+            <div class="chips" id="stm-durations" role="radiogroup" aria-label="Duration"></div>
+
+            <p class="ask__lbl" style="margin-top:1.6rem">Relationship style, and what you expect</p>
+            <div class="chips" id="stm-styles" role="group" aria-label="Relationship style"></div>
+
+            <div class="ltr-filters" id="stm-when-fields" style="margin-top:1.8rem"></div>
+
+            <div class="stm-travel">
+              <label class="ltr-toggle">
+                <input type="checkbox" id="stm-travel-on">
+                <span><b>Travel mode</b> — I am going somewhere, and want matches there</span>
+              </label>
+              <div class="ltr-filters" id="stm-travel-fields" hidden></div>
+            </div>
+
+            <div class="note-inline">
+              Your exact address is never shown to anyone. A city is, and only while your
+              availability is open — it closes by itself on the end date rather than staying up
+              until you remember to take it down.
+            </div>
+          </div>
+        </div>
+
+        <!-- search and filters --------------------------------------------- -->
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head">
+            <h2>Search &amp; filters</h2>
+            <button type="button" class="btn btn--quiet" id="stm-clear">Clear all</button>
+          </div>
+          <div class="panel__body">
+            <div class="ltr-search">
+              <input type="search" id="stm-q" placeholder="Search a name, a city, an interest"
+                     aria-label="Search matches">
+            </div>
+            <div class="ltr-filters" id="stm-basic"></div>
+            <details class="ltr-adv">
+              <summary>Advanced filters</summary>
+              <div class="ltr-filters" id="stm-advanced"></div>
+            </details>
+            <div class="ltr-toggles">
+              <label class="ltr-toggle">
+                <input type="checkbox" id="stm-verified-only"><span>Legend Verified only</span>
+              </label>
+              <label class="ltr-toggle">
+                <input type="checkbox" id="stm-overlap-only"><span>Only where our dates overlap</span>
+              </label>
+              <label class="ltr-toggle">
+                <input type="checkbox" id="stm-saved-only"><span>Saved profiles only</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="ltr-sections" id="stm-sections" role="tablist" aria-label="How matches are grouped"></div>
+
+        <p class="ltr-empty" id="stm-empty" hidden>
+          Nothing answers to those dates and filters. Widen the window, or clear them — on a
+          short-term search an empty result usually means the timing, not the person.
+        </p>
+
+        <div class="ltr-grid" id="stm-grid" aria-live="polite"></div>
+
+        <div class="ltr-more">
+          <button type="button" class="btn" id="stm-more" hidden><span>Show more</span><i class="arrow"></i></button>
+          <p class="quiet" id="stm-shown"></p>
+        </div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          <b>Design preview.</b> Everyone below is illustrative sample content. Overlap and
+          compatibility are computed here in the page from that sample — written rules, not a
+          language model, and nothing you do on this page leaves it.
+        </div>
+      </section>
+
+      <!-- ============================================= FIND — CASUAL -->
+      <section class="view" id="view-find-casual" tabindex="-1" aria-label="Casual dating">
+        <p class="lede">Casual Dating</p>
+        <p class="sub">
+          Private, discreet and curated. A small number of people the house believes are right for
+          you, with expectations stated on both sides before anyone is introduced — not a feed to
+          scroll, and nothing here is decided by swiping.
+        </p>
+
+        <div class="ltr-stats" id="cas-stats" role="status">
+          <div><span class="n" id="cas-count">—</span><span class="l">Curated for you</span></div>
+          <div><span class="n" id="cas-where">—</span><span class="l">Location</span></div>
+          <div><span class="n" id="cas-when">—</span><span class="l">Your availability</span></div>
+          <div><span class="n" id="cas-shortlist">—</span><span class="l">Private shortlist</span></div>
+        </div>
+
+        <!-- intent, expectations, availability, place --------------------- -->
+        <div class="panel" style="margin-top:1.6rem">
+          <div class="panel__head">
+            <h2>Your dating preferences</h2>
+            <span class="pill pill--action" id="cas-intent-pill">Intent required</span>
+          </div>
+          <div class="panel__body">
+            <p class="ask__lbl">What are you looking for?</p>
+            <div class="chips" id="cas-intents" role="radiogroup" aria-label="Your dating intent"></div>
+
+            <p class="ask__lbl" style="margin-top:1.6rem">What you expect, said plainly</p>
+            <div class="chips" id="cas-expect" role="radiogroup" aria-label="Relationship expectations"></div>
+
+            <p class="ask__lbl" style="margin-top:1.6rem">When you are free</p>
+            <div class="chips" id="cas-avail" role="radiogroup" aria-label="Your availability"></div>
+
+            <div class="ltr-filters" id="cas-where-fields" style="margin-top:1.8rem"></div>
+
+            <div class="note-inline">
+              A city is shown, never an address or a live position. What you expect is shown to
+              anyone the house proposes you to — that is the point of stating it.
+            </div>
+          </div>
+        </div>
+
+        <!-- privacy, which is the product here ----------------------------- -->
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head">
+            <h2>Privacy</h2>
+            <span class="pill pill--rest" id="cas-privacy-pill">Standard</span>
+          </div>
+          <div class="panel__body">
+            <label class="ltr-toggle cas-private">
+              <input type="checkbox" id="cas-private">
+              <span><b>Private profile</b> — nobody sees you until you have agreed to it, one person at a time</span>
+            </label>
+            <div class="ltr-filters" id="cas-privacy"></div>
+            <div class="note-inline">
+              With a private profile you are not curated to anyone without being asked first. It is
+              the quietest setting and it will slow your search down; members who use it say that is
+              what they wanted.
+            </div>
+          </div>
+        </div>
+
+        <!-- a narrow search, deliberately ---------------------------------- -->
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head">
+            <h2>Refine</h2>
+            <button type="button" class="btn btn--quiet" id="cas-clear">Clear all</button>
+          </div>
+          <div class="panel__body">
+            <div class="ltr-search">
+              <input type="search" id="cas-q" placeholder="Search a city, a lifestyle, an interest"
+                     aria-label="Search curated matches">
+            </div>
+            <div class="ltr-filters" id="cas-filters"></div>
+            <div class="ltr-toggles">
+              <label class="ltr-toggle">
+                <input type="checkbox" id="cas-verified-only" checked><span>Legend Verified only</span>
+              </label>
+              <label class="ltr-toggle">
+                <input type="checkbox" id="cas-intent-only"><span>Only where our expectations agree</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="ltr-sections" id="cas-sections" role="tablist" aria-label="How matches are grouped"></div>
+
+        <p class="cas-curated" id="cas-note"></p>
+
+        <p class="ltr-empty" id="cas-empty" hidden>
+          Nothing in this group answers to those preferences. The house curates a few rather than
+          many, so an empty group is ordinary — widen one thing, or leave it and let your advisor
+          bring someone.
+        </p>
+
+        <div class="ltr-grid cas-grid" id="cas-grid" aria-live="polite"></div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          <b>Design preview.</b> Everyone below is illustrative sample content, and the figures are
+          computed here in the page from that sample — written rules, not a language model, and
+          nothing you do on this page leaves it.
+        </div>
+      </section>
+
+      <!-- ============================================= FIND — COMPANION -->
+      <section class="view" id="view-find-companion" tabindex="-1" aria-label="Event and party companion">
+        <p class="lede">Event &amp; party companion</p>
+        <p class="sub">
+          Someone for a particular evening — who will be at ease in the room, and who will not be
+          the thing anyone remembers about it.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>What we need from you</h2></div>
+            <div class="panel__body">
+              <ul class="spine">
+                <li><span class="no">01</span><span>The occasion, the room, and who else will be in it</span></li>
+                <li><span class="no">02</span><span>What is expected of a guest there — dress, language, whether anyone will ask questions</span></li>
+                <li><span class="no">03</span><span>What you would like said about how you know each other</span></li>
+                <li><span class="no">04</span><span>The hours, and who leaves first</span></li>
+              </ul>
+              <div class="note-inline">
+                Agreed with both of you before the evening, in writing. Neither of you improvises an
+                answer to a question in front of other people.
+              </div>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Notice</dt><dd>Ten days is comfortable; three is possible</dd>
+                  <dt>Languages</dt><dd>Stated per companion, verified</dd>
+                  <dt>Discretion</dt><dd>No photographs, by standing agreement</dd>
+                  <dt>Afterwards</dt><dd>Nothing is asked of either of you</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will telephone for the details of the evening rather than ask you to write them out.">Describe the evening</button>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Where our limit is</h2></div>
+              <div class="panel__body">
+                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                  This is company for an occasion and nothing else. Both people are told so in the
+                  same words, and an evening ends the moment either of them says it does.
+                </p>
               </div>
             </div>
           </div>
@@ -1407,9 +2225,10 @@
                   <li>Changing this never appears as a notification to anyone else.</li>
                 </ul>
                 <div class="note-inline">
-                  There is no browsing here, and there never will be. Nobody is listed, ranked or
-                  made available to be chosen from. This is the mechanism by which two people who
-                  want the same thing are brought to each other's attention — and nothing else.
+                  Nobody is ranked, and nobody is made available to be chosen from without having
+                  agreed to it. What another member can see of you is set here, asked again for each
+                  introduction, and withdrawn the moment you say so. This is the mechanism by which
+                  two people who want the same thing are brought to each other's attention.
                 </div>
               </div>
             </div>
@@ -2862,7 +3681,7 @@
 
       <!-- ================================================= PROFILE -->
       <section class="view" id="view-me" tabindex="-1" aria-label="Profile">
-        <p class="lede">Profile</p>
+        <p class="lede">Profile &amp; Persona</p>
         <p class="sub">
           Who you are, as this house holds it. Built from four directions — what you write, what a
           conversation surfaces, what you tell us after a meeting, and what your advisor observes.

@@ -12,11 +12,24 @@
 
   // Six categories in the rail; everything else is a section beneath one of them.
   var TITLES = {
+    verified:        'Legend Verified',
+    academy:         'Legend Academy',
+    find:            'Find a partner',
+    occasions:              'Events & Companionship',
+    'occasions-parties':    'Parties',
+    'occasions-events':     'Events',
+    'occasions-business':   'Business events',
+    'occasions-travel':     'Travel companionship',
+    'occasions-social':     'Social occasions',
+    'find-long':     'Long-term relationship',
+    'find-short':    'Short-term relationship',
+    'find-casual':   'Casual dating',
+    'find-companion':'Event & party companion',
     long:       'Long partner',
     short:      'Short partner',
     events:     'Party & event',
     management: 'Relationship management',
-    me:         'Profile',
+    me:         'Profile & Persona',
     settings:   'Settings',
     overview: 'Overview',
     proposed: 'Proposed for you',
@@ -50,11 +63,16 @@
   var el = $('#today');
   if (el) el.textContent = today;
 
+  // The greeting is the overview's title in the bar now, so it is held here and
+  // route() decides where it goes. Salutation and name are kept apart because a
+  // narrow bar has room for the name but not for both. The element lookup stays,
+  // so any view that still shows it inline keeps working.
+  var hour = now.getHours();
+  var SALUTATION = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  var MEMBER = 'A. Marchand.';
+  var GREETING = SALUTATION + ', ' + MEMBER;
   var greet = $('#greeting');
-  if (greet) {
-    var h = now.getHours();
-    greet.textContent = (h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening') + ', A. Marchand.';
-  }
+  if (greet) greet.textContent = GREETING;
 
   /* --- Lock screen -------------------------------------------------------- */
   var lock = $('#lock');
@@ -89,7 +107,17 @@
   // Which category a section belongs to, so the rail still shows where you are
   // once you have gone one level down.
   var PARENT = {
-    proposed: 'long', requests: 'long', introductions: 'long', appointments: 'long',
+    'find-long': 'find', 'find-short': 'find',
+    'find-casual': 'find',
+    // Companionship moved under Events & Companionship; the page stays where it
+    // is and this is what gives it the right way back up.
+    'find-companion': 'occasions',
+    'occasions-parties': 'occasions', 'occasions-events': 'occasions',
+    'occasions-business': 'occasions', 'occasions-travel': 'occasions',
+    'occasions-social': 'occasions',
+    // These four were the working sections of the retired Long partner category;
+    // Find a partner is what carries that ground now.
+    proposed: 'find', requests: 'find', introductions: 'find', appointments: 'find',
     preferences: 'me', reflections: 'me', intentions: 'me', persona: 'me', profile: 'me',
     insights: 'management', formation: 'management', counsel: 'management', continuity: 'management',
     parties: 'events',
@@ -126,7 +154,43 @@
     }
 
     var title = $('#view-title');
-    if (title) title.textContent = TITLES[name];
+    // On the overview the member is greeted; everywhere else the bar names the
+    // view, which is what carries you back out of a section. The salutation is
+    // its own span so a narrow bar can drop it and keep the name.
+    if (title) {
+      title.textContent = '';
+      if (name === 'overview') {
+        var sal = document.createElement('span');
+        sal.className = 'title__salutation';
+        sal.textContent = SALUTATION;
+        title.appendChild(sal);               // the name lives once, top right
+      } else {
+        title.textContent = TITLES[name];
+      }
+    }
+
+    // A category with children in the rail opens its list when it or one of them
+    // is current, and folds away otherwise, so the rail stays the length of its
+    // categories rather than the length of everything under them.
+    $$('.rail__sub').forEach(function (sub) {
+      var root = sub.getAttribute('data-branch');
+      var cat = $('#rail-nav a[data-view="' + root + '"]');
+      if (!cat) return;
+      var open = mark === root;
+      sub.hidden = !open;
+      cat.setAttribute('aria-expanded', open ? 'true' : 'false');
+      // One aria-current per page: it moves to the child only when the child is
+      // itself in this list. A branch can also parent sections that are not
+      // listed here — the working sections of a search, say — and those must
+      // leave the mark on the category, or nothing in the rail is marked at all.
+      var listed = $('a[data-view="' + name + '"]', sub);
+      if (open && listed) { cat.removeAttribute('aria-current'); cat.classList.add('is-branch'); }
+      else { cat.classList.remove('is-branch'); }
+      $$('a', sub).forEach(function (a) {
+        if (a.getAttribute('data-view') === name) { a.setAttribute('aria-current', 'page'); }
+        else { a.removeAttribute('aria-current'); }
+      });
+    });
 
     // The nav can scroll on short screens — keep the current item in sight.
     var current = $('#rail-nav a[aria-current="page"]');
@@ -1059,6 +1123,2213 @@
       if (!box.hidden) { var f = $('textarea, input', box); if (f) f.focus(); }
     });
   });
+
+  /* --- Live tiles ---------------------------------------------------------
+     Three behaviours on one row:
+       · the figures count up once, when the row first arrives;
+       · each tile turns to a second face carrying the sentence behind the
+         figure, staggered so the row is never all in motion at once;
+       · the member can reorder the row by drag or keyboard, and the order is
+         remembered on the device.
+     Nothing here decides anything — it is presentation of what is already on
+     the file, and all of it is off under prefers-reduced-motion.            */
+  var tilesRow = $('#tiles');
+  if (tilesRow) (function () {
+    var TILE_KEY = 'legend.tiles';
+    var tiles = function () { return $$('.tile', tilesRow); };
+
+    function stamp() {
+      tiles().forEach(function (t, i) { t.style.setProperty('--i', i); });
+    }
+
+    /* -- remembered order ------------------------------------------------- */
+    function save() {
+      var order = tiles().map(function (t) { return t.getAttribute('data-tile'); });
+      try { localStorage.setItem(TILE_KEY, order.join(',')); } catch (e) {}
+      if (resetBtn) resetBtn.hidden = false;
+    }
+
+    var DEFAULT_ORDER = tiles().map(function (t) { return t.getAttribute('data-tile'); });
+    var resetBtn = $('#tiles-reset');
+
+    function restore() {
+      var raw = null;
+      try { raw = localStorage.getItem(TILE_KEY); } catch (e) {}
+      if (!raw) return;
+      var order = raw.split(',');
+      // Only honour a remembered order that still names exactly these tiles;
+      // a stale list from an older build is discarded rather than half-applied.
+      var same = order.length === DEFAULT_ORDER.length &&
+        order.every(function (n) { return DEFAULT_ORDER.indexOf(n) > -1; });
+      if (!same) { try { localStorage.removeItem(TILE_KEY); } catch (e) {} return; }
+      order.forEach(function (name) {
+        var t = $('.tile[data-tile="' + name + '"]', tilesRow);
+        if (t) tilesRow.appendChild(t);
+      });
+      if (resetBtn) resetBtn.hidden = false;
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        DEFAULT_ORDER.forEach(function (name) {
+          var t = $('.tile[data-tile="' + name + '"]', tilesRow);
+          if (t) tilesRow.appendChild(t);
+        });
+        try { localStorage.removeItem(TILE_KEY); } catch (e) {}
+        resetBtn.hidden = true;
+        stamp();
+        announce('The tiles are back in their original order.');
+      });
+    }
+
+    /* -- a live region, so reordering is audible as well as visible -------- */
+    var say = document.createElement('p');
+    say.className = 'sr-only';
+    say.setAttribute('role', 'status');
+    say.setAttribute('aria-live', 'polite');
+    tilesRow.parentNode.insertBefore(say, tilesRow.nextSibling);
+    function announce(text) { say.textContent = text; }
+
+    function label(t) {
+      // The front label is broken over two lines, and a <br> yields no space in
+      // textContent; the back face carries the same words unbroken.
+      var l = $('.tile__face--b .tile__l', t) || $('.tile__l', t);
+      return l ? l.textContent.replace(/\s+/g, ' ').trim() : 'Tile';
+    }
+
+    /* -- drag to reorder --------------------------------------------------- */
+    var dragged = null, dragging = false;
+
+    tiles().forEach(function (t) {
+      t.addEventListener('dragstart', function (e) {
+        dragged = t; dragging = true;
+        t.classList.add('is-dragging');
+        try {
+          e.dataTransfer.effectAllowed = 'move';
+          // Firefox will not start a drag without payload.
+          e.dataTransfer.setData('text/plain', t.getAttribute('data-tile'));
+        } catch (err) {}
+      });
+      t.addEventListener('dragend', function () {
+        t.classList.remove('is-dragging');
+        tiles().forEach(function (o) { o.classList.remove('is-over'); });
+        dragged = null;
+        stamp();
+        // The click that ends a drag must not also navigate.
+        setTimeout(function () { dragging = false; }, 60);
+      });
+      t.addEventListener('dragenter', function () {
+        if (dragged && dragged !== t) t.classList.add('is-over');
+      });
+      t.addEventListener('dragleave', function () { t.classList.remove('is-over'); });
+      t.addEventListener('dragover', function (e) { e.preventDefault(); });
+      t.addEventListener('drop', function (e) {
+        e.preventDefault();
+        t.classList.remove('is-over');
+        if (!dragged || dragged === t) return;
+        var list = tiles();
+        var from = list.indexOf(dragged), to = list.indexOf(t);
+        tilesRow.insertBefore(dragged, from < to ? t.nextSibling : t);
+        settle(dragged);
+        save(); stamp();
+        announce(label(dragged) + ' moved to position ' + (tiles().indexOf(dragged) + 1) + ' of ' + list.length + '.');
+      });
+
+      // A drag ends in a click on the anchor; swallow that one.
+      t.addEventListener('click', function (e) {
+        if (dragging) { e.preventDefault(); e.stopImmediatePropagation(); }
+      }, true);
+
+      /* -- keyboard reordering: Alt + arrow -------------------------------- */
+      t.addEventListener('keydown', function (e) {
+        if (!e.altKey || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+        e.preventDefault();
+        var list = tiles(), i = list.indexOf(t);
+        var j = e.key === 'ArrowLeft' ? i - 1 : i + 1;
+        if (j < 0 || j >= list.length) return;
+        tilesRow.insertBefore(t, e.key === 'ArrowLeft' ? list[j] : list[j].nextSibling);
+        settle(t); save(); stamp(); t.focus();
+        announce(label(t) + ' moved to position ' + (j + 1) + ' of ' + list.length + '.');
+      });
+    });
+
+    function settle(t) {
+      if (reduced) return;
+      t.classList.remove('is-settling');
+      void t.offsetWidth;                    // restart the animation
+      t.classList.add('is-settling');
+      setTimeout(function () { t.classList.remove('is-settling'); }, 460);
+    }
+
+    restore();
+    stamp();
+
+    /* -- entrance, counters, and the turning ------------------------------- */
+    function countUp(el) {
+      var target = parseFloat(el.getAttribute('data-count'));
+      var dec = parseInt(el.getAttribute('data-dec') || '0', 10);
+      if (isNaN(target)) return;
+      var t0 = null, ms = 900;
+      function frame(now) {
+        if (t0 === null) t0 = now;
+        var k = Math.min((now - t0) / ms, 1);
+        k = 1 - Math.pow(1 - k, 3);          // ease out
+        el.textContent = (target * k).toFixed(dec);
+        if (k < 1) requestAnimationFrame(frame);
+        else el.textContent = target.toFixed(dec);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    var paused = false, turnTimer = null, turnIdx = 0;
+
+    // One tile is turned at a time: shown for a beat, returned, then a pause
+    // before the next. A recursive timeout rather than an interval, so the
+    // hold and the gap can differ and can never overlap.
+    function turnNext() {
+      var list = tiles();
+      if (!list.length) return;
+      // Folded away for a question, off-screen, or held under the pointer:
+      // all three mean nobody is looking, so nothing should turn.
+      if (paused || document.hidden || tilesRow.closest('.is-asking')) {
+        turnTimer = setTimeout(turnNext, 1400); return;
+      }
+      var t = list[turnIdx % list.length];
+      turnIdx++;
+      t.classList.add('is-flipped');
+      turnTimer = setTimeout(function () {
+        t.classList.remove('is-flipped');
+        turnTimer = setTimeout(turnNext, 1500);
+      }, 3600);
+    }
+
+    function startTurning() {
+      if (reduced || turnTimer) return;
+      turnTimer = setTimeout(turnNext, 600);
+    }
+
+    // The entrance itself is a CSS animation, so the row is never dependent on
+    // this running. What waits for the row to be seen is the counting and the
+    // turning, neither of which is worth doing off-screen.
+    function reveal() {
+      if (!reduced) $$('.tile__num', tilesRow).forEach(countUp);
+      startTurning();
+    }
+
+    if (reduced || !('IntersectionObserver' in window)) { reveal(); }
+    else {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { io.disconnect(); reveal(); }
+        });
+      }, { threshold: .25 });
+      io.observe(tilesRow);
+    }
+  })();
+
+  /* --- Asking clears the room ---------------------------------------------
+     At rest the assistant is one bar. The moment a question is being typed the
+     tiles stand down and the panel opens into the conversation; closing it
+     brings the tiles back as they were. The thread is kept, so returning to a
+     question already asked does not lose the answer.                        */
+  var dashView = $('#view-overview');
+  var mosaic = $('#tiles');
+  var askInput = $('#ask-input');
+  if (dashView && mosaic && askInput) (function () {
+    var asking = false;
+    var sent = false;                      // has the member actually asked anything?
+    var foldTimer = null;
+
+    // Two phases: the tiles fade, then they leave the grid so the bar can take
+    // the whole width. Reversed on the way back, so the bar never jumps before
+    // the tiles have somewhere to land.
+    function setAsking(on) {
+      if (asking === on) return;
+      asking = on;
+      clearTimeout(foldTimer);
+
+      if (on) {
+        dashView.classList.add('is-asking');
+        if (reduced) mosaic.classList.add('is-folded');
+        else foldTimer = setTimeout(function () {
+          if (asking) mosaic.classList.add('is-folded');
+        }, 320);
+      } else {
+        mosaic.classList.remove('is-folded');
+        void mosaic.offsetHeight;          // let the grid settle before fading in
+        dashView.classList.remove('is-asking');
+      }
+
+      // Hidden means hidden: nothing in there should be reachable by tab or
+      // readable by a screen reader while it is folded away.
+      $$('.mosaic > a.tile').forEach(function (t) {
+        if ('inert' in HTMLElement.prototype) t.inert = on;
+        t.setAttribute('aria-hidden', on ? 'true' : 'false');
+      });
+
+      // A film nobody can see should not keep decoding.
+      $$('.tile__video', mosaic).forEach(function (v) {
+        if (on) { try { v.pause(); } catch (e) {} }
+        else if (!reduced) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+      });
+    }
+
+    askInput.addEventListener('input', function () {
+      if (askInput.value.trim() !== '') { setAsking(true); return; }
+      // Cleared without ever asking anything — treat it as never having started.
+      if (!sent) setAsking(false);
+    });
+
+    // A suggested opening is a question too.
+    $$('#ask-chips button').forEach(function (chip) {
+      chip.addEventListener('click', function () { sent = true; setAsking(true); });
+    });
+    if (askForm) askForm.addEventListener('submit', function () { sent = true; });
+
+    function close() {
+      setAsking(false);
+      askInput.value = '';
+      askInput.blur();
+    }
+
+    var closeBtn = $('#ask-close');
+    if (closeBtn) closeBtn.addEventListener('click', close);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && asking) { e.preventDefault(); close(); }
+    });
+
+    // Leaving the overview entirely puts the room back as it was.
+    window.addEventListener('hashchange', function () {
+      if (asking && location.hash.replace('#', '') !== 'overview') close();
+    });
+
+    // Under prefers-reduced-motion a film should not play on its own.
+    if (reduced) $$('.tile__video', mosaic).forEach(function (v) {
+      v.autoplay = false; try { v.pause(); } catch (e) {}
+    });
+  })();
+
+  /* --- Shared by the matching surfaces ------------------------------------
+     Long-term and short-term are different products with different weights and
+     different questions, but they draw the same card, the same filter field and
+     the same plate. These live out here so there is one of each.            */
+  var MATCH = {
+    el: function (tag, cls, text) {
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    },
+    // An abstract plate, not a photograph, and not pretending to be one: the
+    // house does not publish faces.
+    plate: function (seed) {
+      var h = 0; for (var i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) % 360;
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">' +
+        '<defs><linearGradient id="a" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0" stop-color="hsl(' + h + ',12%,26%)"/>' +
+        '<stop offset="1" stop-color="hsl(' + h + ',14%,11%)"/></linearGradient>' +
+        '<radialGradient id="b" cx=".62" cy=".34" r=".55">' +
+        '<stop offset="0" stop-color="#E4D6B6" stop-opacity=".30"/>' +
+        '<stop offset="1" stop-color="#E4D6B6" stop-opacity="0"/></radialGradient></defs>' +
+        '<rect width="400" height="300" fill="url(#a)"/><rect width="400" height="300" fill="url(#b)"/>' +
+        '<path d="M248 300c0-38-24-62-58-62s-58 24-58 62Z" fill="#E4D6B6" fill-opacity=".13"/>' +
+        '<circle cx="190" cy="196" r="30" fill="#E4D6B6" fill-opacity=".13"/></svg>';
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    },
+    field: function (def, store, onChange, prefix) {
+      var el = MATCH.el;
+      var wrap = el('div', 'ltr-field');
+      var id = (prefix || 'ltr') + '-f-' + def.k;
+      var lab = el('label', null, def.label); lab.setAttribute('for', id);
+      var input;
+      if (def.type === 'select') {
+        input = el('select');
+        def.options.forEach(function (o) {
+          var opt = el('option', null, o); opt.value = o;
+          if (store[def.k] === o || (store[def.k] == null && def.value === o)) opt.selected = true;
+          input.appendChild(opt);
+        });
+      } else if (def.type === 'date') {
+        input = el('input'); input.type = 'date';
+        input.value = store[def.k] != null ? store[def.k] : (def.value || '');
+      } else {
+        input = el('input'); input.type = 'number'; input.min = '18'; input.max = '99';
+        input.value = store[def.k] != null ? store[def.k] : (def.value || '');
+      }
+      input.id = id;
+      if (store[def.k] == null && def.value != null) store[def.k] = def.value;
+      input.addEventListener('change', function () { store[def.k] = input.value; onChange(); });
+      wrap.appendChild(lab); wrap.appendChild(input);
+      return wrap;
+    },
+    head: function (title, pill) {
+      var h = MATCH.el('div', 'panel__head');
+      h.appendChild(MATCH.el('h2', null, title));
+      if (pill) h.appendChild(MATCH.el('span', 'pill pill--rest', pill));
+      return h;
+    },
+    // A verification badge, or an honest absence of one.
+    badge: function (verified) {
+      var el = MATCH.el;
+      if (!verified) return el('span', 'ltr-vfd ltr-vfd--no', 'Verification in progress');
+      var v = el('span', 'ltr-vfd');
+      v.appendChild(el('i', null, '\u2713'));
+      v.appendChild(el('span', null, 'Legend Verified'));
+      return v;
+    }
+  };
+
+  /* --- Long-term relationship: discovery and matching ----------------------
+     A matching surface rather than a list of people. Every figure on this page
+     is computed here, in the page, from the sample below: the weights are data
+     so they can be retuned without touching the logic, and the explanations are
+     written from the same factors the score is, so the number and the sentence
+     can never disagree.
+
+     Preview only: no network, no storage beyond this tab, nothing leaves the
+     page.                                                                    */
+  var ltrView = $('#view-find-long');
+  if (ltrView) (function () {
+
+    /* -- what the score is made of. Data, not literals in the maths. ------- */
+    var WEIGHTS = {
+      goals: 30, lifestyle: 15, communication: 15,
+      interests: 10, values: 15, age: 5, location: 5, activity: 5
+    };
+    var FACTOR_LABELS = {
+      goals: 'Relationship goals', lifestyle: 'Lifestyle',
+      communication: 'Communication style', interests: 'Interests',
+      values: 'Values', age: 'Age', location: 'Location', activity: 'Activity'
+    };
+
+    /* -- the member, as this page needs them ------------------------------- */
+    var ME = {
+      goal: 'Long-Term Partner',
+      city: 'London', country: 'United Kingdom',
+      ageMin: 32, ageMax: 46,
+      interests: ['Travel', 'Art', 'Sailing', 'Wine', 'Architecture'],
+      social: 'Small rooms', style: 'Direct', wantsChildren: 'Open'
+    };
+
+    /* -- sample members ---------------------------------------------------- */
+    var PEOPLE = [
+      { id:'p1', name:'Sophia', age:36, city:'Zurich', country:'Switzerland', verified:true,
+        goal:'Marriage', occupation:'Founder, medical devices', active:2, joined:210,
+        interests:['Travel','Art','Sailing','Languages'],
+        smoking:'No', children:'None', wantsChildren:'Yes', education:'MSc',
+        languages:['German','English','French'], social:'Small rooms', style:'Direct',
+        relocate:'Open to relocating',
+        about:'Built one company, sold it, and is deliberately taking the year more slowly. Sails badly and often.',
+        f:{ goals:96, lifestyle:91, communication:89, interests:84, values:88 },
+        diff:['Prefers to stay within Switzerland','Wants children sooner than most'] },
+
+      { id:'p2', name:'Isabelle', age:41, city:'Paris', country:'France', verified:true,
+        goal:'Life Partner', occupation:'Barrister', active:1, joined:640,
+        interests:['Architecture','Wine','Opera','Riding'],
+        smoking:'No', children:'One, grown', wantsChildren:'No', education:'Doctorate',
+        languages:['French','English'], social:'Small rooms', style:'Direct',
+        relocate:'Not relocating',
+        about:'Reads three papers a day and will tell you when you are wrong, which is the point.',
+        f:{ goals:92, lifestyle:88, communication:94, interests:87, values:90 },
+        diff:['Does not want more children','Will not leave Paris'] },
+
+      { id:'p3', name:'Marguerite', age:39, city:'London', country:'United Kingdom', verified:true,
+        goal:'Long-Term Partner', occupation:'Curator', active:1, joined:95,
+        interests:['Art','Architecture','Travel','Wine'],
+        smoking:'No', children:'None', wantsChildren:'Open', education:'MA',
+        languages:['English','Italian'], social:'Small rooms', style:'Considered',
+        relocate:'Open to relocating',
+        about:'Spends her working life deciding what deserves a wall, and is careful about it elsewhere too.',
+        f:{ goals:94, lifestyle:93, communication:86, interests:96, values:89 },
+        diff:['Works most evenings in the season'] },
+
+      { id:'p4', name:'Beatrice', age:34, city:'Milan', country:'Italy', verified:true,
+        goal:'Serious Relationship', occupation:'Architect', active:4, joined:40,
+        interests:['Architecture','Sailing','Food','Cycling'],
+        smoking:'Occasionally', children:'None', wantsChildren:'Yes', education:'MArch',
+        languages:['Italian','English','Spanish'], social:'Large rooms', style:'Warm',
+        relocate:'Open to relocating',
+        about:'Draws buildings that get built. Talks with her hands and does not apologise for it.',
+        f:{ goals:83, lifestyle:79, communication:81, interests:88, values:80 },
+        diff:['Smokes occasionally','Much more social than you are'] },
+
+      { id:'p5', name:'Helena', age:44, city:'Geneva', country:'Switzerland', verified:true,
+        goal:'Long-Term Partner', occupation:'Private banker', active:6, joined:800,
+        interests:['Sailing','Wine','Skiing','Travel'],
+        smoking:'No', children:'Two, teenage', wantsChildren:'No', education:'MBA',
+        languages:['French','English','German'], social:'Small rooms', style:'Direct',
+        relocate:'Not relocating',
+        about:'Has arranged other people’s lives for twenty years and is candid that hers came second.',
+        f:{ goals:88, lifestyle:85, communication:90, interests:82, values:86 },
+        diff:['Two teenage children at home','Will not leave Geneva'] },
+
+      { id:'p6', name:'Anouk', age:37, city:'Amsterdam', country:'Netherlands', verified:false,
+        goal:'Exclusive Relationship', occupation:'Documentary producer', active:1, joined:18,
+        interests:['Travel','Film','Cycling','Food'],
+        smoking:'No', children:'None', wantsChildren:'Open', education:'BA',
+        languages:['Dutch','English','German'], social:'Large rooms', style:'Warm',
+        relocate:'Open to relocating',
+        about:'Away four months of the year and honest that this is the thing to discuss first.',
+        f:{ goals:76, lifestyle:71, communication:84, interests:70, values:79 },
+        diff:['Travels four months a year','Verification not yet complete'] },
+
+      { id:'p7', name:'Clara', age:43, city:'Vienna', country:'Austria', verified:true,
+        goal:'Marriage', occupation:'Orchestral conductor', active:3, joined:300,
+        interests:['Opera','Art','Wine','Languages'],
+        smoking:'No', children:'None', wantsChildren:'No', education:'Doctorate',
+        languages:['German','English','Italian'], social:'Small rooms', style:'Considered',
+        relocate:'Open to relocating',
+        about:'Rehearses in the morning, reads in the afternoon, and keeps her evenings.',
+        f:{ goals:90, lifestyle:87, communication:88, interests:79, values:92 },
+        diff:['Does not want children','Season runs September to June'] },
+
+      { id:'p8', name:'Rosalind', age:33, city:'London', country:'United Kingdom', verified:true,
+        goal:'Long-Term Partner', occupation:'Surgeon', active:5, joined:150,
+        interests:['Travel','Cycling','Wine','Art'],
+        smoking:'No', children:'None', wantsChildren:'Yes', education:'MD',
+        languages:['English','French'], social:'Small rooms', style:'Direct',
+        relocate:'Not relocating',
+        about:'Operates three days a week and is unromantic about how little time that leaves.',
+        f:{ goals:91, lifestyle:82, communication:87, interests:83, values:85 },
+        diff:['On call most weekends','Will not leave London'] },
+
+      { id:'p9', name:'Ingrid', age:46, city:'Copenhagen', country:'Denmark', verified:true,
+        goal:'Open to Exploring', occupation:'Novelist', active:9, joined:520,
+        interests:['Art','Languages','Sailing','Food'],
+        smoking:'No', children:'One, grown', wantsChildren:'No', education:'MA',
+        languages:['Danish','English','German'], social:'Small rooms', style:'Considered',
+        relocate:'Open to relocating',
+        about:'Not certain she wants this, and would rather say so than perform certainty.',
+        f:{ goals:64, lifestyle:83, communication:85, interests:80, values:82 },
+        diff:['Not yet decided what she is looking for'] },
+
+      { id:'p10', name:'Camille', age:35, city:'Brussels', country:'Belgium', verified:false,
+        goal:'Serious Relationship', occupation:'Diplomat', active:12, joined:9,
+        interests:['Languages','Travel','Food','Opera'],
+        smoking:'No', children:'None', wantsChildren:'Open', education:'MA',
+        languages:['French','English','Arabic','Dutch'], social:'Large rooms', style:'Warm',
+        relocate:'Posted every three years',
+        about:'Moves country on a schedule she does not control, and says so before anything else.',
+        f:{ goals:80, lifestyle:68, communication:83, interests:74, values:81 },
+        diff:['Posted to a new country every three years','Verification not yet complete'] },
+
+      { id:'p11', name:'Freya', age:38, city:'Edinburgh', country:'United Kingdom', verified:true,
+        goal:'Life Partner', occupation:'Distiller', active:2, joined:60,
+        interests:['Wine','Sailing','Food','Travel'],
+        smoking:'No', children:'None', wantsChildren:'Yes', education:'BSc',
+        languages:['English'], social:'Small rooms', style:'Direct',
+        relocate:'Open to relocating',
+        about:'Runs a distillery her grandmother started and is the fourth to do it.',
+        f:{ goals:93, lifestyle:89, communication:85, interests:86, values:87 },
+        diff:['One language','Rarely in London'] },
+
+      { id:'p12', name:'Livia', age:40, city:'Rome', country:'Italy', verified:true,
+        goal:'Long-Term Partner', occupation:'Restorer', active:7, joined:410,
+        interests:['Art','Architecture','Food','Languages'],
+        smoking:'No', children:'None', wantsChildren:'Open', education:'MA',
+        languages:['Italian','English','Latin'], social:'Small rooms', style:'Considered',
+        relocate:'Not relocating',
+        about:'Spends months on a single square metre of fresco and finds that a reasonable pace.',
+        f:{ goals:89, lifestyle:86, communication:84, interests:91, values:88 },
+        diff:['Will not leave Rome'] }
+    ];
+
+    /* -- derived factors: the ones we can actually compute ------------------ */
+    function ageFit(p) {
+      if (p.age >= ME.ageMin && p.age <= ME.ageMax) return 100;
+      var out = p.age < ME.ageMin ? ME.ageMin - p.age : p.age - ME.ageMax;
+      return Math.max(0, 100 - out * 12);
+    }
+    function locationFit(p) {
+      if (p.city === ME.city) return 100;
+      if (p.country === ME.country) return 88;
+      return /Open to relocating/.test(p.relocate) ? 74 : 58;
+    }
+    function activityFit(p) { return Math.max(40, 100 - p.active * 5); }
+    function interestFit(p) {
+      var shared = p.interests.filter(function (i) { return ME.interests.indexOf(i) > -1; });
+      return { pct: Math.round(shared.length / Math.max(3, ME.interests.length) * 100), shared: shared };
+    }
+
+    function factorsOf(p) {
+      return {
+        goals: p.f.goals, lifestyle: p.f.lifestyle, communication: p.f.communication,
+        interests: p.f.interests, values: p.f.values,
+        age: ageFit(p), location: locationFit(p), activity: activityFit(p)
+      };
+    }
+    function scoreOf(p) {
+      var f = factorsOf(p), total = 0, sum = 0;
+      Object.keys(WEIGHTS).forEach(function (k) { total += WEIGHTS[k]; sum += WEIGHTS[k] * (f[k] || 0); });
+      return Math.round(sum / total);
+    }
+    PEOPLE.forEach(function (p) { p.factors = factorsOf(p); p.score = scoreOf(p); });
+
+    /* -- an abstract plate per member. Not a photograph, and not pretending
+          to be one: the house does not publish faces.                        */
+    function plate(p) {
+      return MATCH.plate(p.id + p.name);
+    }
+
+    /* -- per-visit state ---------------------------------------------------- */
+    var STATE = {
+      goal: ME.goal, q: '', verifiedOnly: false, savedOnly: false,
+      section: 'recommended', shown: 6,
+      basic: {}, advanced: {}, prefs: {}
+    };
+    var SAVED = {};                       // id -> true
+    var STATUS = {};                      // id -> 'sent' | 'connected'
+
+    var GOALS = ['Serious Relationship','Long-Term Partner','Life Partner','Marriage',
+                 'Exclusive Relationship','Open to Exploring'];
+    var SECTIONS = [
+      { id:'recommended', label:'Recommended for you', note:'Best overall, on your weights' },
+      { id:'compatible',  label:'Highly compatible',   note:'Ninety per cent and above' },
+      { id:'new',         label:'New to Legend',       note:'Joined in the last three months' },
+      { id:'active',      label:'Recently active',     note:'Seen in the last three days' },
+      { id:'persona',     label:'Similar to your persona', note:'Your social and communication style' },
+      { id:'saved',       label:'Saved',               note:'Kept for later' }
+    ];
+
+    /* -- filter definitions. Rendered from data, read back from data. ------- */
+    var BASIC = [
+      { k:'ageMin', label:'Minimum age', type:'number', value:ME.ageMin },
+      { k:'ageMax', label:'Maximum age', type:'number', value:ME.ageMax },
+      { k:'country', label:'Country', type:'select', options:['Any'] },
+      { k:'city', label:'City', type:'select', options:['Any'] },
+      { k:'relocate', label:'Willing to relocate', type:'select', options:['Any','Open to relocating','Not relocating'] },
+      { k:'goal', label:'Their relationship goal', type:'select', options:['Any'].concat(GOALS) }
+    ];
+    var ADVANCED = [
+      { k:'smoking', label:'Smoking', type:'select', options:['Any','No','Occasionally'] },
+      { k:'children', label:'Has children', type:'select', options:['Any','None','Has children'] },
+      { k:'wantsChildren', label:'Wants children', type:'select', options:['Any','Yes','No','Open'] },
+      { k:'education', label:'Education', type:'select', options:['Any','BA','BSc','MA','MSc','MBA','MArch','MD','Doctorate'] },
+      { k:'language', label:'Speaks', type:'select', options:['Any'] },
+      { k:'social', label:'Social style', type:'select', options:['Any','Small rooms','Large rooms'] },
+      { k:'style', label:'Communication style', type:'select', options:['Any','Direct','Considered','Warm'] }
+    ];
+    var PREFS = [
+      { k:'pAgeMin', label:'Age from', type:'number', value:ME.ageMin },
+      { k:'pAgeMax', label:'Age to', type:'number', value:ME.ageMax },
+      { k:'pCountry', label:'Countries', type:'select', options:['Any'] },
+      { k:'pGoal', label:'Relationship', type:'select', options:GOALS, value:ME.goal },
+      { k:'pSmoking', label:'Smoking', type:'select', options:['Any','No'] },
+      { k:'pChildren', label:'Children', type:'select', options:['Any','Wants children','Does not want children'] }
+    ];
+    // the option lists that come from the data itself
+    var countries = ['Any'].concat(PEOPLE.map(function (p) { return p.country; })
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }).sort());
+    var cities = ['Any'].concat(PEOPLE.map(function (p) { return p.city; })
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }).sort());
+    var langs = ['Any'].concat(PEOPLE.reduce(function (a, p) { return a.concat(p.languages); }, [])
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }).sort());
+    BASIC[2].options = countries; BASIC[3].options = cities;
+    ADVANCED[4].options = langs;  PREFS[2].options = countries;
+
+    /* -- filtering ---------------------------------------------------------- */
+    function matches(p) {
+      var b = STATE.basic, a = STATE.advanced;
+      if (STATE.verifiedOnly && !p.verified) return false;
+      if (STATE.savedOnly && !SAVED[p.id]) return false;
+      if (b.ageMin && p.age < +b.ageMin) return false;
+      if (b.ageMax && p.age > +b.ageMax) return false;
+      if (b.country && b.country !== 'Any' && p.country !== b.country) return false;
+      if (b.city && b.city !== 'Any' && p.city !== b.city) return false;
+      if (b.relocate && b.relocate !== 'Any' && p.relocate.indexOf(b.relocate) !== 0) return false;
+      if (b.goal && b.goal !== 'Any' && p.goal !== b.goal) return false;
+      if (a.smoking && a.smoking !== 'Any' && p.smoking !== a.smoking) return false;
+      if (a.children && a.children !== 'Any') {
+        var has = p.children !== 'None';
+        if (a.children === 'None' && has) return false;
+        if (a.children === 'Has children' && !has) return false;
+      }
+      if (a.wantsChildren && a.wantsChildren !== 'Any' && p.wantsChildren !== a.wantsChildren) return false;
+      if (a.education && a.education !== 'Any' && p.education !== a.education) return false;
+      if (a.language && a.language !== 'Any' && p.languages.indexOf(a.language) < 0) return false;
+      if (a.social && a.social !== 'Any' && p.social !== a.social) return false;
+      if (a.style && a.style !== 'Any' && p.style !== a.style) return false;
+      if (STATE.q) {
+        var hay = (p.name + ' ' + p.occupation + ' ' + p.city + ' ' + p.country + ' ' +
+                   p.interests.join(' ') + ' ' + p.languages.join(' ')).toLowerCase();
+        if (hay.indexOf(STATE.q.toLowerCase()) < 0) return false;
+      }
+      return true;
+    }
+    function inSection(p) {
+      switch (STATE.section) {
+        case 'compatible': return p.score >= 90;
+        case 'new':        return p.joined <= 90;
+        case 'active':     return p.active <= 3;
+        case 'persona':    return p.social === ME.social && p.style === ME.style;
+        case 'saved':      return !!SAVED[p.id];
+        default:           return true;
+      }
+    }
+    function results() {
+      return PEOPLE.filter(function (p) { return matches(p) && inSection(p); })
+                   .sort(function (x, y) { return y.score - x.score; });
+    }
+
+    /* -- why the number is the number --------------------------------------- */
+    function strengths(p) {
+      return Object.keys(p.factors)
+        .filter(function (k) { return p.factors[k] >= 85; })
+        .sort(function (a, b) { return p.factors[b] - p.factors[a]; })
+        .map(function (k) { return FACTOR_LABELS[k]; });
+    }
+    function insight(p) {
+      var s = strengths(p), fit = interestFit(p);
+      var lead = 'You and ' + p.name + ' ';
+      if (s.length >= 2) lead += 'line up most on ' + s[0].toLowerCase() + ' and ' + s[1].toLowerCase() + '.';
+      else if (s.length === 1) lead += 'line up most on ' + s[0].toLowerCase() + '.';
+      else lead += 'have no single factor that stands out, which is itself worth knowing.';
+      if (fit.shared.length) lead += ' You share ' + fit.shared.slice(0, 3).join(', ').toLowerCase() + '.';
+      if (p.goal === STATE.goal) lead += ' You are both asking for the same thing: ' + p.goal.toLowerCase() + '.';
+      else lead += ' She is looking for ' + p.goal.toLowerCase() + ', where you have said ' + STATE.goal.toLowerCase() + '.';
+      return lead;
+    }
+    var ASK = [
+      { q:'Why do you think we are compatible?', a:function (p) { return insight(p); } },
+      { q:'What should I know before contacting her?', a:function (p) {
+          return p.diff.length
+            ? 'The things worth raising early: ' + p.diff.join('; ').toLowerCase() + '. None of them is a reason not to meet — they are the reasons to be direct at the first meeting rather than the fourth.'
+            : 'Nothing on her file conflicts with yours in a way worth raising in advance. That is unusual, and not the same as saying it will work.'; } },
+      { q:'Where are we least alike?', a:function (p) {
+          var low = Object.keys(p.factors).sort(function (a, b) { return p.factors[a] - p.factors[b]; })[0];
+          return 'Lowest of the eight factors is ' + FACTOR_LABELS[low].toLowerCase() + ', at ' + p.factors[low] + ' per cent. ' +
+                 'It is weighted at ' + WEIGHTS[low] + ' of 100 in your score, so it moves the figure less than it may matter to you.'; } },
+      { q:'How was this figure worked out?', a:function (p) {
+          return 'Eight factors, each weighted: ' + Object.keys(WEIGHTS).map(function (k) {
+            return FACTOR_LABELS[k].toLowerCase() + ' ' + WEIGHTS[k]; }).join(', ') +
+            '. Her weighted average is ' + p.score + '. The weights are your advisor’s to change, and they are not fixed for every member.'; } }
+    ];
+
+    /* -- rendering ----------------------------------------------------------- */
+    var el = MATCH.el, field = MATCH.field, headOf = MATCH.head;
+
+    function card(p) {
+      var a = el('article', 'ltr-card' + (SAVED[p.id] ? ' is-saved' : ''));
+      var img = el('img', 'ltr-card__plate');
+      img.src = plate(p); img.alt = ''; img.setAttribute('aria-hidden', 'true'); img.loading = 'lazy';
+      a.appendChild(img);
+
+      var body = el('div', 'ltr-card__body');
+      if (p.verified) {
+        var v = el('span', 'ltr-vfd'); v.appendChild(el('i', null, '✓'));
+        v.appendChild(el('span', null, 'Legend Verified')); body.appendChild(v);
+      } else {
+        body.appendChild(el('span', 'ltr-vfd ltr-vfd--no', 'Verification in progress'));
+      }
+      body.appendChild(el('h3', 'ltr-card__name', p.name + ', ' + p.age));
+      body.appendChild(el('p', 'ltr-card__where', p.city + ', ' + p.country));
+      body.appendChild(el('p', 'ltr-card__goal', p.goal));
+
+      var sc = el('div', 'ltr-score');
+      sc.appendChild(el('span', 'ltr-score__n', p.score + '%'));
+      sc.appendChild(el('span', 'ltr-score__l', 'Compatibility'));
+      var bar = el('span', 'ltr-score__bar');
+      var fill = el('span'); fill.style.width = p.score + '%'; bar.appendChild(fill);
+      sc.appendChild(bar);
+      body.appendChild(sc);
+
+      body.appendChild(el('p', 'ltr-card__occ', p.occupation));
+      var tags = el('p', 'ltr-card__tags', p.interests.slice(0, 4).join(' · '));
+      body.appendChild(tags);
+      body.appendChild(el('p', 'ltr-card__seen',
+        (STATUS[p.id] === 'connected' ? 'Connected · ' : STATUS[p.id] === 'sent' ? 'Request sent · ' : '') +
+        (p.active <= 1 ? 'Active today' : 'Active ' + p.active + ' days ago')));
+
+      var acts = el('div', 'ltr-card__acts');
+      var view = el('button', 'btn', null); view.type = 'button';
+      view.appendChild(el('span', null, 'View profile')); view.appendChild(el('i', 'arrow'));
+      view.addEventListener('click', function () { openSheet(p); });
+      var save = el('button', 'ltr-heart'); save.type = 'button';
+      save.setAttribute('aria-pressed', SAVED[p.id] ? 'true' : 'false');
+      save.setAttribute('aria-label', (SAVED[p.id] ? 'Remove ' : 'Save ') + p.name);
+      save.textContent = SAVED[p.id] ? '♥' : '♡';
+      save.addEventListener('click', function () {
+        SAVED[p.id] = !SAVED[p.id]; render();
+        announce((SAVED[p.id] ? 'Saved ' : 'Removed ') + p.name + '.');
+      });
+      acts.appendChild(view); acts.appendChild(save);
+      body.appendChild(acts);
+
+      a.appendChild(body);
+      return a;
+    }
+
+    var grid = $('#ltr-grid'), empty = $('#ltr-empty'), moreBtn = $('#ltr-more'), shownP = $('#ltr-shown');
+    var live = el('p', 'sr-only'); live.setAttribute('role', 'status'); live.setAttribute('aria-live', 'polite');
+    ltrView.appendChild(live);
+    function announce(t) { live.textContent = t; }
+
+    function render() {
+      var all = results();
+      var page = all.slice(0, STATE.shown);
+      grid.textContent = '';
+      page.forEach(function (p) { grid.appendChild(card(p)); });
+      empty.hidden = all.length > 0;
+      moreBtn.hidden = all.length <= STATE.shown;
+      shownP.textContent = all.length
+        ? 'Showing ' + page.length + ' of ' + all.length + ' in this group.'
+        : '';
+      $('#ltr-count').textContent = PEOPLE.filter(matches).length;
+      $('#ltr-where').textContent = (STATE.basic.city && STATE.basic.city !== 'Any')
+        ? STATE.basic.city : (STATE.basic.country && STATE.basic.country !== 'Any' ? STATE.basic.country : 'Anywhere');
+      $('#ltr-goal').textContent = STATE.goal;
+      $('#ltr-verified').textContent = STATE.verifiedOnly ? 'Verified only' : 'All members';
+      $$('#ltr-sections button').forEach(function (b) {
+        var on = b.getAttribute('data-section') === STATE.section;
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+
+    /* -- the profile, opened over the page ---------------------------------- */
+    var sheet = $('#ltr-sheet'), sheetBody = $('#ltr-sheet-body'), lastFocus = null;
+
+    function bars(p) {
+      var wrap = el('div', 'ltr-bars');
+      Object.keys(p.factors).forEach(function (k) {
+        var row = el('div', 'ltr-bars__row');
+        row.appendChild(el('span', 'k', FACTOR_LABELS[k]));
+        var b = el('span', 'b'); var f = el('i'); f.style.width = p.factors[k] + '%'; b.appendChild(f);
+        row.appendChild(b);
+        row.appendChild(el('span', 'v', p.factors[k] + '%'));
+        wrap.appendChild(row);
+      });
+      return wrap;
+    }
+
+    function openSheet(p) {
+      lastFocus = document.activeElement;
+      sheetBody.textContent = '';
+
+      var head = el('div', 'ltr-sheet__head');
+      var img = el('img', 'ltr-sheet__plate'); img.src = plate(p); img.alt = ''; img.setAttribute('aria-hidden','true');
+      head.appendChild(img);
+      var hb = el('div');
+      if (p.verified) {
+        var v = el('span', 'ltr-vfd'); v.appendChild(el('i', null, '✓'));
+        v.appendChild(el('span', null, 'Legend Verified')); hb.appendChild(v);
+      }
+      var h = el('h2', null, p.name + ', ' + p.age); h.id = 'ltr-sheet-name'; hb.appendChild(h);
+      hb.appendChild(el('p', 'ltr-sheet__where', p.city + ', ' + p.country + ' · ' + p.occupation));
+      hb.appendChild(el('p', 'ltr-sheet__score', p.score + '% compatible'));
+      head.appendChild(hb);
+      sheetBody.appendChild(head);
+
+      // actions, and the connect flow
+      var acts = el('div', 'ltr-sheet__acts');
+      var connect = el('button', 'btn btn--solid'); connect.type = 'button';
+      var msg = el('button', 'btn'); msg.type = 'button'; msg.appendChild(el('span', null, 'Message'));
+      var save2 = el('button', 'btn'); save2.type = 'button';
+      var report = el('button', 'btn btn--quiet', 'Report'); report.type = 'button';
+      var block = el('button', 'btn btn--quiet', 'Block'); block.type = 'button';
+
+      function paintActions() {
+        connect.textContent = STATUS[p.id] === 'connected' ? 'Connected'
+          : STATUS[p.id] === 'sent' ? 'Request sent' : 'Connect';
+        connect.disabled = !!STATUS[p.id];
+        msg.hidden = STATUS[p.id] !== 'connected';
+        save2.textContent = SAVED[p.id] ? '♥ Saved' : '♡ Save';
+      }
+      connect.addEventListener('click', function () { openConnect(p, paintActions); });
+      save2.addEventListener('click', function () { SAVED[p.id] = !SAVED[p.id]; paintActions(); render(); });
+      msg.addEventListener('click', function () { location.hash = '#messages'; });
+      report.addEventListener('click', function () { openReport(p); });
+      block.addEventListener('click', function () {
+        STATUS[p.id] = 'blocked'; note(block, p.name + ' is blocked. She is not shown to you again, is not told, and any request between you is withdrawn.');
+      });
+      [connect, msg, save2, report, block].forEach(function (b) { acts.appendChild(b); });
+      paintActions();
+      sheetBody.appendChild(acts);
+
+      var connectBox = el('div', 'ltr-connect'); connectBox.hidden = true;
+      sheetBody.appendChild(connectBox);
+      function openConnect(person, done) {
+        connectBox.hidden = false; connectBox.textContent = '';
+        connectBox.appendChild(el('p', 'ask__lbl', 'Connect with ' + person.name));
+        connectBox.appendChild(el('p', 'quiet', 'Why would you like to connect? A sentence is enough, and it is optional.'));
+        var ta = el('textarea'); ta.rows = 3; ta.placeholder = 'Optional message';
+        ta.setAttribute('aria-label', 'Optional message to ' + person.name);
+        connectBox.appendChild(ta);
+        var send = el('button', 'btn btn--solid', 'Send connection request'); send.type = 'button';
+        send.addEventListener('click', function () {
+          STATUS[person.id] = 'sent';
+          connectBox.textContent = '';
+          connectBox.appendChild(el('p', 'ltr-sent', 'Request sent. She decides whether to answer, and is told nothing about you beyond what you have agreed to disclose.'));
+          done(); render(); announce('Connection request sent to ' + person.name + '.');
+        });
+        connectBox.appendChild(send);
+        ta.focus();
+      }
+      function openReport(person) {
+        connectBox.hidden = false; connectBox.textContent = '';
+        connectBox.appendChild(el('p', 'ask__lbl', 'Report ' + person.name));
+        var sel = el('select');
+        ['Fake profile','Misrepresentation','Harassment','Inappropriate behaviour','Scam or fraud','Safety concern','Other']
+          .forEach(function (o) { var op = el('option', null, o); op.value = o; sel.appendChild(op); });
+        sel.setAttribute('aria-label', 'Reason for reporting');
+        connectBox.appendChild(sel);
+        var ta = el('textarea'); ta.rows = 3; ta.placeholder = 'Anything you would like the house to know';
+        ta.setAttribute('aria-label', 'Details');
+        connectBox.appendChild(ta);
+        var send = el('button', 'btn btn--solid', 'Send to the house'); send.type = 'button';
+        send.addEventListener('click', function () {
+          connectBox.textContent = '';
+          connectBox.appendChild(el('p', 'ltr-sent', 'Read by a person today, not a queue. You are told what was done, and she is never told who reported her.'));
+        });
+        connectBox.appendChild(send);
+      }
+
+      // about, and the persona note
+      var about = el('div', 'panel');
+      about.appendChild(headOf('About ' + p.name));
+      var ab = el('div', 'panel__body');
+      ab.appendChild(el('p', 'ltr-about', p.about));
+      ab.appendChild(el('p', 'ask__lbl', 'Persona note'));
+      ab.appendChild(el('p', 'quiet', 'Shown with her permission. ' + p.name + ' reads as ' +
+        p.style.toLowerCase() + ' in conversation and prefers ' + p.social.toLowerCase() + '. ' +
+        'Her persona is her own; it is not a judgement, and it is not shown to anyone she has not agreed to.'));
+      about.appendChild(ab);
+      sheetBody.appendChild(about);
+
+      // why the score is the score
+      var why = el('div', 'panel');
+      why.appendChild(headOf('Why you are compatible', p.score + '% overall'));
+      var wb = el('div', 'panel__body');
+      wb.appendChild(bars(p));
+      var st = strengths(p);
+      if (st.length) {
+        wb.appendChild(el('p', 'ask__lbl', 'Strong compatibility in'));
+        var ul = el('ul', 'includes');
+        st.forEach(function (s) { ul.appendChild(el('li', null, s)); });
+        wb.appendChild(ul);
+      }
+      if (p.diff.length) {
+        wb.appendChild(el('p', 'ask__lbl', 'Potential differences'));
+        var ul2 = el('ul', 'includes includes--not');
+        p.diff.forEach(function (d) { ul2.appendChild(el('li', null, d)); });
+        wb.appendChild(ul2);
+      }
+      why.appendChild(wb);
+      sheetBody.appendChild(why);
+
+      // the assistant, in the context of this one person
+      var ai = el('div', 'panel');
+      ai.appendChild(headOf('Ask Legend about this match', 'Reads both files'));
+      var aib = el('div', 'panel__body');
+      aib.appendChild(el('p', 'ltr-insight', insight(p)));
+      var thread = el('div', 'ltr-ai-thread');
+      aib.appendChild(thread);
+      var chips = el('div', 'ask__chips');
+      ASK.forEach(function (item) {
+        var b = el('button', null, item.q); b.type = 'button';
+        b.addEventListener('click', function () {
+          thread.appendChild(el('p', 'ltr-ai-q', item.q));
+          thread.appendChild(el('p', 'ltr-ai-a', item.a(p)));
+          b.remove();
+        });
+        chips.appendChild(b);
+      });
+      aib.appendChild(chips);
+      aib.appendChild(el('p', 'quiet', 'Written rules over the two files, not a language model, and nothing here is sent anywhere.'));
+      ai.appendChild(aib);
+      sheetBody.appendChild(ai);
+
+      // what she is looking for, and how she lives
+      var facts = el('div', 'panel');
+      facts.appendChild(headOf('Goals, and how she lives'));
+      var fb = el('div', 'panel__body');
+      var dl = el('dl', 'kv');
+      [['Looking for', p.goal], ['Relocating', p.relocate], ['Children', p.children],
+       ['Wants children', p.wantsChildren], ['Smoking', p.smoking], ['Education', p.education],
+       ['Languages', p.languages.join(', ')], ['Social', p.social], ['Communication', p.style],
+       ['Interests', p.interests.join(', ')]].forEach(function (r) {
+        dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1]));
+      });
+      fb.appendChild(dl);
+      fb.appendChild(el('div', 'note-inline',
+        'What is withheld stays withheld: her surname, her photograph and her address are not on this page and are not ours to give. They are disclosed by her, to you, if she answers.'));
+      facts.appendChild(fb);
+      sheetBody.appendChild(facts);
+
+      sheet.hidden = false;
+      document.body.style.overflow = 'hidden';
+      $('.ltr-sheet__close', sheet).focus();
+    }
+    function closeSheet() {
+      sheet.hidden = true;
+      document.body.style.overflow = '';
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    $$('[data-ltr-close]').forEach(function (b) { b.addEventListener('click', closeSheet); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !sheet.hidden) { e.preventDefault(); closeSheet(); }
+    });
+
+    /* -- build the controls --------------------------------------------------- */
+    var goalsWrap = $('#ltr-goals');
+    GOALS.forEach(function (g) {
+      var b = el('button', 'chip' + (g === STATE.goal ? ' is-on' : ''), g);
+      b.type = 'button'; b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', g === STATE.goal ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        STATE.goal = g;
+        $$('button', goalsWrap).forEach(function (o) {
+          var on = o === b;
+          o.classList.toggle('is-on', on);
+          o.setAttribute('aria-checked', on ? 'true' : 'false');
+        });
+        render(); announce('Your goal is now ' + g + '.');
+      });
+      goalsWrap.appendChild(b);
+    });
+
+    function build(list, host, store) {
+      var wrap = $(host);
+      list.forEach(function (def) { wrap.appendChild(field(def, store, function () { STATE.shown = 6; render(); })); });
+    }
+    build(BASIC, '#ltr-basic', STATE.basic);
+    build(ADVANCED, '#ltr-advanced', STATE.advanced);
+    build(PREFS, '#ltr-prefs', STATE.prefs);
+
+    var sectionsWrap = $('#ltr-sections');
+    SECTIONS.forEach(function (s) {
+      var b = el('button'); b.type = 'button';
+      b.setAttribute('data-section', s.id);
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', s.id === STATE.section ? 'true' : 'false');
+      b.appendChild(el('span', 'ltr-tab__l', s.label));
+      b.appendChild(el('span', 'ltr-tab__n', s.note));
+      b.addEventListener('click', function () { STATE.section = s.id; STATE.shown = 6; render(); });
+      sectionsWrap.appendChild(b);
+    });
+
+    $('#ltr-q').addEventListener('input', function () { STATE.q = this.value.trim(); STATE.shown = 6; render(); });
+    $('#ltr-verified-only').addEventListener('change', function () { STATE.verifiedOnly = this.checked; render(); });
+    $('#ltr-saved-only').addEventListener('change', function () { STATE.savedOnly = this.checked; render(); });
+    moreBtn.addEventListener('click', function () { STATE.shown += 6; render(); });
+    $('#ltr-clear').addEventListener('click', function () {
+      STATE.q = ''; STATE.basic = {}; STATE.advanced = {}; STATE.verifiedOnly = false;
+      STATE.savedOnly = false; STATE.shown = 6;
+      $('#ltr-q').value = ''; $('#ltr-verified-only').checked = false; $('#ltr-saved-only').checked = false;
+      $('#ltr-basic').textContent = ''; $('#ltr-advanced').textContent = '';
+      build(BASIC, '#ltr-basic', STATE.basic); build(ADVANCED, '#ltr-advanced', STATE.advanced);
+      render(); announce('Filters cleared.');
+    });
+    $('#ltr-save-prefs').addEventListener('click', function (e) {
+      note(e.target, 'Saved to your file and sent to C. Vasseur. These are the standing instructions she works to between your visits.');
+    });
+
+    render();
+  })();
+
+  /* --- Short-term relationship: intent, timing, place ----------------------
+     A different product from the long-term surface, not a re-skin of it. Three
+     questions decide a short-term match — what, when, where — so they carry
+     half the weight between them, the card leads with dates rather than
+     values, and the connect flow opens on the overlap the two people actually
+     share rather than on a message box.                                      */
+  var stmView = $('#view-find-short');
+  if (stmView && typeof MATCH !== 'undefined') (function () {
+    var el = MATCH.el, field = MATCH.field, headOf = MATCH.head;
+
+    /* -- weights: timing and intent lead here ------------------------------ */
+    var WEIGHTS = {
+      intent: 25, availability: 20, location: 15, preferences: 15,
+      lifestyle: 10, interests: 5, communication: 5, persona: 5
+    };
+    var LABELS = {
+      intent:'Intent', availability:'Timing', location:'Location',
+      preferences:'Relationship preferences', lifestyle:'Lifestyle',
+      interests:'Interests', communication:'Communication', persona:'Persona'
+    };
+
+    var INTENTS = ['Short-Term Relationship','Casual Dating','Short-Term Companionship',
+                   'Dating During Travel','Social Companionship','Open to Exploring'];
+    var DURATIONS = ['A few days','1–2 weeks','2–4 weeks','1–3 months','3–6 months','Flexible'];
+    var STYLES = ['Casual','Romantic','Exclusive for the duration','Non-exclusive','Flexible'];
+
+    /* -- dates. Everything here is a day number, so overlap is arithmetic. -- */
+    var DAY = 86400000;
+    function d(iso) { return new Date(iso + 'T00:00:00'); }
+    function iso(dt) { return dt.toISOString().slice(0, 10); }
+    function fmt(isoStr) {
+      var dt = d(isoStr);
+      return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
+    function overlap(aFrom, aTo, bFrom, bTo) {
+      var s = Math.max(d(aFrom).getTime(), d(bFrom).getTime());
+      var e = Math.min(d(aTo).getTime(), d(bTo).getTime());
+      if (e < s) return null;
+      return { from: iso(new Date(s)), to: iso(new Date(e)), days: Math.round((e - s) / DAY) + 1 };
+    }
+    // sample dates hang off today, so the page never goes stale
+    var t0 = new Date(); t0.setHours(0, 0, 0, 0);
+    function plus(n) { return iso(new Date(t0.getTime() + n * DAY)); }
+
+    var ME = {
+      intent: null, duration: '2–4 weeks', styles: ['Casual'],
+      city: 'London', country: 'United Kingdom',
+      from: plus(0), to: plus(20),
+      travel: false, travelCity: 'Paris', travelFrom: plus(12), travelTo: plus(18),
+      interests: ['Travel','Dining','Art','Culture'],
+      social: 'Small rooms', style: 'Direct'
+    };
+
+    var PEOPLE = [
+      { id:'s1', name:'Sofia', age:34, city:'Berlin', country:'Germany', verified:true,
+        intent:'Short-Term Relationship', duration:'2–4 weeks', styles:['Romantic','Exclusive for the duration'],
+        from:plus(3), to:plus(24), active:0, mode:'Local',
+        interests:['Travel','Dining','Art','Music'], smoking:'No', fitness:'Often',
+        languages:['German','English'], social:'Small rooms', comms:'Direct',
+        looking:'Someone for dinners, galleries and a few days away during a quiet month at work.',
+        f:{ intent:96, preferences:90, lifestyle:88, interests:85, communication:87, persona:86 } },
+
+      { id:'s2', name:'Elena', age:31, city:'London', country:'United Kingdom', verified:true,
+        intent:'Casual Dating', duration:'1–3 months', styles:['Casual','Non-exclusive'],
+        from:plus(0), to:plus(40), active:0, mode:'Local',
+        interests:['Dining','Nightlife','Fashion','Travel'], smoking:'No', fitness:'Sometimes',
+        languages:['English','Spanish'], social:'Large rooms', comms:'Warm',
+        looking:'Good dinners and better conversation, without either of us pretending it is more.',
+        f:{ intent:82, preferences:78, lifestyle:84, interests:80, communication:83, persona:76 } },
+
+      { id:'s3', name:'Margot', age:37, city:'Paris', country:'France', verified:true,
+        intent:'Dating During Travel', duration:'1–2 weeks', styles:['Romantic','Flexible'],
+        from:plus(10), to:plus(21), active:1, mode:'Visiting soon',
+        interests:['Art','Culture','Dining','Travel'], smoking:'No', fitness:'Often',
+        languages:['French','English','Italian'], social:'Small rooms', comms:'Direct',
+        looking:'In one city for a fortnight at a time. I would rather see it with someone than alone.',
+        f:{ intent:91, preferences:88, lifestyle:86, interests:94, communication:89, persona:90 } },
+
+      { id:'s4', name:'Nadia', age:29, city:'London', country:'United Kingdom', verified:false,
+        intent:'Social Companionship', duration:'Flexible', styles:['Casual','Flexible'],
+        from:plus(2), to:plus(60), active:2, mode:'Local',
+        interests:['Events','Music','Fashion','Dining'], smoking:'Occasionally', fitness:'Rarely',
+        languages:['English','Russian'], social:'Large rooms', comms:'Warm',
+        looking:'Company for the season — openings, dinners, the odd weekend. Nothing heavier.',
+        f:{ intent:74, preferences:70, lifestyle:69, interests:72, communication:78, persona:68 } },
+
+      { id:'s5', name:'Juliette', age:35, city:'Geneva', country:'Switzerland', verified:true,
+        intent:'Short-Term Companionship', duration:'2–4 weeks', styles:['Casual','Exclusive for the duration'],
+        from:plus(25), to:plus(50), active:1, mode:'Local',
+        interests:['Travel','Wellness','Dining','Art'], smoking:'No', fitness:'Often',
+        languages:['French','English','German'], social:'Small rooms', comms:'Considered',
+        looking:'A month between contracts, and a preference for spending it well rather than alone.',
+        f:{ intent:88, preferences:85, lifestyle:87, interests:83, communication:86, persona:88 } },
+
+      { id:'s6', name:'Ava', age:33, city:'Paris', country:'France', verified:true,
+        intent:'Short-Term Relationship', duration:'1–3 months', styles:['Romantic','Exclusive for the duration'],
+        from:plus(8), to:plus(35), active:0, mode:'Local',
+        interests:['Art','Dining','Culture','Music'], smoking:'No', fitness:'Sometimes',
+        languages:['French','English'], social:'Small rooms', comms:'Direct',
+        looking:'Here until the winter. Honest that it ends, and would like it to be good until it does.',
+        f:{ intent:93, preferences:91, lifestyle:85, interests:90, communication:88, persona:89 } },
+
+      { id:'s7', name:'Lucia', age:38, city:'Milan', country:'Italy', verified:true,
+        intent:'Dating During Travel', duration:'A few days', styles:['Casual','Flexible'],
+        from:plus(14), to:plus(19), active:3, mode:"I'm traveling",
+        interests:['Travel','Dining','Fashion','Culture'], smoking:'No', fitness:'Often',
+        languages:['Italian','English'], social:'Large rooms', comms:'Warm',
+        looking:'Four days in a city I do not know well, and no interest in seeing it from a hotel bar.',
+        f:{ intent:85, preferences:80, lifestyle:82, interests:88, communication:84, persona:79 } },
+
+      { id:'s8', name:'Ines', age:32, city:'Lisbon', country:'Portugal', verified:true,
+        intent:'Open to Exploring', duration:'Flexible', styles:['Flexible'],
+        from:plus(1), to:plus(90), active:5, mode:'Local',
+        interests:['Wellness','Travel','Music','Dining'], smoking:'No', fitness:'Often',
+        languages:['Portuguese','English','Spanish'], social:'Small rooms', comms:'Considered',
+        looking:'Not sure what I am looking for, and would rather say that than choose a label.',
+        f:{ intent:62, preferences:68, lifestyle:80, interests:76, communication:81, persona:78 } },
+
+      { id:'s9', name:'Petra', age:36, city:'Vienna', country:'Austria', verified:true,
+        intent:'Short-Term Relationship', duration:'2–4 weeks', styles:['Romantic','Casual'],
+        from:plus(30), to:plus(58), active:2, mode:'Local',
+        interests:['Music','Art','Dining','Culture'], smoking:'No', fitness:'Sometimes',
+        languages:['German','English'], social:'Small rooms', comms:'Direct',
+        looking:'A season off between productions, spent somewhere other than a rehearsal room.',
+        f:{ intent:90, preferences:86, lifestyle:84, interests:87, communication:85, persona:87 } },
+
+      { id:'s10', name:'Yasmin', age:30, city:'London', country:'United Kingdom', verified:true,
+        intent:'Casual Dating', duration:'1–2 weeks', styles:['Casual','Non-exclusive'],
+        from:plus(0), to:plus(12), active:0, mode:'Local',
+        interests:['Nightlife','Dining','Sports','Music'], smoking:'No', fitness:'Often',
+        languages:['English','Arabic'], social:'Large rooms', comms:'Warm',
+        looking:'Two weeks before I move for work. Light, and clear about the date it ends.',
+        f:{ intent:80, preferences:76, lifestyle:79, interests:74, communication:82, persona:73 } },
+
+      { id:'s11', name:'Delphine', age:39, city:'Paris', country:'France', verified:false,
+        intent:'Short-Term Companionship', duration:'1–3 months', styles:['Casual','Flexible'],
+        from:plus(11), to:plus(45), active:6, mode:'Local',
+        interests:['Art','Culture','Travel','Wellness'], smoking:'No', fitness:'Sometimes',
+        languages:['French','English'], social:'Small rooms', comms:'Considered',
+        looking:'Company on stated terms, for the length of a project that keeps me in one place.',
+        f:{ intent:84, preferences:82, lifestyle:83, interests:86, communication:80, persona:82 } },
+
+      { id:'s12', name:'Clara', age:34, city:'Amsterdam', country:'Netherlands', verified:true,
+        intent:'Social Companionship', duration:'A few days', styles:['Casual'],
+        from:plus(4), to:plus(9), active:1, mode:'Visiting soon',
+        interests:['Events','Art','Dining','Business'], smoking:'No', fitness:'Often',
+        languages:['Dutch','English'], social:'Large rooms', comms:'Direct',
+        looking:'In town for a conference and a dinner I would rather not attend by myself.',
+        f:{ intent:77, preferences:74, lifestyle:81, interests:75, communication:83, persona:72 } },
+    ];
+
+    /* -- the three that decide it ------------------------------------------ */
+    function myWindow() {
+      return ME.travel ? { from: ME.travelFrom, to: ME.travelTo, city: ME.travelCity }
+                       : { from: ME.from, to: ME.to, city: ME.city };
+    }
+    function overlapOf(p) {
+      var w = myWindow();
+      return overlap(w.from, w.to, p.from, p.to);
+    }
+    function timingFit(p) {
+      var o = overlapOf(p);
+      if (!o) return 0;
+      var mine = Math.round((d(myWindow().to) - d(myWindow().from)) / DAY) + 1;
+      return Math.min(100, Math.round(o.days / Math.max(1, Math.min(mine, 21)) * 100));
+    }
+    function locationFit(p) {
+      var w = myWindow();
+      if (p.city === w.city) return 100;
+      if (p.country === ME.country) return 78;
+      return /travel|visit/i.test(p.mode) ? 70 : 52;
+    }
+    function intentFit(p) {
+      if (!ME.intent) return p.f.intent;                 // nothing chosen yet
+      if (p.intent === ME.intent) return 100;
+      var loose = { 'Open to Exploring': 70 };
+      if (loose[p.intent]) return loose[p.intent];
+      return Math.max(45, p.f.intent - 20);
+    }
+    function factorsOf(p) {
+      return {
+        intent: intentFit(p), availability: timingFit(p), location: locationFit(p),
+        preferences: p.f.preferences, lifestyle: p.f.lifestyle,
+        interests: p.f.interests, communication: p.f.communication, persona: p.f.persona
+      };
+    }
+    function scoreOf(f) {
+      var total = 0, sum = 0;
+      Object.keys(WEIGHTS).forEach(function (k) { total += WEIGHTS[k]; sum += WEIGHTS[k] * (f[k] || 0); });
+      return Math.round(sum / total);
+    }
+    function recompute() {
+      PEOPLE.forEach(function (p) {
+        p.overlap = overlapOf(p);
+        p.factors = factorsOf(p);
+        p.score = scoreOf(p.factors);
+      });
+    }
+
+    /* -- state -------------------------------------------------------------- */
+    var STATE = { q:'', verifiedOnly:false, overlapOnly:false, savedOnly:false,
+                  section:'now', shown:6, basic:{}, advanced:{} };
+    var SAVED = {}, STATUS = {};
+
+    var SECTIONS = [
+      { id:'now',    label:'Available now',    note:'Open today' },
+      { id:'best',   label:'Your best matches', note:'Highest overall' },
+      { id:'dates',  label:'Matching my dates', note:'Seven days of overlap or more' },
+      { id:'nearby', label:'Nearby',            note:'In the city you are in' },
+      { id:'travel', label:'Travel matches',    note:'Visiting, or on the move' },
+      { id:'active', label:'Recently active',   note:'Seen in the last two days' },
+      { id:'saved',  label:'Saved',             note:'Kept for later' }
+    ];
+
+    var WHEN = [
+      { k:'from', label:'Available from', type:'date', value:ME.from },
+      { k:'to',   label:'Available until', type:'date', value:ME.to },
+      { k:'city', label:'City', type:'select', options:[] },
+      { k:'mode', label:'Your situation', type:'select',
+        options:["I'm local","I'm staying in this city","I'm visiting soon","I'm traveling"] }
+    ];
+    var TRAVEL = [
+      { k:'travelCity', label:'Travelling to', type:'select', options:[] },
+      { k:'travelFrom', label:'Arrival', type:'date', value:ME.travelFrom },
+      { k:'travelTo',   label:'Departure', type:'date', value:ME.travelTo }
+    ];
+    var BASIC = [
+      { k:'ageMin', label:'Minimum age', type:'number', value:28 },
+      { k:'ageMax', label:'Maximum age', type:'number', value:44 },
+      { k:'city',   label:'Their city', type:'select', options:[] },
+      { k:'intent', label:'Their intent', type:'select', options:['Any'].concat(INTENTS) },
+      { k:'duration', label:'Their duration', type:'select', options:['Any'].concat(DURATIONS) },
+      { k:'mode',   label:'Their situation', type:'select',
+        options:['Any','Local','Visiting soon',"I'm traveling"] }
+    ];
+    var ADVANCED = [
+      { k:'smoking', label:'Smoking', type:'select', options:['Any','No','Occasionally'] },
+      { k:'fitness', label:'Fitness', type:'select', options:['Any','Often','Sometimes','Rarely'] },
+      { k:'language', label:'Speaks', type:'select', options:[] },
+      { k:'social', label:'Social lifestyle', type:'select', options:['Any','Small rooms','Large rooms'] },
+      { k:'comms', label:'Communication', type:'select', options:['Any','Direct','Considered','Warm'] },
+      { k:'interest', label:'Interested in', type:'select', options:[] },
+      { k:'style', label:'Relationship style', type:'select', options:['Any'].concat(STYLES) }
+    ];
+    var cities = PEOPLE.map(function (p) { return p.city; })
+      .concat([ME.city, ME.travelCity])
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }).sort();
+    var langs = PEOPLE.reduce(function (a, p) { return a.concat(p.languages); }, [])
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }).sort();
+    var ints = PEOPLE.reduce(function (a, p) { return a.concat(p.interests); }, [])
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }).sort();
+    WHEN[2].options = cities; WHEN[2].value = ME.city;
+    TRAVEL[0].options = cities; TRAVEL[0].value = ME.travelCity;
+    BASIC[2].options = ['Any'].concat(cities);
+    ADVANCED[2].options = ['Any'].concat(langs);
+    ADVANCED[5].options = ['Any'].concat(ints);
+
+    /* -- filtering ---------------------------------------------------------- */
+    function passes(p) {
+      var b = STATE.basic, a = STATE.advanced;
+      if (STATE.verifiedOnly && !p.verified) return false;
+      if (STATE.savedOnly && !SAVED[p.id]) return false;
+      if (STATE.overlapOnly && !p.overlap) return false;
+      if (b.ageMin && p.age < +b.ageMin) return false;
+      if (b.ageMax && p.age > +b.ageMax) return false;
+      if (b.city && b.city !== 'Any' && p.city !== b.city) return false;
+      if (b.intent && b.intent !== 'Any' && p.intent !== b.intent) return false;
+      if (b.duration && b.duration !== 'Any' && p.duration !== b.duration) return false;
+      if (b.mode && b.mode !== 'Any' && p.mode !== b.mode) return false;
+      if (a.smoking && a.smoking !== 'Any' && p.smoking !== a.smoking) return false;
+      if (a.fitness && a.fitness !== 'Any' && p.fitness !== a.fitness) return false;
+      if (a.language && a.language !== 'Any' && p.languages.indexOf(a.language) < 0) return false;
+      if (a.social && a.social !== 'Any' && p.social !== a.social) return false;
+      if (a.comms && a.comms !== 'Any' && p.comms !== a.comms) return false;
+      if (a.interest && a.interest !== 'Any' && p.interests.indexOf(a.interest) < 0) return false;
+      if (a.style && a.style !== 'Any' && p.styles.indexOf(a.style) < 0) return false;
+      if (STATE.q) {
+        var hay = (p.name + ' ' + p.city + ' ' + p.country + ' ' + p.intent + ' ' +
+                   p.interests.join(' ') + ' ' + p.languages.join(' ')).toLowerCase();
+        if (hay.indexOf(STATE.q.toLowerCase()) < 0) return false;
+      }
+      return true;
+    }
+    function inSection(p) {
+      var w = myWindow();
+      switch (STATE.section) {
+        case 'best':   return p.score >= 80;
+        case 'dates':  return p.overlap && p.overlap.days >= 7;
+        case 'nearby': return p.city === w.city;
+        case 'travel': return /travel|visit/i.test(p.mode) || ME.travel;
+        case 'active': return p.active <= 2;
+        case 'saved':  return !!SAVED[p.id];
+        default:       return p.overlap && d(p.from) <= t0 && d(p.to) >= t0;   // available now
+      }
+    }
+    function results() {
+      return PEOPLE.filter(function (p) { return passes(p) && inSection(p); })
+                   .sort(function (x, y) { return y.score - x.score; });
+    }
+
+    /* -- what the timing actually says --------------------------------------- */
+    function timingLine(p) {
+      if (!p.overlap) return 'No overlap with your dates';
+      var n = p.overlap.days;
+      var q = n >= 10 ? 'Great timing match' : n >= 5 ? 'Workable overlap' : 'Narrow overlap';
+      return q + ' · ' + n + ' day' + (n === 1 ? '' : 's') + ', ' + fmt(p.overlap.from) + '–' + fmt(p.overlap.to);
+    }
+    function insight(p) {
+      var bits = [];
+      if (p.overlap) bits.push('you are both free for ' + p.overlap.days + ' of the same days (' +
+        fmt(p.overlap.from) + '–' + fmt(p.overlap.to) + ')');
+      else bits.push('your dates do not currently meet, which is the first thing to fix');
+      var w = myWindow();
+      if (p.city === w.city) bits.push('you are both in ' + p.city);
+      else bits.push('she is in ' + p.city + ' and you are in ' + w.city);
+      if (ME.intent && p.intent === ME.intent) bits.push('you are asking for the same thing');
+      else if (ME.intent) bits.push('she is looking for ' + p.intent.toLowerCase() + ', where you have said ' + ME.intent.toLowerCase());
+      var shared = p.interests.filter(function (i) { return ME.interests.indexOf(i) > -1; });
+      if (shared.length) bits.push('you share ' + shared.slice(0, 3).join(', ').toLowerCase());
+      return 'You and ' + p.name + ': ' + bits.join('; ') + '.';
+    }
+    var ASK = [
+      { q:'Why this match?', a:insight },
+      { q:'What should I talk about first?', a:function (p) {
+          var shared = p.interests.filter(function (i) { return ME.interests.indexOf(i) > -1; });
+          return (shared.length ? 'Start with ' + shared[0].toLowerCase() + ' — it is on both files, so it is not a guess. '
+                                : 'You share no stated interest, so ask rather than assume. ') +
+                 'Then the dates: she is open ' + fmt(p.from) + '–' + fmt(p.to) + ', and being plain about that early is the whole advantage of this track.'; } },
+      { q:'Give me a good opening.', a:function (p) {
+          var shared = p.interests.filter(function (i) { return ME.interests.indexOf(i) > -1; });
+          return '"' + (shared.length
+            ? 'I see we both put ' + shared[0].toLowerCase() + ' down. I am free ' + fmt(p.overlap ? p.overlap.from : ME.from) + ' onwards — would you like dinner in that window?'
+            : 'Our dates line up more than most. I am free ' + fmt(ME.from) + '–' + fmt(ME.to) + ' — would dinner suit?') + '"'; } },
+      { q:'How was this figure worked out?', a:function (p) {
+          return 'Eight factors, weighted for a short-term search: ' + Object.keys(WEIGHTS).map(function (k) {
+            return LABELS[k].toLowerCase() + ' ' + WEIGHTS[k]; }).join(', ') +
+            '. Intent, timing and location carry sixty of the hundred, which is the difference between this page and the long-term one.'; } }
+    ];
+
+    /* -- rendering ------------------------------------------------------------ */
+    var grid = $('#stm-grid'), empty = $('#stm-empty'), moreBtn = $('#stm-more'), shownP = $('#stm-shown');
+    var live = el('p', 'sr-only'); live.setAttribute('role','status'); live.setAttribute('aria-live','polite');
+    stmView.appendChild(live);
+    function announce(t) { live.textContent = t; }
+
+    function card(p) {
+      var a = el('article', 'ltr-card stm-card' + (SAVED[p.id] ? ' is-saved' : ''));
+      var img = el('img', 'ltr-card__plate');
+      img.src = MATCH.plate(p.id + p.name); img.alt = ''; img.setAttribute('aria-hidden','true'); img.loading = 'lazy';
+      a.appendChild(img);
+
+      var body = el('div', 'ltr-card__body');
+      body.appendChild(MATCH.badge(p.verified));
+      body.appendChild(el('h3', 'ltr-card__name', p.name + ', ' + p.age));
+      body.appendChild(el('p', 'ltr-card__where', p.city + ', ' + p.country + ' · ' + p.mode));
+
+      // dates lead on this card, where values lead on the long-term one
+      var av = el('div', 'stm-when' + (p.overlap ? '' : ' stm-when--none'));
+      av.appendChild(el('span', 'stm-when__d', 'Available ' + fmt(p.from) + '–' + fmt(p.to)));
+      av.appendChild(el('span', 'stm-when__o', timingLine(p)));
+      body.appendChild(av);
+
+      body.appendChild(el('p', 'ltr-card__goal', p.intent + ' · ' + p.duration));
+
+      var sc = el('div', 'ltr-score');
+      sc.appendChild(el('span', 'ltr-score__n', p.score + '%'));
+      sc.appendChild(el('span', 'ltr-score__l', 'Compatibility'));
+      var bar = el('span', 'ltr-score__bar'); var fill = el('span');
+      fill.style.width = p.score + '%'; bar.appendChild(fill); sc.appendChild(bar);
+      body.appendChild(sc);
+
+      body.appendChild(el('p', 'ltr-card__tags', p.interests.slice(0, 4).join(' · ')));
+      body.appendChild(el('p', 'ltr-card__seen',
+        (STATUS[p.id] === 'connected' ? 'Connected · ' : STATUS[p.id] === 'sent' ? 'Request sent · ' : '') +
+        (p.active === 0 ? 'Active today' : 'Active ' + p.active + ' day' + (p.active === 1 ? '' : 's') + ' ago')));
+
+      var acts = el('div', 'ltr-card__acts');
+      var view = el('button', 'btn'); view.type = 'button';
+      view.appendChild(el('span', null, 'View profile')); view.appendChild(el('i', 'arrow'));
+      view.addEventListener('click', function () { openSheet(p); });
+      var save = el('button', 'ltr-heart'); save.type = 'button';
+      save.setAttribute('aria-pressed', SAVED[p.id] ? 'true' : 'false');
+      save.setAttribute('aria-label', (SAVED[p.id] ? 'Remove ' : 'Save ') + p.name);
+      save.textContent = SAVED[p.id] ? '♥' : '♡';
+      save.addEventListener('click', function () {
+        SAVED[p.id] = !SAVED[p.id]; render();
+        announce((SAVED[p.id] ? 'Saved ' : 'Removed ') + p.name + '.');
+      });
+      acts.appendChild(view); acts.appendChild(save);
+      body.appendChild(acts);
+      a.appendChild(body);
+      return a;
+    }
+
+    function render() {
+      recompute();
+      var all = results(), page = all.slice(0, STATE.shown);
+      grid.textContent = '';
+      page.forEach(function (p) { grid.appendChild(card(p)); });
+      empty.hidden = all.length > 0;
+      moreBtn.hidden = all.length <= STATE.shown;
+      shownP.textContent = all.length ? 'Showing ' + page.length + ' of ' + all.length + ' in this group.' : '';
+      var w = myWindow();
+      $('#stm-count').textContent = PEOPLE.filter(passes).length;
+      $('#stm-where').textContent = w.city + (ME.travel ? ' (travel)' : '');
+      $('#stm-when').textContent = fmt(w.from) + '–' + fmt(w.to);
+      $('#stm-verified').textContent = STATE.verifiedOnly ? 'Verified only' : 'All members';
+      var pill = $('#stm-intent-pill');
+      pill.textContent = ME.intent ? ME.intent : 'Intent required';
+      pill.className = 'pill ' + (ME.intent ? 'pill--rest' : 'pill--action');
+      $$('#stm-sections button').forEach(function (b) {
+        b.setAttribute('aria-selected', b.getAttribute('data-section') === STATE.section ? 'true' : 'false');
+      });
+    }
+
+    /* -- the profile ---------------------------------------------------------- */
+    var sheet = $('#ltr-sheet'), sheetBody = $('#ltr-sheet-body'), lastFocus = null;
+    function bars(p) {
+      var wrap = el('div', 'ltr-bars');
+      Object.keys(p.factors).forEach(function (k) {
+        var row = el('div', 'ltr-bars__row');
+        row.appendChild(el('span', 'k', LABELS[k]));
+        var b = el('span', 'b'); var f = el('i'); f.style.width = p.factors[k] + '%'; b.appendChild(f);
+        row.appendChild(b); row.appendChild(el('span', 'v', p.factors[k] + '%'));
+        wrap.appendChild(row);
+      });
+      return wrap;
+    }
+    function openSheet(p) {
+      lastFocus = document.activeElement;
+      sheetBody.textContent = '';
+
+      var head = el('div', 'ltr-sheet__head');
+      var img = el('img', 'ltr-sheet__plate'); img.src = MATCH.plate(p.id + p.name);
+      img.alt = ''; img.setAttribute('aria-hidden','true'); head.appendChild(img);
+      var hb = el('div');
+      if (p.verified) hb.appendChild(MATCH.badge(true));
+      var h = el('h2', null, p.name + ', ' + p.age); h.id = 'ltr-sheet-name'; hb.appendChild(h);
+      hb.appendChild(el('p', 'ltr-sheet__where', p.city + ', ' + p.country + ' · ' + p.mode));
+      hb.appendChild(el('p', 'ltr-sheet__score', p.score + '% compatible · ' + timingLine(p)));
+      head.appendChild(hb);
+      sheetBody.appendChild(head);
+
+      var acts = el('div', 'ltr-sheet__acts');
+      var connect = el('button', 'btn btn--solid'); connect.type = 'button';
+      var msg = el('button', 'btn'); msg.type = 'button'; msg.appendChild(el('span', null, 'Message'));
+      var save2 = el('button', 'btn'); save2.type = 'button';
+      var report = el('button', 'btn btn--quiet', 'Report'); report.type = 'button';
+      var block = el('button', 'btn btn--quiet', 'Block'); block.type = 'button';
+      function paint() {
+        connect.textContent = STATUS[p.id] === 'connected' ? 'Connected'
+          : STATUS[p.id] === 'sent' ? 'Request sent' : 'Connect';
+        connect.disabled = !!STATUS[p.id];
+        msg.hidden = STATUS[p.id] !== 'connected';
+        save2.textContent = SAVED[p.id] ? '♥ Saved' : '♡ Save';
+      }
+      var box = el('div', 'ltr-connect'); box.hidden = true;
+      connect.addEventListener('click', function () {
+        box.hidden = false; box.textContent = '';
+        box.appendChild(el('p', 'ask__lbl', 'Connect with ' + p.name));
+        // the overlap, spelled out, because it is the thing being agreed
+        var w = myWindow();
+        var dl = el('dl', 'kv');
+        [['Your availability', fmt(w.from) + '–' + fmt(w.to)],
+         ['Her availability', fmt(p.from) + '–' + fmt(p.to)],
+         ['Shared', p.overlap ? fmt(p.overlap.from) + '–' + fmt(p.overlap.to) + ' · ' + p.overlap.days + ' days' : 'None — the dates do not meet']]
+          .forEach(function (r) { dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1])); });
+        box.appendChild(dl);
+        var ta = el('textarea'); ta.rows = 3; ta.placeholder = 'Optional message';
+        ta.setAttribute('aria-label', 'Optional message to ' + p.name);
+        box.appendChild(ta);
+        var send = el('button', 'btn btn--solid', 'Send connection request'); send.type = 'button';
+        send.addEventListener('click', function () {
+          STATUS[p.id] = 'sent'; box.textContent = '';
+          box.appendChild(el('p', 'ltr-sent', 'Request sent.' + (p.overlap
+            ? ' If she accepts you have ' + p.overlap.days + ' days in common, and the conversation opens on those dates.'
+            : ' Your dates do not currently meet, and she is shown that too — one of you would have to move.')));
+          paint(); render(); announce('Connection request sent to ' + p.name + '.');
+        });
+        box.appendChild(send); ta.focus();
+      });
+      save2.addEventListener('click', function () { SAVED[p.id] = !SAVED[p.id]; paint(); render(); });
+      msg.addEventListener('click', function () { location.hash = '#messages'; });
+      report.addEventListener('click', function () {
+        box.hidden = false; box.textContent = '';
+        box.appendChild(el('p', 'ask__lbl', 'Report ' + p.name));
+        var sel = el('select');
+        ['Fake profile','Misrepresentation','Harassment','Scam or fraud','Inappropriate behaviour','Safety concern','Other']
+          .forEach(function (o) { var op = el('option', null, o); op.value = o; sel.appendChild(op); });
+        sel.setAttribute('aria-label', 'Reason for reporting'); box.appendChild(sel);
+        var ta = el('textarea'); ta.rows = 3; ta.placeholder = 'Anything you would like the house to know';
+        ta.setAttribute('aria-label','Details'); box.appendChild(ta);
+        var send = el('button', 'btn btn--solid', 'Send to the house'); send.type = 'button';
+        send.addEventListener('click', function () {
+          box.textContent = '';
+          box.appendChild(el('p', 'ltr-sent', 'Read by a person today, not a queue. You are told what was done, and she is never told who reported her.'));
+        });
+        box.appendChild(send);
+      });
+      block.addEventListener('click', function () {
+        STATUS[p.id] = 'blocked';
+        note(block, p.name + ' is blocked. She is not shown to you again, is not told, and any request between you is withdrawn.');
+      });
+      [connect, msg, save2, report, block].forEach(function (b) { acts.appendChild(b); });
+      paint();
+      sheetBody.appendChild(acts);
+      sheetBody.appendChild(box);
+
+      var about = el('div', 'panel');
+      about.appendChild(headOf('What ' + p.name + ' is looking for'));
+      var ab = el('div', 'panel__body');
+      ab.appendChild(el('p', 'ltr-about', p.looking));
+      var dl2 = el('dl', 'kv');
+      [['Intent', p.intent], ['Duration', p.duration], ['Style', p.styles.join(', ')],
+       ['Available', fmt(p.from) + ' – ' + fmt(p.to)], ['Situation', p.mode],
+       ['Interests', p.interests.join(', ')], ['Languages', p.languages.join(', ')],
+       ['Smoking', p.smoking], ['Fitness', p.fitness]]
+        .forEach(function (r) { dl2.appendChild(el('dt', null, r[0])); dl2.appendChild(el('dd', null, r[1])); });
+      ab.appendChild(dl2);
+      ab.appendChild(el('div', 'note-inline',
+        'A city, never an address. Her availability closes on its own end date rather than staying up until she remembers to take it down.'));
+      about.appendChild(ab);
+      sheetBody.appendChild(about);
+
+      var why = el('div', 'panel');
+      why.appendChild(headOf('Compatibility', p.score + '% overall'));
+      var wb = el('div', 'panel__body');
+      wb.appendChild(bars(p));
+      var strong = [];
+      if (p.overlap && p.overlap.days >= 7) strong.push('Your dates overlap by ' + p.overlap.days + ' days');
+      if (ME.intent && p.intent === ME.intent) strong.push('Same relationship intent');
+      if (p.city === myWindow().city) strong.push('Same city for the period');
+      var shared = p.interests.filter(function (i) { return ME.interests.indexOf(i) > -1; });
+      if (shared.length) strong.push('Shared interests: ' + shared.join(', '));
+      if (strong.length) {
+        wb.appendChild(el('p', 'ask__lbl', 'Strong matches'));
+        var ul = el('ul', 'includes');
+        strong.forEach(function (t) { ul.appendChild(el('li', null, t)); });
+        wb.appendChild(ul);
+      }
+      var weak = Object.keys(p.factors).filter(function (k) { return p.factors[k] < 75; });
+      if (weak.length) {
+        wb.appendChild(el('p', 'ask__lbl', 'Worth raising early'));
+        var ul2 = el('ul', 'includes includes--not');
+        weak.forEach(function (k) { ul2.appendChild(el('li', null, LABELS[k] + ' — ' + p.factors[k] + '%')); });
+        wb.appendChild(ul2);
+      }
+      why.appendChild(wb);
+      sheetBody.appendChild(why);
+
+      var ai = el('div', 'panel');
+      ai.appendChild(headOf('Ask Legend about this match', 'Reads both files'));
+      var aib = el('div', 'panel__body');
+      aib.appendChild(el('p', 'ltr-insight', insight(p)));
+      var thread = el('div', 'ltr-ai-thread'); aib.appendChild(thread);
+      var chips = el('div', 'ask__chips');
+      ASK.forEach(function (item) {
+        var b = el('button', null, item.q); b.type = 'button';
+        b.addEventListener('click', function () {
+          thread.appendChild(el('p', 'ltr-ai-q', item.q));
+          thread.appendChild(el('p', 'ltr-ai-a', item.a(p)));
+          b.remove();
+        });
+        chips.appendChild(b);
+      });
+      aib.appendChild(chips);
+      aib.appendChild(el('p', 'quiet', 'Written rules over the two files, not a language model, and nothing here is sent anywhere.'));
+      ai.appendChild(aib);
+      sheetBody.appendChild(ai);
+
+      sheet.hidden = false;
+      document.body.style.overflow = 'hidden';
+      $('.ltr-sheet__close', sheet).focus();
+    }
+
+    /* -- controls -------------------------------------------------------------- */
+    function chipRow(host, list, current, multi, onPick) {
+      var wrap = $(host);
+      list.forEach(function (v) {
+        var on = multi ? current.indexOf(v) > -1 : current === v;
+        var b = el('button', 'chip' + (on ? ' is-on' : ''), v);
+        b.type = 'button';
+        b.setAttribute('role', multi ? 'checkbox' : 'radio');
+        b.setAttribute(multi ? 'aria-checked' : 'aria-checked', on ? 'true' : 'false');
+        b.addEventListener('click', function () {
+          if (multi) {
+            var ix = current.indexOf(v);
+            if (ix > -1) current.splice(ix, 1); else current.push(v);
+            b.classList.toggle('is-on');
+            b.setAttribute('aria-checked', current.indexOf(v) > -1 ? 'true' : 'false');
+          } else {
+            $$('button', wrap).forEach(function (o) {
+              o.classList.toggle('is-on', o === b);
+              o.setAttribute('aria-checked', o === b ? 'true' : 'false');
+            });
+          }
+          onPick(v); STATE.shown = 6; render();
+        });
+        wrap.appendChild(b);
+      });
+    }
+    chipRow('#stm-intents', INTENTS, ME.intent, false, function (v) {
+      ME.intent = v; announce('Your intent is now ' + v + '.');
+    });
+    chipRow('#stm-durations', DURATIONS, ME.duration, false, function (v) { ME.duration = v; });
+    chipRow('#stm-styles', STYLES, ME.styles, true, function () {});
+
+    function build(list, host, store, prefix) {
+      var wrap = $(host);
+      list.forEach(function (def) {
+        wrap.appendChild(field(def, store, function () { STATE.shown = 6; render(); }, prefix));
+      });
+    }
+    build(WHEN, '#stm-when-fields', ME, 'stm-when');
+    build(TRAVEL, '#stm-travel-fields', ME, 'stm-travel');
+    build(BASIC, '#stm-basic', STATE.basic, 'stm');
+    build(ADVANCED, '#stm-advanced', STATE.advanced, 'stm-a');
+
+    var sectionsWrap = $('#stm-sections');
+    SECTIONS.forEach(function (s) {
+      var b = el('button'); b.type = 'button';
+      b.setAttribute('data-section', s.id); b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', s.id === STATE.section ? 'true' : 'false');
+      b.appendChild(el('span', 'ltr-tab__l', s.label));
+      b.appendChild(el('span', 'ltr-tab__n', s.note));
+      b.addEventListener('click', function () { STATE.section = s.id; STATE.shown = 6; render(); });
+      sectionsWrap.appendChild(b);
+    });
+
+    $('#stm-travel-on').addEventListener('change', function () {
+      ME.travel = this.checked;
+      $('#stm-travel-fields').hidden = !this.checked;
+      STATE.shown = 6; render();
+      announce(this.checked ? 'Travel mode on. Matches are for ' + ME.travelCity + '.' : 'Travel mode off.');
+    });
+    $('#stm-q').addEventListener('input', function () { STATE.q = this.value.trim(); STATE.shown = 6; render(); });
+    $('#stm-verified-only').addEventListener('change', function () { STATE.verifiedOnly = this.checked; render(); });
+    $('#stm-overlap-only').addEventListener('change', function () { STATE.overlapOnly = this.checked; render(); });
+    $('#stm-saved-only').addEventListener('change', function () { STATE.savedOnly = this.checked; render(); });
+    moreBtn.addEventListener('click', function () { STATE.shown += 6; render(); });
+    $('#stm-clear').addEventListener('click', function () {
+      STATE.q = ''; STATE.basic = {}; STATE.advanced = {};
+      STATE.verifiedOnly = STATE.overlapOnly = STATE.savedOnly = false; STATE.shown = 6;
+      $('#stm-q').value = '';
+      ['#stm-verified-only','#stm-overlap-only','#stm-saved-only'].forEach(function (s) { $(s).checked = false; });
+      $('#stm-basic').textContent = ''; $('#stm-advanced').textContent = '';
+      build(BASIC, '#stm-basic', STATE.basic, 'stm');
+      build(ADVANCED, '#stm-advanced', STATE.advanced, 'stm-a');
+      render(); announce('Filters cleared.');
+    });
+
+    render();
+  })();
+
+  /* --- Casual dating: curated, private, and explicit about expectations -----
+     Not a feed. The house proposes a few people rather than many, so there is
+     no infinite scroll and no swipe: the two verbs here are read the profile
+     and request a connection. Expectations are stated by both sides and
+     compared before a request can be sent, because the failure mode on this
+     track is not a bad match — it is two people who wanted different things
+     and never said so.                                                       */
+  var casView = $('#view-find-casual');
+  if (casView && typeof MATCH !== 'undefined') (function () {
+    var el = MATCH.el, field = MATCH.field, headOf = MATCH.head;
+
+    var WEIGHTS = {
+      intent: 25, lifestyle: 20, location: 15, availability: 15,
+      communication: 10, interests: 5, persona: 5, verification: 5
+    };
+    var LABELS = {
+      intent:'Dating intent', lifestyle:'Lifestyle', location:'Location',
+      availability:'Availability', communication:'Communication style',
+      interests:'Interests', persona:'Persona', verification:'Verification'
+    };
+
+    var INTENTS = ['Casual Dating','Casual Connection','Social Dating',
+                   'Romantic Connection','Short-Term Dating','Open to Exploring'];
+    var EXPECT  = ['No Long-Term Commitment','Open to Something More',
+                   'Exclusive During Dating','Non-Exclusive','Flexible'];
+    var AVAIL   = ['Available Now','This Week','This Weekend','Flexible'];
+    var LIFESTYLES = ['Social','Fitness','Travel','Business','Arts & Culture','Dining','Nightlife'];
+
+    var ME = {
+      intent: null, expect: 'No Long-Term Commitment', avail: 'This Week',
+      city: 'Munich', country: 'Germany',
+      interests: ['Fine Dining','Art','Travel','Culture'],
+      lifestyle: 'Arts & Culture', comms: 'Direct',
+      privateProfile: false
+    };
+
+    /* -- the house's own curation. A short list, by design. ----------------- */
+    var PEOPLE = [
+      { id:'c1', name:'Sophia', age:34, city:'Munich', country:'Germany', verified:true,
+        intent:'Casual Dating', expect:'No Long-Term Commitment', avail:'This Week',
+        lifestyle:'Arts & Culture', comms:'Direct', active:0,
+        interests:['Travel','Art','Fine Dining','Culture'],
+        about:'Two evenings a week that are mine, and a preference for spending them somewhere good.',
+        f:{ lifestyle:94, communication:92, interests:95, persona:90 } },
+
+      { id:'c2', name:'Valentina', age:31, city:'Munich', country:'Germany', verified:true,
+        intent:'Social Dating', expect:'Flexible', avail:'This Weekend',
+        lifestyle:'Social', comms:'Warm', active:0,
+        interests:['Dining','Music','Fashion','Travel'],
+        about:'Out most weekends and would rather be out with someone worth talking to.',
+        f:{ lifestyle:82, communication:85, interests:78, persona:80 } },
+
+      { id:'c3', name:'Amelie', age:36, city:'Vienna', country:'Austria', verified:true,
+        intent:'Casual Connection', expect:'No Long-Term Commitment', avail:'Flexible',
+        lifestyle:'Arts & Culture', comms:'Considered', active:1,
+        interests:['Art','Culture','Fine Dining','Music'],
+        about:'Clear that this is not going anywhere, and entirely serious about it being good anyway.',
+        f:{ lifestyle:90, communication:88, interests:92, persona:89 } },
+
+      { id:'c4', name:'Renata', age:33, city:'Munich', country:'Germany', verified:true,
+        intent:'Romantic Connection', expect:'Open to Something More', avail:'Available Now',
+        lifestyle:'Fitness', comms:'Direct', active:0,
+        interests:['Sports','Travel','Dining','Wellness'],
+        about:'Up at five, and honest that she is open to this turning into something.',
+        f:{ lifestyle:74, communication:86, interests:70, persona:76 } },
+
+      { id:'c5', name:'Léa', age:29, city:'Zurich', country:'Switzerland', verified:true,
+        intent:'Casual Dating', expect:'Non-Exclusive', avail:'This Week',
+        lifestyle:'Business', comms:'Direct', active:2,
+        interests:['Business','Travel','Fine Dining','Fashion'],
+        about:'Travels for work three weeks in four and says so before the first dinner.',
+        f:{ lifestyle:78, communication:84, interests:80, persona:77 } },
+
+      { id:'c6', name:'Marta', age:38, city:'Munich', country:'Germany', verified:false,
+        intent:'Open to Exploring', expect:'Flexible', avail:'Flexible',
+        lifestyle:'Nightlife', comms:'Warm', active:4,
+        interests:['Nightlife','Music','Fashion','Dining'],
+        about:'Not sure what she wants, and would rather explore than pretend otherwise.',
+        f:{ lifestyle:66, communication:75, interests:64, persona:68 } },
+
+      { id:'c7', name:'Nour', age:32, city:'Munich', country:'Germany', verified:true,
+        intent:'Casual Dating', expect:'Exclusive During Dating', avail:'This Weekend',
+        lifestyle:'Arts & Culture', comms:'Considered', active:1,
+        interests:['Art','Fine Dining','Culture','Travel'],
+        about:'Nothing permanent, but exclusive while it lasts, and firm about that.',
+        f:{ lifestyle:92, communication:87, interests:94, persona:88 } },
+
+      { id:'c8', name:'Giulia', age:35, city:'Milan', country:'Italy', verified:true,
+        intent:'Short-Term Dating', expect:'No Long-Term Commitment', avail:'Flexible',
+        lifestyle:'Dining', comms:'Warm', active:3,
+        interests:['Fine Dining','Fashion','Art','Travel'],
+        about:'In Munich often enough for this to be reasonable, and never for long.',
+        f:{ lifestyle:85, communication:83, interests:88, persona:84 } }
+    ];
+
+    /* -- factors ------------------------------------------------------------ */
+    function intentFit(p) {
+      if (!ME.intent) return 75;
+      if (p.intent === ME.intent) return 100;
+      var near = { 'Casual Dating':['Casual Connection','Short-Term Dating'],
+                   'Casual Connection':['Casual Dating','Social Dating'],
+                   'Social Dating':['Casual Connection'],
+                   'Romantic Connection':['Short-Term Dating'],
+                   'Short-Term Dating':['Casual Dating','Romantic Connection'],
+                   'Open to Exploring':[] };
+      if ((near[ME.intent] || []).indexOf(p.intent) > -1) return 82;
+      if (p.intent === 'Open to Exploring') return 66;
+      return 52;
+    }
+    // Expectations are the thing people get wrong on this track, so they are
+    // compared as a rule rather than folded into a number and forgotten.
+    function expectationsAgree(p) {
+      if (p.expect === ME.expect) return true;
+      var compatible = {
+        'No Long-Term Commitment': ['Non-Exclusive','Flexible','Exclusive During Dating'],
+        'Open to Something More':  ['Flexible','Exclusive During Dating'],
+        'Exclusive During Dating': ['No Long-Term Commitment','Open to Something More','Flexible'],
+        'Non-Exclusive':           ['No Long-Term Commitment','Flexible'],
+        'Flexible':                EXPECT
+      };
+      return (compatible[ME.expect] || []).indexOf(p.expect) > -1;
+    }
+    function availFit(p) {
+      if (p.avail === ME.avail) return 100;
+      if (p.avail === 'Flexible' || ME.avail === 'Flexible') return 84;
+      if (p.avail === 'Available Now') return 78;
+      return 62;
+    }
+    function locationFit(p) {
+      if (p.city === ME.city) return 100;
+      if (p.country === ME.country) return 74;
+      return 55;
+    }
+    function factorsOf(p) {
+      return { intent: intentFit(p), lifestyle: p.f.lifestyle, location: locationFit(p),
+               availability: availFit(p), communication: p.f.communication,
+               interests: p.f.interests, persona: p.f.persona,
+               verification: p.verified ? 100 : 40 };
+    }
+    function scoreOf(f) {
+      var t = 0, s = 0;
+      Object.keys(WEIGHTS).forEach(function (k) { t += WEIGHTS[k]; s += WEIGHTS[k] * (f[k] || 0); });
+      return Math.round(s / t);
+    }
+    function recompute() {
+      PEOPLE.forEach(function (p) {
+        p.factors = factorsOf(p); p.score = scoreOf(p.factors);
+        p.agree = expectationsAgree(p);
+      });
+    }
+
+    var STATE = { q:'', verifiedOnly:true, intentOnly:false, section:'curated', filters:{} };
+    var SHORT = {}, STATUS = {};
+    var PRIVACY = {};
+
+    // Curated means curated: each group is capped, and the cap is stated.
+    var SECTIONS = [
+      { id:'curated', label:'Curated for you', note:'Chosen by your advisor', cap:3 },
+      { id:'compat',  label:'Highly compatible', note:'Ninety per cent and above', cap:4 },
+      { id:'avail',   label:'Recently available', note:'Free now or this week', cap:4 },
+      { id:'near',    label:'Nearby', note:'In your city', cap:4 },
+      { id:'new',     label:'New verified members', note:'Checked in the last month', cap:4 },
+      { id:'short',   label:'Private shortlist', note:'Yours alone', cap:12 }
+    ];
+
+    var WHERE = [
+      { k:'city', label:'Your city', type:'select', options:[], value:ME.city },
+      { k:'lifestyle', label:'Your lifestyle', type:'select', options:LIFESTYLES, value:ME.lifestyle }
+    ];
+    var PRIV = [
+      { k:'profile', label:'Profile visible to', type:'select',
+        options:['Curated matches only','Members I have accepted','Nobody until I ask'] },
+      { k:'photo', label:'Photograph visible to', type:'select',
+        options:['Members I have accepted','Curated matches only','Nobody until I ask'] },
+      { k:'contact', label:'Who can contact me', type:'select',
+        options:['Curated matches only','Verified members','Nobody until I ask'] },
+      { k:'location', label:'Location shown as', type:'select', options:['City only','Country only','Hidden'] },
+      { k:'online', label:'Online status', type:'select', options:['Hidden','Shown to accepted members'] },
+      { k:'activity', label:'Activity status', type:'select', options:['Hidden','Shown to accepted members'] },
+      { k:'persona', label:'Persona visible to', type:'select',
+        options:['Nobody','Members I have accepted','Curated matches only'] }
+    ];
+    var FILTERS = [
+      { k:'ageMin', label:'Minimum age', type:'number', value:28 },
+      { k:'ageMax', label:'Maximum age', type:'number', value:42 },
+      { k:'city', label:'Their city', type:'select', options:[] },
+      { k:'intent', label:'Their intent', type:'select', options:['Any'].concat(INTENTS) },
+      { k:'avail', label:'Their availability', type:'select', options:['Any'].concat(AVAIL) },
+      { k:'lifestyle', label:'Their lifestyle', type:'select', options:['Any'].concat(LIFESTYLES) }
+    ];
+    var cities = PEOPLE.map(function (p) { return p.city; }).concat([ME.city])
+      .filter(function (v, i, a) { return a.indexOf(v) === i; }).sort();
+    WHERE[0].options = cities;
+    FILTERS[2].options = ['Any'].concat(cities);
+
+    function passes(p) {
+      var f = STATE.filters;
+      if (STATE.verifiedOnly && !p.verified) return false;
+      if (STATE.intentOnly && !p.agree) return false;
+      if (f.ageMin && p.age < +f.ageMin) return false;
+      if (f.ageMax && p.age > +f.ageMax) return false;
+      if (f.city && f.city !== 'Any' && p.city !== f.city) return false;
+      if (f.intent && f.intent !== 'Any' && p.intent !== f.intent) return false;
+      if (f.avail && f.avail !== 'Any' && p.avail !== f.avail) return false;
+      if (f.lifestyle && f.lifestyle !== 'Any' && p.lifestyle !== f.lifestyle) return false;
+      if (STATE.q) {
+        var hay = (p.name + ' ' + p.city + ' ' + p.country + ' ' + p.intent + ' ' +
+                   p.lifestyle + ' ' + p.interests.join(' ')).toLowerCase();
+        if (hay.indexOf(STATE.q.toLowerCase()) < 0) return false;
+      }
+      return true;
+    }
+    function inSection(p) {
+      switch (STATE.section) {
+        case 'compat': return p.score >= 90;
+        case 'avail':  return p.avail === 'Available Now' || p.avail === 'This Week';
+        case 'near':   return p.city === ME.city;
+        case 'new':    return p.verified && p.active <= 1;
+        case 'short':  return !!SHORT[p.id];
+        default:       return p.agree;                    // curated: expectations must meet
+      }
+    }
+    function section() { return SECTIONS.filter(function (s) { return s.id === STATE.section; })[0]; }
+    function results() {
+      var s = section();
+      return PEOPLE.filter(function (p) { return passes(p) && inSection(p); })
+                   .sort(function (x, y) { return y.score - x.score; })
+                   .slice(0, s.cap);
+    }
+
+    /* -- the sentence behind the number -------------------------------------- */
+    function insight(p) {
+      var bits = [];
+      bits.push(ME.intent && p.intent === ME.intent
+        ? 'you are both here for ' + p.intent.toLowerCase()
+        : 'she is here for ' + p.intent.toLowerCase() + (ME.intent ? ', where you have said ' + ME.intent.toLowerCase() : ''));
+      bits.push(p.agree ? 'your expectations agree' : 'your expectations differ, and that is worth settling first');
+      if (p.city === ME.city) bits.push('you are both in ' + p.city);
+      var shared = p.interests.filter(function (i) { return ME.interests.indexOf(i) > -1; });
+      if (shared.length) bits.push('you share ' + shared.slice(0, 3).join(', ').toLowerCase());
+      return 'You and ' + p.name + ': ' + bits.join('; ') + '.';
+    }
+    var ASK = [
+      { q:'Why might we be compatible?', a:insight },
+      { q:'What do we have in common?', a:function (p) {
+          var shared = p.interests.filter(function (i) { return ME.interests.indexOf(i) > -1; });
+          return (shared.length ? 'On the files: ' + shared.join(', ') + '. ' : 'Nothing on the files overlaps, which is not fatal but is worth knowing. ') +
+                 (p.lifestyle === ME.lifestyle ? 'You also live the same way — both ' + p.lifestyle.toLowerCase() + '. ' : 'She lives differently: ' + p.lifestyle.toLowerCase() + ' where you are ' + ME.lifestyle.toLowerCase() + '. ') +
+                 (p.comms === ME.comms ? 'And you talk the same way.' : 'She is ' + p.comms.toLowerCase() + ' in conversation where you are ' + ME.comms.toLowerCase() + '.'); } },
+      { q:'How should I start the conversation?', a:function (p) {
+          var shared = p.interests.filter(function (i) { return ME.interests.indexOf(i) > -1; });
+          return 'Say what you are here for in the first message — she has, and this track only works if both people do. ' +
+                 (shared.length ? 'Then ' + shared[0].toLowerCase() + ', which is on both files. ' : '') +
+                 'She is free ' + p.avail.toLowerCase() + ', so propose something real rather than asking how her week is.'; } },
+      { q:'What should I know before connecting?', a:function (p) {
+          if (!p.agree) return 'Her expectation is "' + p.expect + '" and yours is "' + ME.expect + '". Those do not sit together comfortably. Say so first, plainly, or do not send the request — this is the one thing that ends badly when it is left unsaid.';
+          var weak = Object.keys(p.factors).filter(function (k) { return p.factors[k] < 75; });
+          return 'Expectations agree: "' + p.expect + '" on both sides. ' +
+                 (weak.length ? 'Weakest of the eight is ' + LABELS[weak[0]].toLowerCase() + ' at ' + p.factors[weak[0]] + ' per cent. '
+                              : 'Nothing on the eight factors falls below seventy-five. ') +
+                 (p.verified ? 'She is verified in person by an advisor.' : 'She is not yet verified, and until she is the house will not vouch for anything on her file.'); } },
+      { q:'How was this figure worked out?', a:function () {
+          return 'Eight factors, weighted for a casual search: ' + Object.keys(WEIGHTS).map(function (k) {
+            return LABELS[k].toLowerCase() + ' ' + WEIGHTS[k]; }).join(', ') +
+            '. Intent and lifestyle carry forty-five of the hundred; on the long-term page values and goals carry that weight instead.'; } }
+    ];
+
+    /* -- rendering ------------------------------------------------------------ */
+    var grid = $('#cas-grid'), empty = $('#cas-empty'), noteP = $('#cas-note');
+    var live = el('p', 'sr-only'); live.setAttribute('role','status'); live.setAttribute('aria-live','polite');
+    casView.appendChild(live);
+    function announce(t) { live.textContent = t; }
+
+    // Deliberately spare: a name, a place, a figure, an intent, four interests.
+    function card(p) {
+      var a = el('article', 'ltr-card cas-card' + (SHORT[p.id] ? ' is-saved' : ''));
+      var img = el('img', 'ltr-card__plate');
+      img.src = MATCH.plate(p.id + p.name); img.alt = ''; img.setAttribute('aria-hidden','true'); img.loading = 'lazy';
+      a.appendChild(img);
+      var body = el('div', 'ltr-card__body');
+      body.appendChild(MATCH.badge(p.verified));
+      body.appendChild(el('h3', 'ltr-card__name', p.name + ', ' + p.age));
+      body.appendChild(el('p', 'ltr-card__where', p.city));
+
+      var sc = el('div', 'ltr-score');
+      sc.appendChild(el('span', 'ltr-score__n', p.score + '%'));
+      sc.appendChild(el('span', 'ltr-score__l', 'Match'));
+      var bar = el('span', 'ltr-score__bar'); var fill = el('span');
+      fill.style.width = p.score + '%'; bar.appendChild(fill); sc.appendChild(bar);
+      body.appendChild(sc);
+
+      body.appendChild(el('p', 'ltr-card__goal', p.intent));
+      var av = el('p', 'cas-avail' + (p.agree ? '' : ' cas-avail--warn'),
+        p.agree ? 'Available ' + p.avail.toLowerCase() : 'Expectations differ · ' + p.expect);
+      body.appendChild(av);
+      body.appendChild(el('p', 'ltr-card__tags', p.interests.slice(0, 4).join(' · ')));
+
+      var acts = el('div', 'cas-acts');
+      var view = el('button', 'btn'); view.type = 'button';
+      view.appendChild(el('span', null, 'View profile')); view.appendChild(el('i', 'arrow'));
+      view.addEventListener('click', function () { openSheet(p); });
+      var req = el('button', 'btn btn--solid'); req.type = 'button';
+      req.textContent = STATUS[p.id] === 'sent' ? 'Request sent' : 'Request connection';
+      req.disabled = !!STATUS[p.id];
+      req.addEventListener('click', function () { openSheet(p, true); });
+      acts.appendChild(view); acts.appendChild(req);
+      body.appendChild(acts);
+      a.appendChild(body);
+      return a;
+    }
+
+    function render() {
+      recompute();
+      var s = section(), all = results();
+      grid.textContent = '';
+      all.forEach(function (p) { grid.appendChild(card(p)); });
+      empty.hidden = all.length > 0;
+      var eligible = PEOPLE.filter(function (p) { return passes(p) && inSection(p); }).length;
+      noteP.textContent = all.length
+        ? s.label + ' — ' + all.length + ' of a possible ' + eligible +
+          '. The house shows a few rather than many; ' + s.note.toLowerCase() + '.'
+        : '';
+      $('#cas-count').textContent = PEOPLE.filter(function (p) { return passes(p) && p.agree; }).length;
+      $('#cas-where').textContent = ME.city;
+      $('#cas-when').textContent = ME.avail;
+      $('#cas-shortlist').textContent = Object.keys(SHORT).filter(function (k) { return SHORT[k]; }).length;
+      var pill = $('#cas-intent-pill');
+      pill.textContent = ME.intent || 'Intent required';
+      pill.className = 'pill ' + (ME.intent ? 'pill--rest' : 'pill--action');
+      var pp = $('#cas-privacy-pill');
+      pp.textContent = ME.privateProfile ? 'Private profile' : 'Standard';
+      pp.className = 'pill ' + (ME.privateProfile ? 'pill--live' : 'pill--rest');
+      $$('#cas-sections button').forEach(function (b) {
+        b.setAttribute('aria-selected', b.getAttribute('data-section') === STATE.section ? 'true' : 'false');
+      });
+    }
+
+    /* -- profile, and the request that checks intent first -------------------- */
+    var sheet = $('#ltr-sheet'), sheetBody = $('#ltr-sheet-body');
+    function bars(p) {
+      var wrap = el('div', 'ltr-bars');
+      Object.keys(p.factors).forEach(function (k) {
+        var row = el('div', 'ltr-bars__row');
+        row.appendChild(el('span', 'k', LABELS[k]));
+        var b = el('span', 'b'); var f = el('i'); f.style.width = p.factors[k] + '%'; b.appendChild(f);
+        row.appendChild(b); row.appendChild(el('span', 'v', p.factors[k] + '%'));
+        wrap.appendChild(row);
+      });
+      return wrap;
+    }
+    function openSheet(p, straightToRequest) {
+      sheetBody.textContent = '';
+      var head = el('div', 'ltr-sheet__head');
+      var img = el('img', 'ltr-sheet__plate'); img.src = MATCH.plate(p.id + p.name);
+      img.alt = ''; img.setAttribute('aria-hidden','true'); head.appendChild(img);
+      var hb = el('div');
+      if (p.verified) hb.appendChild(MATCH.badge(true));
+      var h = el('h2', null, p.name + ', ' + p.age); h.id = 'ltr-sheet-name'; hb.appendChild(h);
+      hb.appendChild(el('p', 'ltr-sheet__where', p.city + ', ' + p.country));
+      hb.appendChild(el('p', 'ltr-sheet__score', p.score + '% match · available ' + p.avail.toLowerCase()));
+      head.appendChild(hb);
+      sheetBody.appendChild(head);
+
+      var acts = el('div', 'ltr-sheet__acts');
+      var req = el('button', 'btn btn--solid'); req.type = 'button';
+      var msg = el('button', 'btn'); msg.type = 'button'; msg.appendChild(el('span', null, 'Message'));
+      var save = el('button', 'btn'); save.type = 'button';
+      var report = el('button', 'btn btn--quiet', 'Report'); report.type = 'button';
+      var block = el('button', 'btn btn--quiet', 'Block'); block.type = 'button';
+      var box = el('div', 'ltr-connect'); box.hidden = true;
+      function paint() {
+        req.textContent = STATUS[p.id] === 'sent' ? 'Request sent' : 'Request connection';
+        req.disabled = !!STATUS[p.id];
+        msg.hidden = STATUS[p.id] !== 'accepted';
+        save.textContent = SHORT[p.id] ? '♥ On your shortlist' : '♡ Add to shortlist';
+      }
+      function openRequest() {
+        box.hidden = false; box.textContent = '';
+        box.appendChild(el('p', 'ask__lbl', 'Request a private connection'));
+        // the mutual-intent check, before anything is sent
+        var check = el('div', 'cas-check' + (p.agree ? '' : ' cas-check--warn'));
+        var dl = el('dl', 'kv');
+        [['Your intent', ME.intent || 'Not stated yet'], ['Her intent', p.intent],
+         ['You expect', ME.expect], ['She expects', p.expect]]
+          .forEach(function (r) { dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1])); });
+        check.appendChild(dl);
+        check.appendChild(el('p', 'cas-check__v', p.agree
+          ? '✓ Compatible intent. Both of you have said the same thing, and both will see that you did.'
+          : '⚠ Your relationship expectations may differ. She will be shown this too. Say it in the message rather than hoping it resolves itself.'));
+        box.appendChild(check);
+        var ta = el('textarea'); ta.rows = 3;
+        ta.placeholder = p.agree ? 'Optional message' : 'Worth saying something about the difference above';
+        ta.setAttribute('aria-label', 'Optional message to ' + p.name);
+        box.appendChild(ta);
+        var send = el('button', 'btn btn--solid', 'Send private request'); send.type = 'button';
+        send.addEventListener('click', function () {
+          STATUS[p.id] = 'sent'; box.textContent = '';
+          box.appendChild(el('p', 'ltr-sent',
+            'Sent privately. She sees your first name, your intent and your expectation — nothing else until she answers, and nothing at all if she does not.'));
+          paint(); render(); announce('Private request sent to ' + p.name + '.');
+        });
+        box.appendChild(send); ta.focus();
+      }
+      req.addEventListener('click', openRequest);
+      save.addEventListener('click', function () { SHORT[p.id] = !SHORT[p.id]; paint(); render(); });
+      msg.addEventListener('click', function () { location.hash = '#messages'; });
+      report.addEventListener('click', function () {
+        box.hidden = false; box.textContent = '';
+        box.appendChild(el('p', 'ask__lbl', 'Report ' + p.name));
+        var sel = el('select');
+        ['Fake profile','Misrepresentation','Harassment','Scam or fraud','Inappropriate behaviour','Safety concern','Other']
+          .forEach(function (o) { var op = el('option', null, o); op.value = o; sel.appendChild(op); });
+        sel.setAttribute('aria-label','Reason for reporting'); box.appendChild(sel);
+        var ta = el('textarea'); ta.rows = 3; ta.setAttribute('aria-label','Details');
+        ta.placeholder = 'Anything you would like the house to know'; box.appendChild(ta);
+        var send = el('button', 'btn btn--solid', 'Send to the house'); send.type = 'button';
+        send.addEventListener('click', function () {
+          box.textContent = '';
+          box.appendChild(el('p', 'ltr-sent', 'Read by a person today, not a queue. You are told what was done, and she is never told who reported her.'));
+        });
+        box.appendChild(send);
+      });
+      block.addEventListener('click', function () {
+        STATUS[p.id] = 'blocked';
+        note(block, p.name + ' is blocked. She is not curated to you again, is not told, and any request between you is withdrawn.');
+      });
+      [req, msg, save, report, block].forEach(function (b) { acts.appendChild(b); });
+      paint();
+      sheetBody.appendChild(acts);
+      sheetBody.appendChild(box);
+
+      var about = el('div', 'panel');
+      about.appendChild(headOf('About ' + p.name));
+      var ab = el('div', 'panel__body');
+      ab.appendChild(el('p', 'ltr-about', p.about));
+      var dl2 = el('dl', 'kv');
+      [['Intent', p.intent], ['Expects', p.expect], ['Available', p.avail],
+       ['Lifestyle', p.lifestyle], ['Interests', p.interests.join(', ')],
+       ['Communication', p.comms], ['Location', p.city + ', ' + p.country]]
+        .forEach(function (r) { dl2.appendChild(el('dt', null, r[0])); dl2.appendChild(el('dd', null, r[1])); });
+      ab.appendChild(dl2);
+      ab.appendChild(el('p', 'ask__lbl', 'Persona'));
+      ab.appendChild(el('p', 'quiet', 'Shown with her permission: ' + p.comms.toLowerCase() +
+        ' in conversation, ' + p.lifestyle.toLowerCase() + ' by habit. Her private persona and anything the house has inferred are not shown here and are not hers to share by accident.'));
+      about.appendChild(ab);
+      sheetBody.appendChild(about);
+
+      var why = el('div', 'panel');
+      why.appendChild(headOf('Why this match', p.score + '% overall'));
+      var wb = el('div', 'panel__body');
+      wb.appendChild(bars(p));
+      wb.appendChild(el('div', p.agree ? 'note-inline' : 'note-inline cas-check--warn',
+        p.agree ? 'Expectations agree on both sides: "' + p.expect + '".'
+                : 'Expectations differ: you have said "' + ME.expect + '" and she has said "' + p.expect + '".'));
+      why.appendChild(wb);
+      sheetBody.appendChild(why);
+
+      var ai = el('div', 'panel');
+      ai.appendChild(headOf('Ask Legend about this match', 'Reads both files'));
+      var aib = el('div', 'panel__body');
+      aib.appendChild(el('p', 'ltr-insight', insight(p)));
+      var thread = el('div', 'ltr-ai-thread'); aib.appendChild(thread);
+      var chips = el('div', 'ask__chips');
+      ASK.forEach(function (item) {
+        var b = el('button', null, item.q); b.type = 'button';
+        b.addEventListener('click', function () {
+          thread.appendChild(el('p', 'ltr-ai-q', item.q));
+          thread.appendChild(el('p', 'ltr-ai-a', item.a(p)));
+          b.remove();
+        });
+        chips.appendChild(b);
+      });
+      aib.appendChild(chips);
+      aib.appendChild(el('p', 'quiet', 'Written rules over the two files, not a language model, and only over what each of you has agreed may be used.'));
+      ai.appendChild(aib);
+      sheetBody.appendChild(ai);
+
+      sheet.hidden = false;
+      document.body.style.overflow = 'hidden';
+      $('.ltr-sheet__close', sheet).focus();
+      if (straightToRequest && !STATUS[p.id]) openRequest();
+    }
+
+    /* -- controls -------------------------------------------------------------- */
+    function chipRow(host, list, current, onPick) {
+      var wrap = $(host);
+      list.forEach(function (v) {
+        var b = el('button', 'chip' + (current === v ? ' is-on' : ''), v);
+        b.type = 'button'; b.setAttribute('role','radio');
+        b.setAttribute('aria-checked', current === v ? 'true' : 'false');
+        b.addEventListener('click', function () {
+          $$('button', wrap).forEach(function (o) {
+            o.classList.toggle('is-on', o === b);
+            o.setAttribute('aria-checked', o === b ? 'true' : 'false');
+          });
+          onPick(v); render();
+        });
+        wrap.appendChild(b);
+      });
+    }
+    chipRow('#cas-intents', INTENTS, ME.intent, function (v) { ME.intent = v; announce('Your intent is now ' + v + '.'); });
+    chipRow('#cas-expect', EXPECT, ME.expect, function (v) { ME.expect = v; });
+    chipRow('#cas-avail', AVAIL, ME.avail, function (v) { ME.avail = v; });
+
+    function build(list, host, store, prefix) {
+      var wrap = $(host);
+      list.forEach(function (def) { wrap.appendChild(field(def, store, render, prefix)); });
+    }
+    build(WHERE, '#cas-where-fields', ME, 'cas-w');
+    build(PRIV, '#cas-privacy', PRIVACY, 'cas-p');
+    build(FILTERS, '#cas-filters', STATE.filters, 'cas');
+
+    var sectionsWrap = $('#cas-sections');
+    SECTIONS.forEach(function (s) {
+      var b = el('button'); b.type = 'button';
+      b.setAttribute('data-section', s.id); b.setAttribute('role','tab');
+      b.setAttribute('aria-selected', s.id === STATE.section ? 'true' : 'false');
+      b.appendChild(el('span', 'ltr-tab__l', s.label));
+      b.appendChild(el('span', 'ltr-tab__n', s.note));
+      b.addEventListener('click', function () { STATE.section = s.id; render(); });
+      sectionsWrap.appendChild(b);
+    });
+
+    $('#cas-private').addEventListener('change', function () {
+      ME.privateProfile = this.checked;
+      if (this.checked) {
+        // the quietest setting actually sets the controls, rather than only saying so
+        PRIVACY.profile = 'Nobody until I ask'; PRIVACY.photo = 'Nobody until I ask';
+        PRIVACY.contact = 'Nobody until I ask'; PRIVACY.online = 'Hidden';
+        PRIVACY.activity = 'Hidden'; PRIVACY.persona = 'Nobody';
+        $('#cas-privacy').textContent = '';
+        build(PRIV, '#cas-privacy', PRIVACY, 'cas-p');
+      }
+      render();
+      announce(this.checked ? 'Private profile on. Nobody sees you until you agree, one at a time.' : 'Private profile off.');
+    });
+    $('#cas-q').addEventListener('input', function () { STATE.q = this.value.trim(); render(); });
+    $('#cas-verified-only').addEventListener('change', function () { STATE.verifiedOnly = this.checked; render(); });
+    $('#cas-intent-only').addEventListener('change', function () { STATE.intentOnly = this.checked; render(); });
+    $('#cas-clear').addEventListener('click', function () {
+      STATE.q = ''; STATE.filters = {}; STATE.intentOnly = false; STATE.verifiedOnly = true;
+      $('#cas-q').value = ''; $('#cas-intent-only').checked = false; $('#cas-verified-only').checked = true;
+      $('#cas-filters').textContent = '';
+      build(FILTERS, '#cas-filters', STATE.filters, 'cas');
+      render(); announce('Filters cleared.');
+    });
+
+    render();
+  })();
 
   route();
 })();

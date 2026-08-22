@@ -24,13 +24,13 @@ $pages = @(
   @{ n='mandates';         t='Mandates — Levels of Engagement | Legend';
      d='Three levels of private engagement: Reserve, Signature and The Private Mandate. Relationship management from $8,000, agreed privately before any work begins.' },
   @{ n='network';          t='The Private Network — Curated & Unpublished | Legend';
-     d='A closed circle of verified individuals, personally met by our advisors. No public profiles, no directory, no browsing — and dedicated search where the right person is not yet known to us.' },
+     d='A closed circle of verified individuals, personally met by our advisors. Visibility set by consent on both sides — and dedicated search where the right person is not yet known to us.' },
   @{ n='philosophy';       t='Philosophy — Why Relationship Management Exists | Legend';
      d='Why we decline more than we accept, why the work does not end at an introduction, and what we mean by judgment in a private relationship practice.' },
   @{ n='intelligence';     t='Intelligence — Judgment, Sharpened | Legend';
      d='How Legend uses compatibility analysis, preference mapping and private candidate discovery to narrow the field — and why the decision always remains with a person.' },
   @{ n='discretion';       t='Discretion — A Standard, Not a Feature | Legend';
-     d='No public profiles, no member directory, no browsing. How confidentiality, consent and controlled introductions are handled at Legend.' },
+     d='Visibility by consent, on both sides, withdrawn at a word. How confidentiality, consent and controlled introductions are handled at Legend.' },
   @{ n='about';            t='The House — Legend';
      d='Legend is a private relationship management practice serving international clients from London, New York, Geneva, Dubai and Singapore. Our standards, method and perspective.' },
   @{ n='journal';          t='The Journal — Writing on Partnership & Privacy | Legend';

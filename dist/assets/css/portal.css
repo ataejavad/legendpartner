@@ -109,7 +109,7 @@ body.portal-body{
 /* 03 — TOPBAR ============================================================== */
 .topbar{
   position:sticky; top:0; z-index:60;
-  height:74px; display:flex; align-items:center; justify-content:space-between; gap:2rem;
+  height:56px; display:flex; align-items:center; justify-content:space-between; gap:2rem;
   padding:0 clamp(1.5rem,3.4vw,4rem);
   background:rgba(11,11,12,.78);
   backdrop-filter:blur(14px) saturate(120%);
@@ -117,7 +117,60 @@ body.portal-body{
   border-bottom:1px solid var(--line);
 }
 .topbar h1{
-  font-family:var(--serif); font-weight:300; font-size:1.32rem; letter-spacing:-.01em;
+  font-family:var(--serif); font-weight:300; font-size:1.15rem; letter-spacing:-.01em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* The rail carries the member's name at every width — stacked across the top
+   below 900px, in the sidebar above it — so the bar showing it too put the same
+   name on screen twice. It also does not fit: the full greeting measures 221px
+   and the title only has that much room from about 1150px up, so under that it
+   was being cut mid-name. Below the threshold the bar keeps the greeting and
+   the rail keeps the name; the comma travels with the name so what is left
+   reads as a sentence. */
+@media (max-width:1150px){
+  /* The date is the least load-bearing thing in the bar, and at 901px — where
+     the rail becomes a sidebar and the column narrows — it was leaving the
+     title 69px to render a greeting in. It goes first. */
+  .topbar .meta .date{ display:none; }
+}
+
+/* The member's identity, at the far right of the bar. Small by necessity: the
+   bar is 56px and already carries the greeting, the section links and the
+   confidentiality mark. The name is the half that matters, so the reference
+   folds away first. */
+.topbar__member{
+  display:flex; align-items:baseline; gap:.55rem;
+  flex:none; min-width:0;
+  padding-left:1.6rem; border-left:1px solid var(--line-soft);
+}
+.topbar__member .name{
+  font-family:var(--serif); font-weight:300; font-size:.95rem;
+  letter-spacing:normal; text-transform:none; color:#EDEAE3; white-space:nowrap;
+}
+.topbar__member .ref{
+  font-size:.52rem; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--fg-faint); white-space:nowrap;
+}
+@media (max-width:1150px){
+  .topbar__member .ref{ display:none; }
+}
+@media (max-width:900px){
+  .topbar__member{ padding-left:1rem; }
+  .topbar__member .name{ font-size:.86rem; }
+}
+
+/* Below 640px the 2rem gaps between the bar's three groups are most of what is
+   left; at 390px the bar wanted 425px of content in 342px and the greeting was
+   being ellipsed down to "G.". The gaps go first, then the confidentiality
+   mark, which is the only thing here the lock screen and the footer already
+   say. The greeting and the name both survive to 320px. */
+@media (max-width:640px){
+  .topbar{ gap:1rem; }
+  .topbar .meta{ gap:1rem; }
+}
+@media (max-width:520px){
+  .topbar .confidential{ display:none; }
 }
 .topbar .meta{
   display:flex; align-items:center; gap:1.6rem;
@@ -359,8 +412,8 @@ body.portal-body{
   .rail__nav a i.mk{ display:none; }
   .rail__nav a[aria-current="page"]{ background:none; border-bottom:1px solid var(--champagne); }
   .rail__foot{ display:none; }
-  .topbar{ height:64px; }
-  .topbar h1{ font-size:1.1rem; }
+  .topbar{ height:50px; }
+  .topbar h1{ font-size:1rem; }
   .topbar .meta .date{ display:none; }
   .figs div{ border-right:0; border-bottom:1px solid var(--line-soft); }
   .intro-row,.appt,.doc{ grid-template-columns:1fr; gap:.6rem; }
@@ -940,7 +993,9 @@ a.tile:hover{ transform:translateY(-2px); }
   --tile-ink:#12131A;
   --card:#3A394A;
   --card-line:rgba(255,255,255,.09);
-  --dash-bg:#2B2B38;
+  /* No plate behind the mosaic: the tiles carry their own colour and sit
+     straight on the page ground. Give this a colour to bring the plate back. */
+  --dash-bg:transparent;
   --r:6px;
   --shadow:0 6px 18px rgba(0,0,0,.34);
 }
@@ -1187,6 +1242,23 @@ a.tile:hover{ transform:translateY(-2px); }
 
 /* the toggle sits with the brand */
 .rail__top{ display:flex; align-items:flex-start; justify-content:space-between; gap:.5rem; padding-right:1rem; }
+
+/* On a phone the rail is a strip across the top of the page, and this block was
+   spending 66px of an 844px screen on the house's own name before the member
+   saw anything of theirs. The mark shrinks, and the descriptor comes up onto
+   the same line as the wordmark instead of sitting under it. The collapse
+   toggle is already hidden at this width, so the room it was reserving goes
+   back too. */
+@media (max-width:900px){
+  .rail__top{ padding-right:0; align-items:center; }
+  .rail__brand{ padding-bottom:.7rem; gap:.6rem; }
+  .rail__brand svg{ width:18px; height:18px; }
+  .rail__brand b{ font-size:.66rem; letter-spacing:.3em; }
+  .rail__brand span span{
+    display:inline; margin-top:0; font-size:.46rem; letter-spacing:.18em;
+  }
+  .rail__brand span span::before{ content:"\00B7"; margin:0 .5em; opacity:.55; }
+}
 .rail__toggle{
   flex:none; width:26px; height:26px; margin-top:.1rem;
   display:grid; place-items:center;
@@ -1477,7 +1549,594 @@ a.tile:hover{ transform:translateY(-2px); }
    numeral column is what has to go. */
 .rail__nav a.cat .num{ display:none; }
 
+/* --- Find a partner: the one category with children in the rail ---------- */
+/* The list opens only while that branch is current, so six items do not become
+   ten. Indented under the parent's label, not its icon, so the hierarchy reads
+   at a glance. */
+.rail__sub{
+  display:flex; flex-direction:column;
+  margin:.1rem 0 .5rem;
+  padding-left:2.6rem;
+}
+.rail__sub .sub{
+  position:relative;
+  padding:.42rem 0 .42rem .9rem;
+  font-size:.78rem; line-height:1.35; color:var(--fg-soft);
+  border-left:1px solid var(--line-soft);
+  transition:color .25s var(--ease), border-color .25s var(--ease);
+}
+.rail__sub .sub:hover{ color:#EDEAE3; border-left-color:var(--champagne-dim, var(--champagne)); }
+.rail__sub .sub[aria-current="page"]{
+  color:#EDEAE3; border-left-color:var(--champagne);
+}
+/* The parent of the open branch stays legible without claiming to be the page. */
+.rail__nav a.cat.is-branch{ color:#EDEAE3; }
+
+/* Collapsed to a strip, and on the touch layout, the children have nowhere to
+   sit — the parent still reaches them. */
+.portal[data-rail="collapsed"] .rail__sub{ display:none; }
+@media (max-width:900px){
+  .rail__sub{ padding-left:1.2rem; flex-direction:row; flex-wrap:wrap; gap:.2rem 1.1rem; }
+  .rail__sub .sub{ border-left:0; padding-left:0; font-size:.72rem; }
+  .rail__sub .sub[aria-current="page"]{ border-bottom:1px solid var(--champagne); }
+}
+
 @media (prefers-reduced-motion:reduce){
   .rail__nav a.cat .nav-ic{ transform:none; }
   .rail__tip{ transition:none; }
 }
+
+/* --- Live tiles ---------------------------------------------------------- */
+/* Each tile carries two faces. The front is the figure; the back is the
+   sentence that explains it, which is the only reason the tile moves at all.
+   The row is also the member's to arrange — drag, or Alt+arrow from the
+   keyboard — and the order is remembered on the device. */
+.tiles--live{ perspective:900px; }
+
+.tiles--live .tile{ cursor:grab; }
+.tiles--live .tile:active{ cursor:grabbing; }
+
+.tile__flip{
+  display:grid; flex:1; min-height:0;
+  transform-style:preserve-3d;
+  transition:transform .9s cubic-bezier(.6,.02,.2,1);
+}
+.tile__face{
+  grid-area:1/1;
+  display:flex; flex-direction:column; justify-content:space-between; gap:.5rem;
+  -webkit-backface-visibility:hidden; backface-visibility:hidden;
+}
+.tile__face--b{ transform:rotateX(180deg); }
+.tile.is-flipped .tile__flip{ transform:rotateX(180deg); }
+
+.tile__d{
+  font-family:var(--serif); font-size:1.02rem; line-height:1.4; font-weight:300;
+  text-wrap:balance;
+}
+.tile__num{ font-variant-numeric:tabular-nums; }
+.tile__suf{ font-size:.42em; letter-spacing:.06em; }
+
+/* Entrance: the row settles in rather than appearing all at once. This is a
+   CSS animation, not a JS class, so the tiles are never left invisible if the
+   script does not run. `backwards` holds the opening frame through the stagger
+   delay and then lets go entirely — which is what keeps the hover lift below
+   from being overridden by a lingering fill. */
+@keyframes tile-in{ from{ opacity:0; transform:translateY(10px); } }
+.tiles--live .tile{
+  animation:tile-in .7s var(--ease) backwards;
+  animation-delay:calc(var(--i,0) * 70ms);
+}
+
+/* Dragging */
+.tile.is-dragging{ opacity:.4; cursor:grabbing; }
+.tile.is-over{ outline:1px solid var(--champagne); outline-offset:3px; }
+.tile.is-settling{ animation:tile-settle .42s var(--ease); }
+@keyframes tile-settle{
+  0%{ transform:scale(.97) } 60%{ transform:scale(1.015) } 100%{ transform:none }
+}
+
+.tiles__hint{
+  margin:.9rem 0 0;
+  font-size:.72rem; line-height:1.7; color:var(--fg-faint);
+  display:flex; align-items:baseline; gap:.6rem; flex-wrap:wrap;
+}
+.tiles__hint kbd{
+  font-family:var(--sans); font-size:.66rem; padding:.1rem .34rem;
+  border:1px solid var(--line-soft); border-radius:var(--r-xs);
+  color:var(--fg-soft);
+}
+.tiles__reset{
+  background:none; border:0; padding:0; cursor:pointer;
+  font:inherit; color:var(--champagne);
+  border-bottom:1px solid currentColor;
+}
+.tiles__reset:hover{ opacity:.75; }
+
+/* --- The assistant, in the middle of the mosaic -------------------------- */
+/* The slot in the grid decides how wide it is, so nothing here sets a width. */
+.ask--centre .ask__thread{ min-height:clamp(220px,26vh,340px); max-height:46vh; }
+/* An opening line stranded at the top of a tall panel reads as a dead page.
+   Pushing the first message down sits the conversation on the composer, the
+   way a thread actually behaves — done with margin rather than
+   justify-content, which clips the top of an overflowing flex column. */
+.ask--centre .ask__thread > .msg:first-child{ margin-top:auto; }
+/* Wider than the sidebar version was, but still a measure you can read; the
+   member's own messages keep sitting right because .msg--me has room to push. */
+.ask--centre .msg{ max-width:min(68ch, 100%); }
+.ask--centre .msg .bubble{ font-size:.96rem; line-height:1.7; }
+.ask--centre .composer textarea{ min-height:2.8rem; }
+
+@media (max-width:720px){
+  .ask--centre .ask__thread{ min-height:200px; }
+}
+
+/* Announcements for the reordering, for screen readers only. */
+.sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap;
+  border:0;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .tile__flip{ transition:none; }
+  .tiles--live .tile{ animation:none; }
+  .tile.is-settling{ animation:none; }
+}
+
+/* --- The mosaic ---------------------------------------------------------- */
+/* Twelve columns, four rows, and the assistant sits in the middle of them
+   rather than beneath. Two tall tiles hold the left and right edges through
+   the first three rows; the bar runs between them; two tiles sit above it and
+   two below; a full-width pair closes the bottom.
+
+   Slots are addressed by position, not by a class on the tile, so DOM order is
+   slot order and a dragged tile takes on the geometry of wherever it lands. */
+.mosaic{
+  display:grid;
+  grid-template-columns:repeat(12,minmax(0,1fr));
+  grid-template-rows:minmax(8.5rem,auto) auto minmax(11rem,auto) minmax(9rem,auto);
+  gap:clamp(.6rem,1vw,1rem);
+}
+.mosaic > a.tile:nth-of-type(1){ grid-column:1 / 4;   grid-row:1 / 4; }
+.mosaic > a.tile:nth-of-type(2){ grid-column:4 / 6;   grid-row:1; }
+.mosaic > a.tile:nth-of-type(3){ grid-column:6 / 11;  grid-row:1; }
+.mosaic > a.tile:nth-of-type(4){ grid-column:11 / 13; grid-row:1 / 4; }
+.mosaic > a.tile:nth-of-type(5){ grid-column:4 / 8;   grid-row:3; }
+.mosaic > a.tile:nth-of-type(6){ grid-column:8 / 11;  grid-row:3; }
+.mosaic > a.tile:nth-of-type(7){ grid-column:1 / 7;   grid-row:4; }
+.mosaic > a.tile:nth-of-type(8){ grid-column:7 / 13;  grid-row:4; }
+.mosaic__ask{ grid-column:4 / 11; grid-row:2; min-width:0; }
+
+/* The palette is keyed to the tile, not to where it sits. The old positional
+   rules counted the assistant's slot as one of the children, which left the
+   last three tiles unpainted; keying on identity also means a tile keeps its
+   colour — and its ink contrast — wherever the member drags it. */
+.mosaic > a.tile[data-tile="proposed"]     { background:var(--t1); }
+.mosaic > a.tile[data-tile="requests"]     { background:var(--t2); }
+.mosaic > a.tile[data-tile="appointments"] { background:var(--t3); }
+.mosaic > a.tile[data-tile="introductions"]{ background:var(--t4); }
+.mosaic > a.tile[data-tile="persona"]      { background:var(--t5); }
+.mosaic > a.tile[data-tile="reflections"]  { background:var(--t6); }
+.mosaic > a.tile.tile--media               { background:#0E0E10; }
+
+
+/* The figure is sized by the room the slot gives it. */
+.mosaic > a.tile:nth-of-type(1) .tile__n{ font-size:clamp(2.6rem,4vw,3.8rem); }
+.mosaic > a.tile:nth-of-type(1) .tile__d{ font-size:1.2rem; }
+.mosaic > a.tile:nth-of-type(2) .tile__n,
+.mosaic > a.tile:nth-of-type(6) .tile__n{ font-size:1.9rem; }
+.mosaic > a.tile:nth-of-type(2) .tile__l,
+.mosaic > a.tile:nth-of-type(6) .tile__l{ font-size:.52rem; }
+.mosaic > a.tile:nth-of-type(2) .tile__d,
+.mosaic > a.tile:nth-of-type(6) .tile__d{ font-size:.88rem; line-height:1.36; }
+
+/* --- A tile can hold anything ------------------------------------------- */
+/* The face is a container, not a fixed shape. A figure is the default; an
+   image or a film fills the tile behind the face, and the face becomes an
+   overlay with a scrim under it so the words stay readable over any picture. */
+.tile--media{ padding:0; }
+.tile__img,
+.tile__video{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover; display:block;
+  /* the tile's own gradient wash would otherwise sit on top of the picture */
+  z-index:0;
+}
+.tile--media .tile__flip{ position:relative; z-index:1; padding:1.1rem 1.2rem; }
+/* The face must be its own positioning context, or the scrim below anchors to
+   the tile and the padding offsets push it outside the rounded corner. */
+.tile--media .tile__face{ position:relative; }
+.tile--media .tile__face--over{ justify-content:flex-end; }
+.tile--media .tile__face--over::before,
+.tile--media .tile__face--b::before{
+  content:""; position:absolute; inset:-1.1rem -1.2rem;
+  background:linear-gradient(0deg, rgba(8,8,10,.86), rgba(8,8,10,.34) 46%, rgba(8,8,10,0));
+}
+.tile--media .tile__face--b{ justify-content:flex-end; }
+.tile--media .tile__face--b::before{
+  background:linear-gradient(0deg, rgba(8,8,10,.92), rgba(8,8,10,.74));
+}
+.tile--media .tile__l,
+.tile--media .tile__d{ color:#EDEAE3; position:relative; }
+.tile--media .tile__l{ opacity:.92; }
+.dash .tile--media{ background-image:none; }
+
+/* --- The mosaic stands down while a question is asked -------------------- */
+.mosaic > a.tile{
+  transition:opacity .32s var(--ease), transform .38s var(--ease);
+}
+.dash.is-asking .mosaic > a.tile{
+  opacity:0; transform:scale(.97); pointer-events:none;
+}
+/* Once faded, the tiles leave the grid entirely and the bar takes the room. */
+.mosaic.is-folded{ grid-template-columns:minmax(0,1fr); grid-template-rows:auto; }
+.mosaic.is-folded > a.tile{ display:none; }
+.mosaic.is-folded > .mosaic__ask{ grid-column:1; grid-row:1; }
+
+@media (max-width:1080px){
+  /* Six columns: the tall pair becomes a top row, the bar keeps the middle. */
+  .mosaic{
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    grid-template-rows:repeat(2,minmax(8.5rem,auto)) auto repeat(3,minmax(8.5rem,auto));
+  }
+  .mosaic > a.tile:nth-of-type(1){ grid-column:1 / 4; grid-row:1 / 3; }
+  .mosaic > a.tile:nth-of-type(2){ grid-column:4 / 7; grid-row:1; }
+  .mosaic > a.tile:nth-of-type(3){ grid-column:4 / 7; grid-row:2; }
+  .mosaic > a.tile:nth-of-type(4){ grid-column:1 / 7; grid-row:4; }
+  .mosaic__ask{ grid-column:1 / 7; grid-row:3; }
+  .mosaic > a.tile:nth-of-type(5){ grid-column:1 / 4; grid-row:5; }
+  .mosaic > a.tile:nth-of-type(6){ grid-column:4 / 7; grid-row:5; }
+  .mosaic > a.tile:nth-of-type(7){ grid-column:1 / 4; grid-row:6; }
+  .mosaic > a.tile:nth-of-type(8){ grid-column:4 / 7; grid-row:6; }
+}
+@media (max-width:640px){
+  /* Two columns, everything stacked; the bar still divides the mosaic. */
+  .mosaic{ grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:none; grid-auto-rows:minmax(var(--tile-h),auto); }
+  .mosaic > a.tile:nth-of-type(n){ grid-column:span 2; grid-row:auto; }
+  .mosaic > a.tile:nth-of-type(2),
+  .mosaic > a.tile:nth-of-type(6){ grid-column:span 1; }
+  .mosaic__ask{ grid-column:span 2; grid-row:auto; }
+  .mosaic > a.tile:nth-of-type(1) .tile__n{ font-size:2.6rem; }
+  .mosaic > a.tile:nth-of-type(1) .tile__d{ font-size:1.05rem; }
+  .mosaic > a.tile.tile--media{ min-height:11rem; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .mosaic > a.tile{ transition:none; }
+  .tile__video{ display:none; }
+  .tile--media .tile__img{ display:block; }
+}
+
+/* --- The assistant: a bar at rest, a room in use ------------------------- */
+/* At rest only the composer shows, centred, and it reads as an invitation
+   rather than a card. The moment a question is being typed the panel opens
+   into the thread, the openings, and the terms it answers under. */
+.ask--centre .panel__head,
+.ask--centre .ask__thread,
+.ask--centre .ask__chips,
+.ask--centre .panel__foot{ display:none; }
+
+.dash .mosaic__ask .ask--centre{
+  background:none; border:0; box-shadow:none;
+  height:100%;
+}
+.ask--centre .composer{
+  border:1px solid var(--card-line); border-radius:var(--r);
+  background:var(--card); box-shadow:var(--shadow);
+  padding:.9rem 1rem .9rem 1.4rem;
+  align-items:center;
+  transition:border-color .3s var(--ease), box-shadow .3s var(--ease);
+}
+.ask--centre .composer:focus-within{
+  border-color:rgba(207,196,176,.42);
+  box-shadow:var(--shadow), 0 0 0 1px rgba(207,196,176,.14);
+}
+.ask--centre .composer textarea{
+  min-height:1.9rem; border-bottom:0; padding-block:.2rem;
+  font-size:1rem;
+}
+.ask--centre .composer textarea:focus{ border-bottom-color:transparent; }
+
+/* Asking */
+.dash.is-asking .mosaic__ask .ask--centre{
+  background:var(--card); border:1px solid var(--card-line);
+  border-radius:var(--r); box-shadow:var(--shadow);
+  --fg-faint:rgba(237,234,227,.64);
+}
+.dash.is-asking .ask--centre .panel__head{ display:flex; }
+.dash.is-asking .ask--centre .ask__thread{ display:flex; }
+.dash.is-asking .ask--centre .ask__chips{ display:flex; }
+.dash.is-asking .ask--centre .panel__foot{ display:block; }
+.dash.is-asking .ask--centre .composer{
+  border:0; border-top:1px solid var(--line-soft); border-radius:0;
+  background:none; box-shadow:none;
+  padding:1.1rem 1.5rem; align-items:flex-end;
+}
+.dash.is-asking .ask--centre .composer:focus-within{ box-shadow:none; }
+.dash.is-asking .ask--centre .composer textarea{ min-height:2.8rem; }
+
+.ask__close{
+  margin-left:auto;
+  display:inline-flex; align-items:center; gap:.5rem;
+  background:none; border:1px solid var(--line-soft); border-radius:var(--r-sm);
+  color:var(--fg-soft); cursor:pointer;
+  font-family:var(--sans); font-size:.6rem; letter-spacing:.18em;
+  text-transform:uppercase; padding:.42rem .7rem;
+  transition:border-color .25s var(--ease), color .25s var(--ease);
+}
+.ask__close:hover{ border-color:var(--champagne); color:#EDEAE3; }
+.ask__esc{
+  font-size:.54rem; letter-spacing:.1em; opacity:.6;
+  border:1px solid currentColor; border-radius:2px; padding:0 .24rem;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .dash .mosaic__ask .ask--centre,
+  .ask--centre .composer{ transition:none; }
+}
+
+/* --- Long-term relationship: discovery ----------------------------------- */
+/* A matching surface. Density is the point: a member should be able to compare
+   eight people without scrolling twice, so the card carries the figure, the
+   goal and the difference, and everything else waits behind the profile. */
+.ltr-stats{
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:clamp(.8rem,1.6vw,1.6rem);
+  margin-top:2rem; padding:1.2rem 0;
+  border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft);
+}
+.ltr-stats .n{
+  display:block; font-family:var(--serif); font-size:clamp(1.3rem,2.2vw,1.9rem);
+  line-height:1.1; color:#EDEAE3; font-variant-numeric:tabular-nums;
+}
+.ltr-stats .l{
+  display:block; margin-top:.4rem;
+  font-size:.56rem; letter-spacing:.2em; text-transform:uppercase; color:var(--fg-faint);
+}
+
+/* the member's own goal, and any other set of choices on this page */
+.chips{ display:flex; flex-wrap:wrap; gap:.5rem; }
+.chip{
+  background:none; cursor:pointer;
+  border:1px solid var(--line-soft); border-radius:var(--r-full,999px);
+  color:var(--fg-soft); font:inherit; font-size:.78rem;
+  padding:.44rem .95rem;
+  transition:border-color .25s var(--ease), color .25s var(--ease), background .25s var(--ease);
+}
+.chip:hover{ color:#EDEAE3; border-color:var(--champagne); }
+.chip.is-on{ color:#12131A; background:var(--champagne); border-color:var(--champagne); }
+
+/* search and filters */
+.ltr-search input{
+  width:100%; background:none; color:#EDEAE3;
+  border:0; border-bottom:1px solid var(--line-soft);
+  font:inherit; font-size:1rem; padding:.6rem 0;
+}
+.ltr-search input:focus{ outline:none; border-bottom-color:var(--champagne); }
+.ltr-filters{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));
+  gap:1rem 1.4rem; margin-top:1.4rem;
+}
+.ltr-field{ display:flex; flex-direction:column; gap:.4rem; min-width:0; }
+.ltr-field label{
+  font-size:.56rem; letter-spacing:.2em; text-transform:uppercase; color:var(--fg-faint);
+}
+.ltr-field select,
+.ltr-field input{
+  background:none; color:#EDEAE3; font:inherit; font-size:.86rem;
+  border:0; border-bottom:1px solid var(--line-soft); padding:.4rem 0;
+  min-width:0;
+}
+.ltr-field select{ appearance:none; cursor:pointer; }
+.ltr-field select option{ background:#141416; color:#EDEAE3; }
+.ltr-field select:focus,
+.ltr-field input:focus{ outline:none; border-bottom-color:var(--champagne); }
+
+.ltr-adv{ margin-top:1.6rem; border-top:1px solid var(--line-soft); padding-top:1.1rem; }
+.ltr-adv summary{
+  cursor:pointer; list-style:none;
+  font-size:.6rem; letter-spacing:.2em; text-transform:uppercase; color:var(--champagne);
+}
+.ltr-adv summary::-webkit-details-marker{ display:none; }
+.ltr-adv summary::after{ content:" +"; opacity:.6; }
+.ltr-adv[open] summary::after{ content:" −"; }
+
+.ltr-toggles{ display:flex; flex-wrap:wrap; gap:1.6rem; margin-top:1.6rem; }
+.ltr-toggle{ display:flex; align-items:center; gap:.6rem; cursor:pointer; font-size:.82rem; color:var(--fg-soft); }
+.ltr-toggle input{ accent-color:var(--champagne); width:16px; height:16px; }
+
+/* the grouping tabs */
+.ltr-sections{
+  display:flex; gap:.5rem; margin-top:2rem; padding-bottom:.3rem;
+  overflow-x:auto; scrollbar-width:thin;
+}
+.ltr-sections button{
+  flex:none; text-align:left; cursor:pointer; background:none;
+  border:1px solid var(--line-soft); border-radius:var(--r);
+  padding:.7rem 1rem; color:var(--fg-soft); font:inherit;
+  transition:border-color .25s var(--ease), color .25s var(--ease);
+}
+.ltr-sections button:hover{ color:#EDEAE3; border-color:var(--champagne); }
+.ltr-sections button[aria-selected="true"]{ color:#EDEAE3; border-color:var(--champagne); }
+.ltr-tab__l{ display:block; font-size:.86rem; }
+.ltr-tab__n{ display:block; margin-top:.2rem; font-size:.6rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--fg-faint); }
+
+/* the cards */
+.ltr-grid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(15.5rem,1fr));
+  gap:clamp(.8rem,1.4vw,1.3rem); margin-top:1.4rem;
+}
+.ltr-card{
+  display:flex; flex-direction:column; min-width:0;
+  background:var(--card); border:1px solid var(--card-line); border-radius:var(--r);
+  overflow:hidden; box-shadow:var(--shadow);
+}
+.ltr-card.is-saved{ border-color:rgba(207,196,176,.4); }
+.ltr-card__plate{ width:100%; aspect-ratio:4/3; object-fit:cover; display:block; }
+.ltr-card__body{ display:flex; flex-direction:column; gap:.5rem; padding:1.1rem 1.2rem 1.2rem; }
+.ltr-vfd{
+  display:inline-flex; align-items:center; gap:.4rem; align-self:flex-start;
+  font-size:.54rem; letter-spacing:.18em; text-transform:uppercase; color:var(--champagne);
+}
+.ltr-vfd i{ font-style:normal; }
+.ltr-vfd--no{ color:var(--fg-faint); }
+.ltr-card__name{ font-family:var(--serif); font-weight:300; font-size:1.32rem; line-height:1.15; margin:0; color:#EDEAE3; }
+.ltr-card__where{ margin:0; font-size:.78rem; color:var(--fg-soft); }
+.ltr-card__goal{
+  margin:0; font-size:.58rem; letter-spacing:.18em; text-transform:uppercase; color:var(--fg-faint);
+}
+.ltr-score{ display:grid; grid-template-columns:auto 1fr; gap:.2rem .6rem; align-items:baseline; margin-top:.3rem; }
+.ltr-score__n{ font-family:var(--serif); font-size:1.5rem; color:#EDEAE3; font-variant-numeric:tabular-nums; }
+.ltr-score__l{ font-size:.54rem; letter-spacing:.18em; text-transform:uppercase; color:var(--fg-faint); }
+.ltr-score__bar{ grid-column:1 / -1; height:2px; background:var(--line-soft); display:block; }
+.ltr-score__bar span{ display:block; height:100%; background:var(--champagne); }
+.ltr-card__occ{ margin:0; font-size:.82rem; color:var(--fg-soft); }
+.ltr-card__tags{ margin:0; font-size:.72rem; color:var(--fg-faint); }
+.ltr-card__seen{ margin:0; font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--fg-faint); }
+.ltr-card__acts{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; margin-top:.5rem; }
+.ltr-heart{
+  background:none; border:1px solid var(--line-soft); border-radius:var(--r-full,999px);
+  width:2.1rem; height:2.1rem; flex:none; cursor:pointer;
+  color:var(--champagne); font-size:.95rem; line-height:1;
+  transition:border-color .25s var(--ease);
+}
+.ltr-heart:hover{ border-color:var(--champagne); }
+
+.ltr-empty{ margin-top:1.6rem; max-width:52ch; color:var(--fg-soft); font-size:.92rem; }
+.ltr-more{ display:flex; align-items:center; gap:1.2rem; margin-top:1.6rem; flex-wrap:wrap; }
+.ltr-more .quiet{ margin:0; }
+
+/* the profile, over the page */
+.ltr-sheet{ position:fixed; inset:0; z-index:120; display:flex; justify-content:flex-end; }
+/* display:flex above beats the [hidden] default, which left a full-screen scrim
+   swallowing every click on the page behind it while the sheet was shut. */
+.ltr-sheet[hidden]{ display:none; }
+.ltr-sheet__scrim{ position:absolute; inset:0; background:rgba(6,6,8,.72); backdrop-filter:blur(3px); }
+.ltr-sheet__panel{
+  position:relative; width:min(46rem,100%); height:100%; overflow-y:auto;
+  background:var(--ink-2,#141416); border-left:1px solid var(--line);
+  padding:clamp(1.4rem,3vw,2.6rem);
+  display:flex; flex-direction:column; gap:1.2rem;
+  animation:ltr-in .32s var(--ease);
+}
+@keyframes ltr-in{ from{ transform:translateX(3%); opacity:0 } }
+.ltr-sheet__close{
+  position:sticky; top:0; align-self:flex-end; z-index:2;
+  display:inline-flex; align-items:center; gap:.5rem;
+  background:var(--ink-2,#141416); border:1px solid var(--line-soft); border-radius:var(--r-sm);
+  color:var(--fg-soft); cursor:pointer;
+  font-family:var(--sans); font-size:.6rem; letter-spacing:.18em; text-transform:uppercase;
+  padding:.42rem .7rem;
+}
+.ltr-sheet__close:hover{ border-color:var(--champagne); color:#EDEAE3; }
+.ltr-sheet__head{ display:flex; gap:1.2rem; align-items:flex-start; flex-wrap:wrap; }
+.ltr-sheet__plate{ width:8.5rem; aspect-ratio:4/3; object-fit:cover; border-radius:var(--r); flex:none; }
+.ltr-sheet__head h2{ font-family:var(--serif); font-weight:300; font-size:1.9rem; margin:.3rem 0 0; color:#EDEAE3; }
+.ltr-sheet__where{ margin:.4rem 0 0; font-size:.86rem; color:var(--fg-soft); }
+.ltr-sheet__score{ margin:.5rem 0 0; font-family:var(--serif); font-size:1.15rem; color:var(--champagne); }
+.ltr-sheet__acts{ display:flex; flex-wrap:wrap; gap:.6rem; }
+.ltr-sheet__acts .btn[disabled]{ opacity:.55; cursor:default; }
+.ltr-connect{ border:1px solid var(--line-soft); border-radius:var(--r); padding:1.2rem; }
+.ltr-connect textarea,
+.ltr-connect select{
+  width:100%; margin-top:.6rem; background:none; color:#EDEAE3; font:inherit; font-size:.9rem;
+  border:1px solid var(--line-soft); border-radius:var(--r-sm); padding:.6rem .7rem;
+}
+.ltr-connect select option{ background:#141416; }
+.ltr-connect .btn{ margin-top:.9rem; }
+.ltr-sent{ margin:0; font-size:.92rem; color:var(--fg-soft); }
+.ltr-about{ font-family:var(--serif); font-size:1.15rem; line-height:1.6; color:#EDEAE3; margin:0 0 1.1rem; }
+
+.ltr-bars{ display:flex; flex-direction:column; gap:.6rem; margin-bottom:1.4rem; }
+.ltr-bars__row{ display:grid; grid-template-columns:10.5rem 1fr 3rem; gap:.9rem; align-items:center; }
+.ltr-bars__row .k{ font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--fg-faint); }
+.ltr-bars__row .b{ height:3px; background:var(--line-soft); display:block; }
+.ltr-bars__row .b i{ display:block; height:100%; background:var(--champagne); }
+.ltr-bars__row .v{ text-align:right; font-variant-numeric:tabular-nums; font-size:.8rem; color:#EDEAE3; }
+
+.ltr-insight{ font-family:var(--serif); font-size:1.05rem; line-height:1.6; color:#EDEAE3; margin:0 0 1.1rem; }
+.ltr-ai-thread{ display:flex; flex-direction:column; gap:.5rem; margin-bottom:1rem; }
+.ltr-ai-q{ margin:0; font-size:.6rem; letter-spacing:.18em; text-transform:uppercase; color:var(--champagne); }
+.ltr-ai-a{ margin:0 0 .6rem; font-size:.92rem; line-height:1.7; color:var(--fg-soft); }
+
+@media (max-width:900px){
+  .ltr-stats{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .ltr-bars__row{ grid-template-columns:8rem 1fr 2.6rem; gap:.6rem; }
+  .ltr-sheet__panel{ width:100%; border-left:0; }
+}
+@media (max-width:520px){
+  .ltr-grid{ grid-template-columns:minmax(0,1fr); }
+  .ltr-bars__row{ grid-template-columns:1fr 2.6rem; }
+  .ltr-bars__row .b{ grid-column:1 / -1; order:3; }
+}
+@media (prefers-reduced-motion:reduce){
+  .ltr-sheet__panel{ animation:none; }
+  .chip,.ltr-sections button,.ltr-heart{ transition:none; }
+}
+
+/* --- Short-term: dates lead ---------------------------------------------- */
+/* On a short-term card the availability window is the fact that decides
+   whether the rest is worth reading, so it sits above the score and gets the
+   only boxed treatment on the card. */
+.stm-when{
+  display:flex; flex-direction:column; gap:.2rem;
+  padding:.6rem .7rem; margin:.2rem 0;
+  border:1px solid rgba(207,196,176,.28); border-radius:var(--r-sm);
+  background:rgba(207,196,176,.06);
+}
+.stm-when--none{ border-color:var(--line-soft); background:none; opacity:.7; }
+.stm-when__d{ font-size:.8rem; color:#EDEAE3; font-variant-numeric:tabular-nums; }
+.stm-when__o{
+  font-size:.56rem; letter-spacing:.16em; text-transform:uppercase; color:var(--champagne);
+}
+.stm-when--none .stm-when__o{ color:var(--fg-faint); }
+
+.stm-travel{ margin-top:1.8rem; border-top:1px solid var(--line-soft); padding-top:1.2rem; }
+.stm-travel .ltr-toggle b{ color:#EDEAE3; font-weight:500; }
+.stm-travel .ltr-filters[hidden]{ display:none; }
+
+/* the date inputs need to read as the rest of the field set does */
+.ltr-field input[type="date"]{
+  color-scheme:dark;
+  font-variant-numeric:tabular-nums;
+}
+
+/* --- Casual dating: fewer, and quieter ----------------------------------- */
+/* Less on the card, deliberately. The luxury signal here is restraint, so the
+   grid is wider-gutter and the card carries a name, a place, a figure and an
+   intent — and stops. */
+.cas-grid{ grid-template-columns:repeat(auto-fill,minmax(17rem,1fr)); gap:clamp(1rem,1.8vw,1.7rem); }
+.cas-card .ltr-card__body{ gap:.6rem; padding:1.3rem 1.4rem 1.4rem; }
+.cas-card .ltr-card__plate{ aspect-ratio:1/1; }
+
+.cas-avail{
+  margin:0; font-size:.62rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--champagne);
+}
+.cas-avail--warn{ color:#D8A15E; }
+
+.cas-acts{ display:flex; flex-direction:column; gap:.5rem; margin-top:.5rem; }
+.cas-acts .btn{ justify-content:center; }
+
+.cas-curated{
+  margin:1.4rem 0 0; max-width:60ch;
+  font-size:.78rem; line-height:1.7; color:var(--fg-faint);
+}
+
+.cas-private{ margin-bottom:1.4rem; }
+.cas-private b{ color:#EDEAE3; font-weight:500; }
+
+/* the mutual-intent check, before a request can be sent */
+.cas-check{
+  border:1px solid rgba(207,196,176,.3); border-radius:var(--r-sm);
+  padding:1rem 1.1rem; margin:.4rem 0 1rem;
+  background:rgba(207,196,176,.05);
+}
+.cas-check--warn{ border-color:rgba(216,161,94,.45); background:rgba(216,161,94,.07); }
+.cas-check .kv{ margin:0; }
+.cas-check__v{
+  margin:.9rem 0 0; font-size:.82rem; line-height:1.6; color:var(--champagne);
+}
+.cas-check--warn .cas-check__v{ color:#E8BC80; }
