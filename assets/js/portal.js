@@ -57,7 +57,13 @@
     credential: 'Your verification mark',
     data: 'What we hold',
     safety: 'Safety & conduct',
-    account: 'Account & security'
+    account: 'Account & security',
+    advisor: 'Ask the advisor',
+    saved: 'Favourites & saved',
+    presentation: 'How you appear',
+    billing: 'Membership & billing',
+    privacy: 'Privacy & security',
+    help: 'Help'
   };
 
   /* --- Dates & greeting --------------------------------------------------- */
@@ -127,7 +133,10 @@
     parties: 'events',
     consent: 'settings', data: 'settings', account: 'settings', safety: 'settings',
     mandate: 'settings', documents: 'settings',
-    messages: null, assistant: null, overview: null
+    saved: 'activity', messages: 'activity',
+    presentation: 'me',
+    billing: 'settings', privacy: 'settings', help: 'settings',
+    assistant: null, overview: null
   };
 
   /* --- Routing ------------------------------------------------------------ */
@@ -4458,6 +4467,1405 @@
       b.addEventListener('click', function () { tab = t.id; render(); });
       $('#cn-tabs').appendChild(b);
     });
+    render();
+  })();
+
+  /* --- Ask the advisor ----------------------------------------------------
+     The house's own counsel. Two halves: advice, which is a conversation, and
+     analysis, which is a read-out. Both are built from the same rule — say what
+     the answer rests on, and say plainly where there was nothing to rest on. */
+  (function () {
+    if (!$('#view-advisor')) return;
+    var el = MATCH.el;
+
+    var MODES = [
+      { id: 'dating', label: 'Dating advice',
+        note: 'The practical part — a first meeting, a second, and what to do when one of them goes quiet.',
+        opening: 'Tell me what stage you are at and what is bothering you about it.' },
+      { id: 'relationship', label: 'Relationship advice',
+        note: 'Something inside a relationship you are already in, rather than a decision about entering one.',
+        opening: 'What has changed recently, and how long has it been going the way it is going?' },
+      { id: 'conversation', label: 'Conversation advice',
+        note: 'What to say, and when it is better to say nothing. Bring the actual words if you have them.',
+        opening: 'Paste what you want to say, or describe the conversation you are avoiding.' },
+      { id: 'situation', label: 'A situation',
+        note: 'Something that does not fit the other three. Awkward, unresolved, or simply strange.',
+        opening: 'Describe it as you would to a friend. Order does not matter.' }
+    ];
+
+    // Advice is assembled from what the situation actually contains rather than
+    // drawn from a bag of sayings, so the same question gives the same answer
+    // and the reasoning can be shown alongside it.
+    var READS = {
+      dating: [
+        ['You are reading silence as a verdict.', 'A gap of a few days after a good first meeting is the commonest thing there is, and it is almost never about you. Answer it once, plainly, and then let it be.'],
+        ['You are deciding on too little.', 'One meeting tells you whether you want a second. It does not tell you whether this is a person to build with, and treating it as though it does is what makes second meetings go badly.'],
+        ['The arrangement is doing the work the conversation should.', 'A better restaurant will not fix a first meeting that has nothing to say. Choose somewhere quiet and let the difficulty be interesting.']
+      ],
+      relationship: [
+        ['This is a recurring argument, not a new one.', 'A disagreement that returns in the same shape every few weeks is a standing difference wearing a new coat. Name the standing difference and the argument stops needing to happen.'],
+        ['One of you is keeping score.', 'Where effort is being counted, the count is the problem. Say what you actually need rather than what you are owed.'],
+        ['You are asking whether to leave, and answering whether you are unhappy.', 'They are different questions and the second cannot settle the first. Unhappiness is information about now; it is not a decision.']
+      ],
+      conversation: [
+        ['Say the difficult sentence first.', 'What you are dreading belongs in the opening, not at the end. Everything before it will be heard as a delay, and it will be.'],
+        ['Take the accusation out and the request stays.', 'Most of what makes a message hard to send is the part that assigns blame. Remove it and what remains is usually reasonable and usually gets a reasonable answer.'],
+        ['Do not send it tonight.', 'A message written after a difficult evening reads differently in the morning to the person who wrote it. That is the test worth applying.']
+      ],
+      situation: [
+        ['Separate what has happened from what you fear it means.', 'Write the facts in one column and the reading in the other. The second column is almost always longer, and that is the finding.'],
+        ['You have more than one obligation here and they conflict.', 'That is not a failure of judgement, it is the shape of the situation. Decide which obligation you are prepared to disappoint and the rest follows.'],
+        ['Nothing needs deciding this week.', 'Where a matter has no deadline, treating it as urgent is a choice, and usually the wrong one.']
+      ]
+    };
+
+    var mode = MODES[0];
+    var thread = [];
+    var saved = [
+      { d: '11 August', mode: 'Conversation advice', t: 'How to answer No. 06 without closing the door',
+        s: 'You wanted to decline a second meeting without making it a rejection of the person. We settled on saying the true thing shortly.' },
+      { d: '02 August', mode: 'Dating advice', t: 'Whether three weeks between meetings is a signal',
+        s: 'It was not. The reason was a parent in hospital, which you learned afterwards.' }
+    ];
+
+    function reply(text) {
+      var t = (text || '').toLowerCase();
+      var pool = READS[mode.id];
+      // Pick by what is in the question, deterministically, and fall through to
+      // the first reading when nothing in the text points anywhere.
+      var pick = 0;
+      if (/argu|again|always|never|every time|score|fair|owe/.test(t)) pick = 1;
+      else if (/leave|end it|should i|decide|worth/.test(t)) pick = 2;
+      else if (/quiet|silence|hasn.t|no reply|ignor|waiting/.test(t)) pick = 0;
+      else if (t.length > 220) pick = 2;
+      else if (t.length > 90) pick = 1;
+      var r = pool[Math.min(pick, pool.length - 1)];
+      var words = t.split(/\s+/).filter(Boolean).length;
+      return {
+        head: r[0], body: r[1],
+        basis: words < 12
+          ? 'Based on ' + words + ' words and nothing else. Give me more and this gets better — it is not being modest.'
+          : 'Based on what you wrote (' + words + ' words), the track you are on, and nothing from your file.'
+      };
+    }
+
+    function renderThread() {
+      var box = $('#ad-thread'); box.textContent = '';
+      thread.forEach(function (m) {
+        var w = el('div', 'msg msg--' + (m.me ? 'me' : 'them'));
+        w.appendChild(el('p', 'who', m.me ? 'You' : 'The advisor'));
+        var b = el('div', 'bubble');
+        if (m.me) { b.textContent = m.text; }
+        else {
+          b.appendChild(el('p', 'ad-head', m.head));
+          b.appendChild(el('p', 'ad-body', m.body));
+          b.appendChild(el('p', 'ad-basis', m.basis));
+        }
+        w.appendChild(b); box.appendChild(w);
+      });
+    }
+
+    function renderSaved() {
+      var box = $('#ad-saved'); box.textContent = '';
+      saved.forEach(function (c, i) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', c.t));
+        left.appendChild(el('p', 'cn__s', c.d + ' · ' + c.mode));
+        left.appendChild(el('p', 'cn__m', c.s));
+        var acts = el('div', 'cn__acts');
+        var del = el('button', 'btn btn--quiet', 'Forget it'); del.type = 'button';
+        del.addEventListener('click', function () { saved.splice(i, 1); renderSaved(); });
+        acts.appendChild(del);
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#ad-saved-n').textContent = saved.length ? saved.length + ' held' : 'None';
+      $('#ad-saved-empty').hidden = saved.length > 0;
+    }
+
+    MODES.forEach(function (m) {
+      var b = el('button', 'chip' + (m === mode ? ' is-on' : ''), m.label);
+      b.type = 'button'; b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', m === mode ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        mode = m; thread = []; renderThread();
+        $$('#ad-modes button').forEach(function (o) {
+          o.classList.toggle('is-on', o === b);
+          o.setAttribute('aria-checked', o === b ? 'true' : 'false');
+        });
+        $('#ad-note').textContent = m.note;
+        $('#ad-input').placeholder = m.opening;
+      });
+      $('#ad-modes').appendChild(b);
+    });
+    $('#ad-note').textContent = mode.note;
+    $('#ad-input').placeholder = mode.opening;
+
+    $('#ad-send').addEventListener('click', function () {
+      var v = $('#ad-input').value.trim();
+      if (!v) return;
+      thread.push({ me: true, text: v });
+      var r = reply(v); r.me = false; thread.push(r);
+      $('#ad-input').value = '';
+      renderThread();
+    });
+    $('#ad-save').addEventListener('click', function () {
+      var first = thread.filter(function (m) { return m.me; })[0];
+      if (!first) { $('#ad-note').textContent = 'Ask something first — there is nothing to save yet.'; return; }
+      saved.unshift({
+        d: 'Today', mode: mode.label,
+        t: first.text.length > 60 ? first.text.slice(0, 58).trim() + '…' : first.text,
+        s: thread.filter(function (m) { return !m.me; }).slice(-1)[0].head
+      });
+      renderSaved();
+    });
+    $('#ad-hand').addEventListener('click', function () {
+      $('#ad-note').textContent = thread.length
+        ? 'Sent to C. Vasseur with the whole exchange attached. She will read it before she replies, and she is not obliged to agree with any of it.'
+        : 'Nothing to send yet.';
+    });
+
+    /* Analysis — four read-outs, each stating what it worked from. */
+    var TOOLS = [
+      { id: 'message', ic: '✎', t: 'Message analysis', n: 'How something you were sent, or are about to send, is likely to land.',
+        ask: 'Paste the message.',
+        run: function (v) {
+          var q = (v.match(/\?/g) || []).length;
+          var words = v.split(/\s+/).filter(Boolean).length;
+          var warm = /thank|glad|looking forward|enjoyed|kind/i.test(v);
+          var hedge = (v.match(/\b(maybe|perhaps|possibly|sort of|i guess|just)\b/gi) || []).length;
+          return [
+            ['Length', words + ' words — ' + (words < 25 ? 'short enough to read as curt if the subject is delicate' : words > 140 ? 'long enough that the point will be missed' : 'about right')],
+            ['Questions', q === 0 ? 'None. A message with no question gives the other person nothing to answer' : q + ' — enough to carry the reply'],
+            ['Warmth', warm ? 'Present, and it is doing useful work' : 'Absent. Nothing here is unkind, but nothing is warm either'],
+            ['Hedging', hedge === 0 ? 'None' : hedge + ' hedging phrases. Each one invites a softer answer than you want'],
+            ['Based on', 'The text you pasted. Nothing from your file, and nothing about the person it is for']
+          ];
+        } },
+      { id: 'profile', ic: '❖', t: 'Profile analysis', n: 'What your own record says, and where it is thin.',
+        run: function () {
+          return [
+            ['Complete', '64% — the gaps are in Family & circumstances and in availability'],
+            ['Strongest', 'Standards. It is specific, and specific is what an advisor can actually work from'],
+            ['Weakest', 'Interests, which currently reads as a list rather than a life'],
+            ['Effect on matching', 'Two of the eight factors are being computed from very little. That widens the field rather than narrowing it wrongly'],
+            ['Based on', 'Your private profile and persona, both of which only you and C. Vasseur can read']
+          ];
+        } },
+      { id: 'compat', ic: '≈', t: 'Compatibility analysis', n: 'Why a particular case scored the way it did.',
+        ask: 'Which case? A number, or a name.',
+        run: function (v) {
+          var n = (v.match(/\d+/) || ['7'])[0];
+          return [
+            ['Case', 'No. ' + ('0' + n).slice(-2)],
+            ['Strongest agreement', 'What you both want from the next decade — the heaviest factor, and it is close'],
+            ['Real difference', 'Pace. You would meet again within the fortnight; they would take a month'],
+            ['Not scored', 'Chemistry. Nothing here measures it and nothing here pretends to'],
+            ['Based on', 'The eight factors behind the score, weighted as shown on the case itself']
+          ];
+        } },
+      { id: 'situation', ic: '◷', t: 'Situation analysis', n: 'An unresolved matter, separated into what is known and what is feared.',
+        ask: 'Describe the situation.',
+        run: function (v) {
+          var facts = v.split(/[.;\n]/).map(function (x) { return x.trim(); }).filter(function (x) { return x.length > 3; });
+          var fear = facts.filter(function (x) { return /think|feel|worry|afraid|might|probably|maybe|seems/i.test(x); });
+          return [
+            ['Statements given', facts.length],
+            ['Of those, readings rather than facts', fear.length + (fear.length ? ' — they are doing most of the work' : '')],
+            ['What is actually established', facts.length - fear.length + ' statement' + (facts.length - fear.length === 1 ? '' : 's')],
+            ['What would settle it', 'One question asked directly of the person concerned, which is usually the thing being avoided'],
+            ['Based on', 'Only what you typed. This is a way of sorting it, not a judgement of it']
+          ];
+        } }
+    ];
+
+    var tool = null;
+    function renderTool() {
+      var box = $('#ad-tool-out'); box.textContent = '';
+      if (!tool) return;
+      var wrap = el('div', 'ad-tool');
+      wrap.appendChild(el('h3', 'ad-tool__t', tool.t));
+      if (tool.ask) {
+        var lab = el('label', 'sr-only', tool.ask); lab.setAttribute('for', 'ad-tool-in');
+        var inp = el('textarea', 'ad-input'); inp.id = 'ad-tool-in'; inp.rows = 3; inp.placeholder = tool.ask;
+        var go = el('button', 'btn btn--solid', 'Run it'); go.type = 'button';
+        var out = el('dl', 'kv');
+        go.addEventListener('click', function () {
+          var v = inp.value.trim();
+          out.textContent = '';
+          if (!v) { out.appendChild(el('dt', null, 'Nothing to read')); out.appendChild(el('dd', null, 'Give it something and it will.')); return; }
+          tool.run(v).forEach(function (r) {
+            out.appendChild(el('dt', null, r[0])); out.appendChild(el('dd', null, String(r[1])));
+          });
+        });
+        wrap.appendChild(lab); wrap.appendChild(inp);
+        var acts = el('div', 'ad-acts'); acts.appendChild(go); wrap.appendChild(acts);
+        wrap.appendChild(out);
+      } else {
+        var dl = el('dl', 'kv');
+        tool.run('').forEach(function (r) {
+          dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, String(r[1])));
+        });
+        wrap.appendChild(dl);
+      }
+      box.appendChild(wrap);
+    }
+
+    TOOLS.forEach(function (t) {
+      var b = el('button', 'qa__i'); b.type = 'button'; b.setAttribute('data-tool', t.id);
+      b.appendChild(el('span', 'qa__ic', t.ic));
+      b.appendChild(el('span', 'qa__t', t.t));
+      b.appendChild(el('span', 'qa__n', t.n));
+      b.addEventListener('click', function () {
+        tool = tool === t ? null : t;
+        $$('#ad-tools .qa__i').forEach(function (o) { o.classList.toggle('is-on', tool === t && o === b); });
+        renderTool();
+      });
+      $('#ad-tools').appendChild(b);
+    });
+
+    renderThread();
+    renderSaved();
+  })();
+
+  /* --- Favourites & saved -------------------------------------------------
+     One place for everything set aside, in five kinds. Saving is deliberately
+     inert: nobody is told, and it feeds nothing. */
+  (function () {
+    if (!$('#view-saved')) return;
+    var el = MATCH.el;
+
+    var ITEMS = [
+      { g: 'favourites', n: 'No. 07', s: 'Long-term · London', d: '18 August',
+        m: 'Kept because of the Singapore decade, which you wanted to understand before deciding.' },
+      { g: 'favourites', n: 'No. 04', s: 'Long-term · Paris', d: '02 July',
+        m: 'Declined at the time. You asked that the case stay readable in case the timing changed.' },
+      { g: 'profiles', n: 'No. 11', s: 'Short-term · Geneva', d: '15 August',
+        m: 'Set aside without a decision. It expires from here in three weeks unless you act.' },
+      { g: 'profiles', n: 'No. 12', s: 'Casual · London', d: '13 August',
+        m: 'Set aside without a decision.' },
+      { g: 'searches', n: 'Long-term · 38–48 · London or Paris', s: 'Saved search', d: '09 August',
+        m: 'Two new cases have matched since you saved it. You are not written to about them unless you ask.' },
+      { g: 'searches', n: 'Short-term · discreet · within 90 minutes of London', s: 'Saved search', d: '21 July',
+        m: 'Nothing new since you saved it.' },
+      { g: 'events', n: 'The Marylebone dinner', s: '28 August · London', d: '10 August',
+        m: 'Twelve at table. You have not accepted; the place is held until the 24th.' },
+      { g: 'events', n: 'Autumn weekend, Hampshire', s: '3–5 October', d: '04 August',
+        m: 'Saved to consider. Nothing is reserved.' },
+      { g: 'recs', n: 'Reading a first meeting', s: 'Academy · recommended by C. Vasseur', d: '12 August',
+        m: 'Suggested after your note about second meetings going quiet.' },
+      { g: 'recs', n: 'Formation', s: 'Relationship management', d: '30 July',
+        m: 'Recommended if an introduction reaches a second season. You are already retained for it.' }
+    ];
+
+    var TABS = [
+      { id: 'favourites', label: 'Favourite profiles', note: 'Kept deliberately, with your reason attached' },
+      { id: 'profiles',   label: 'Saved profiles',     note: 'Set aside without a decision, and they expire' },
+      { id: 'searches',   label: 'Saved searches',     note: 'The brief you wrote, held so you need not write it again' },
+      { id: 'events',     label: 'Saved events',       note: 'Considered, not accepted' },
+      { id: 'recs',       label: 'Saved recommendations', note: 'Suggested to you, and why' }
+    ];
+    var tab = TABS[0].id;
+
+    function render() {
+      var box = $('#sv-list'); box.textContent = '';
+      var rows = ITEMS.filter(function (i) { return i.g === tab; });
+      rows.forEach(function (it) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', it.n));
+        left.appendChild(el('p', 'cn__s', it.s + ' · saved ' + it.d));
+        left.appendChild(el('p', 'cn__m', it.m));
+        var acts = el('div', 'cn__acts');
+        var open = el('button', 'btn btn--quiet', it.g === 'searches' ? 'Run it again' : 'Open'); open.type = 'button';
+        open.addEventListener('click', function () {
+          left.appendChild(el('p', 'cn__m', it.g === 'searches'
+            ? 'Run. Two cases match; C. Vasseur is asked to read them before you are shown anything.'
+            : 'Opened for C. Vasseur, who will write before anything is arranged.'));
+          open.disabled = true;
+        });
+        var rm = el('button', 'btn btn--quiet', 'Remove'); rm.type = 'button';
+        rm.addEventListener('click', function () {
+          ITEMS.splice(ITEMS.indexOf(it), 1); render();
+        });
+        acts.appendChild(open); acts.appendChild(rm);
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#sv-empty').hidden = rows.length > 0;
+      var t = TABS.filter(function (x) { return x.id === tab; })[0];
+      $('#sv-note').textContent = rows.length
+        ? t.label + ' — ' + rows.length + '. ' + t.note + '.'
+        : t.note + '.';
+      $$('#sv-tabs button').forEach(function (b) {
+        b.setAttribute('aria-selected', b.getAttribute('data-sv') === tab ? 'true' : 'false');
+      });
+    }
+
+    TABS.forEach(function (t) {
+      var b = el('button', null, t.label); b.type = 'button';
+      b.setAttribute('data-sv', t.id); b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', t.id === tab ? 'true' : 'false');
+      b.addEventListener('click', function () { tab = t.id; render(); });
+      $('#sv-tabs').appendChild(b);
+    });
+    render();
+  })();
+
+  /* --- How you appear -----------------------------------------------------
+     Photographs, facets and visibility are one subject, because a member never
+     sees a whole profile: they see whatever the stage of the introduction has
+     released. The preview is built from the same records, so it cannot drift. */
+  (function () {
+    if (!$('#view-presentation')) return;
+    var el = MATCH.el;
+
+    var STAGES = [
+      { id: 'proposed', label: 'When a case is written', n: 'Your advisor has proposed you. They know nothing that identifies you.' },
+      { id: 'accepted', label: 'When you both accept',   n: 'An introduction is open. Enough is released for a conversation to be possible.' },
+      { id: 'met',      label: 'After you have met',     n: 'You have met in person. What remains closed stays closed until you move it.' }
+    ];
+    var ORDER = { proposed: 0, accepted: 1, met: 2 };
+    var stage = 'proposed';
+
+    var PHOTOS = [
+      { t: 'Standing, Hampshire',  at: 'accepted' },
+      { t: 'At the piano',         at: 'met' },
+      { t: 'Portrait, 2024',       at: 'accepted' },
+      { t: 'With the dogs',        at: 'met' },
+      { t: 'Milan, 2023',          at: 'never' }
+    ];
+
+    var FACETS = [
+      { g: 'Lifestyle', k: 'How the week runs', v: 'Four days in London, the rest in Hampshire', at: 'accepted' },
+      { g: 'Lifestyle', k: 'Drinking',          v: 'Wine at dinner, rarely otherwise',           at: 'accepted' },
+      { g: 'Lifestyle', k: 'Smoking',           v: 'No',                                          at: 'proposed' },
+      { g: 'Lifestyle', k: 'Children at home',  v: 'One, sixteen, most weeks',                    at: 'accepted' },
+      { g: 'Interests', k: 'Held longest',      v: 'Chamber music — playing it, badly, not attending it', at: 'accepted' },
+      { g: 'Interests', k: 'Recent',            v: 'Restoring a 1962 saloon, unfinished',         at: 'accepted' },
+      { g: 'Interests', k: 'Would rather not',  v: 'Anything competitive on a weekend',           at: 'met' },
+      { g: 'Availability', k: 'Evenings',       v: 'Tuesday to Thursday',                          at: 'accepted' },
+      { g: 'Availability', k: 'Weekends',       v: 'Alternate, and not in term-time',              at: 'accepted' },
+      { g: 'Availability', k: 'Travel',         v: 'Will travel for a second meeting, not a first', at: 'proposed' },
+      { g: 'Availability', k: 'Notice needed',  v: 'A week for dinner, a month for a weekend',      at: 'accepted' }
+    ];
+
+    var CHOICES = [
+      { v: 'proposed', label: 'From the case' },
+      { v: 'accepted', label: 'On acceptance' },
+      { v: 'met',      label: 'After meeting' },
+      { v: 'never',    label: 'Never' }
+    ];
+
+    function selector(item, onChange) {
+      var s = el('select');
+      CHOICES.forEach(function (c) {
+        var o = el('option', null, c.label); o.value = c.v;
+        if (item.at === c.v) o.selected = true;
+        s.appendChild(o);
+      });
+      s.addEventListener('change', function () { item.at = s.value; onChange(); });
+      return s;
+    }
+
+    function visible(at) { return at !== 'never' && ORDER[at] <= ORDER[stage]; }
+
+    function renderPhotos() {
+      var box = $('#pr-photos'); box.textContent = '';
+      PHOTOS.forEach(function (p, i) {
+        var c = el('div', 'pr-photo');
+        var img = el('img'); img.src = MATCH.plate('photo-' + i + '-' + p.t);
+        img.alt = ''; img.setAttribute('aria-hidden', 'true');
+        c.appendChild(img);
+        c.appendChild(el('p', 'pr-photo__t', p.t));
+        var lab = el('label', 'sr-only', 'When ' + p.t + ' is released');
+        var id = 'pr-photo-' + i; lab.setAttribute('for', id);
+        var sel = selector(p, renderAll); sel.id = id;
+        c.appendChild(lab); c.appendChild(sel);
+        box.appendChild(c);
+      });
+      var held = PHOTOS.filter(function (p) { return p.at !== 'never'; }).length;
+      $('#pr-photo-n').textContent = PHOTOS.length + ' held · ' + held + ' released at some stage';
+    }
+
+    function renderFacets() {
+      var box = $('#pr-facets'); box.textContent = '';
+      ['Lifestyle', 'Interests', 'Availability'].forEach(function (g) {
+        box.appendChild(el('h3', 'pr-g', g));
+        FACETS.filter(function (f) { return f.g === g; }).forEach(function (f, i) {
+          var row = el('div', 'pr-row');
+          var left = el('div');
+          left.appendChild(el('p', 'pr-row__k', f.k));
+          left.appendChild(el('p', 'pr-row__v', f.v));
+          var lab = el('label', 'sr-only', 'When ' + f.k + ' is released');
+          var id = 'pr-f-' + g.toLowerCase() + '-' + i; lab.setAttribute('for', id);
+          var sel = selector(f, renderAll); sel.id = id;
+          row.appendChild(left); row.appendChild(lab); row.appendChild(sel);
+          box.appendChild(row);
+        });
+      });
+    }
+
+    function renderVis() {
+      var box = $('#pr-vis'); box.textContent = '';
+      STAGES.forEach(function (s) {
+        var n = PHOTOS.filter(function (p) { return p.at === s.id; }).length +
+                FACETS.filter(function (f) { return f.at === s.id; }).length;
+        var row = el('div', 'nt-pref');
+        row.appendChild(el('span', 'nt-pref__k', s.label));
+        row.appendChild(el('span', 'nt-pref__v', n + ' item' + (n === 1 ? '' : 's')));
+        box.appendChild(row);
+        box.appendChild(el('p', 'pr-vis__n', s.n));
+      });
+      var never = PHOTOS.filter(function (p) { return p.at === 'never'; }).length +
+                  FACETS.filter(function (f) { return f.at === 'never'; }).length;
+      var row = el('div', 'nt-pref');
+      row.appendChild(el('span', 'nt-pref__k', 'Never released'));
+      row.appendChild(el('span', 'nt-pref__v', never + ' item' + (never === 1 ? '' : 's')));
+      box.appendChild(row);
+    }
+
+    function renderPreview() {
+      var box = $('#pr-preview'); box.textContent = '';
+      var st = STAGES.filter(function (s) { return s.id === stage; })[0];
+      $('#pr-stage-name').textContent = st.label;
+      box.appendChild(el('p', 'pr-card__s', st.n));
+
+      var ph = PHOTOS.filter(function (p) { return visible(p.at); });
+      var strip = el('div', 'pr-strip');
+      if (ph.length) {
+        ph.forEach(function (p, i) {
+          var img = el('img'); img.src = MATCH.plate('photo-' + PHOTOS.indexOf(p) + '-' + p.t);
+          img.alt = ''; img.setAttribute('aria-hidden', 'true');
+          strip.appendChild(img);
+        });
+      } else {
+        strip.appendChild(el('p', 'ltr-empty', 'No photograph at this stage.'));
+      }
+      box.appendChild(strip);
+
+      var dl = el('dl', 'kv');
+      var shown = FACETS.filter(function (f) { return visible(f.at); });
+      shown.forEach(function (f) {
+        dl.appendChild(el('dt', null, f.k));
+        dl.appendChild(el('dd', null, f.v));
+      });
+      if (!shown.length) {
+        dl.appendChild(el('dt', null, 'Nothing'));
+        dl.appendChild(el('dd', null, 'At this stage they are told what you are looking for and nothing about you.'));
+      }
+      box.appendChild(dl);
+      box.appendChild(el('p', 'pr-card__f',
+        shown.length + ' of ' + FACETS.length + ' details and ' + ph.length + ' of ' + PHOTOS.length +
+        ' photographs. Your name is not among them at any stage — that is released by you, in person.'));
+    }
+
+    function renderAll() { renderPhotos(); renderFacets(); renderVis(); renderPreview(); }
+
+    STAGES.forEach(function (s) {
+      var b = el('button', 'chip' + (s.id === stage ? ' is-on' : ''), s.label);
+      b.type = 'button'; b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', s.id === stage ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        stage = s.id;
+        $$('#pr-stages button').forEach(function (o) {
+          o.classList.toggle('is-on', o === b);
+          o.setAttribute('aria-checked', o === b ? 'true' : 'false');
+        });
+        renderPreview();
+      });
+      $('#pr-stages').appendChild(b);
+    });
+
+    renderAll();
+  })();
+
+  /* --- Membership & billing ----------------------------------------------- */
+  (function () {
+    if (!$('#view-billing')) return;
+    var el = MATCH.el;
+
+    var TIERS = [
+      { id: 'reg',  name: 'Register',   fee: '£4,000 a year',
+        n: 'Your file is held and read. You are proposed to others; nothing is searched on your behalf.',
+        inc: ['Verification, renewed annually', 'Considered for introductions others are searching for', 'Access to gatherings of the house'] },
+      { id: 'ret',  name: 'Retained',   fee: '£24,000 a year',
+        n: 'An advisor is retained for you. A search is run, cases are written, and the arrangements are handled.',
+        inc: ['A named advisor, and a second who knows the file', 'Searches run for you across all four tracks', 'Cases written in full, in person', 'The assistant, for arrangements around an introduction', 'Formation, for the first year'] },
+      { id: 'con',  name: 'Continuity', fee: '£60,000 a year',
+        n: 'The retainer, and an advisor who holds the whole history across the years rather than the engagement.',
+        inc: ['Everything in Retained', 'Counsel, without a separate fee', 'A standing advisor across decades', 'The house available at any hour'] }
+    ];
+    var current = 'ret';
+
+    var HISTORY = [
+      { d: '14 March 2026',  k: 'invoice', t: 'Membership — Retained, annual',        a: '£24,000.00', s: 'Due',      no: 'LP-2026-0031' },
+      { d: '14 March 2025',  k: 'invoice', t: 'Membership — Retained, annual',        a: '£24,000.00', s: 'Paid',     no: 'LP-2025-0027' },
+      { d: '02 August 2025', k: 'txn',     t: 'Arrangement — Marylebone, 28 August',  a: '£1,240.00',  s: 'Settled',  no: 'LP-A-1188' },
+      { d: '11 June 2025',   k: 'txn',     t: 'Arrangement — car, Mayfair',           a: '£310.00',    s: 'Settled',  no: 'LP-A-1121' },
+      { d: '30 April 2025',  k: 'invoice', t: 'Formation — first year, in full',      a: '£9,000.00',  s: 'Paid',     no: 'LP-2025-0044' },
+      { d: '18 March 2025',  k: 'credit',  t: 'Credit — introduction withdrawn by us', a: '−£2,000.00', s: 'Applied', no: 'LP-C-0009' },
+      { d: '14 March 2024',  k: 'invoice', t: 'Membership — Register, annual',        a: '£4,000.00',  s: 'Paid',     no: 'LP-2024-0019' }
+    ];
+    var KINDS = [
+      { id: 'all',     label: 'Everything' },
+      { id: 'invoice', label: 'Invoices' },
+      { id: 'txn',     label: 'Transactions' },
+      { id: 'credit',  label: 'Credits' }
+    ];
+    var kind = 'all';
+
+    var METHODS = [
+      { t: 'Coutts · account ending 4471', n: 'Bank transfer, by arrangement. The default for membership.', d: true },
+      { t: 'Amex · ending 1008',           n: 'Used for arrangements under £2,500 only.', d: false }
+    ];
+
+    var CODES = [
+      { c: 'MARCHAND-7', t: 'Your referral code', n: 'Given to someone you would vouch for. If they are accepted, a year of your membership is credited — and you are told only that they were accepted, never what they said.' }
+    ];
+
+    function renderSummary() {
+      var t = TIERS.filter(function (x) { return x.id === current; })[0];
+      $('#bl-tier').textContent = t.name;
+      var dl = $('#bl-summary'); dl.textContent = '';
+      [ ['Membership', t.name],
+        ['Fee', t.fee],
+        ['Held since', '14 March 2024'],
+        ['Renews', '14 March 2026 — we write on 14 February'],
+        ['Advisor', 'C. Vasseur, London'],
+        ['Outstanding', 'One invoice, LP-2026-0031, due 14 March'] ]
+        .forEach(function (r) { dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1])); });
+
+      var b = $('#bl-benefits'); b.textContent = '';
+      t.inc.forEach(function (line, i) {
+        var row = el('div', 'convo__item');
+        row.appendChild(el('span', 'no', ('0' + (i + 1)).slice(-2)));
+        var d = el('div'); d.appendChild(el('p', 'nm', line));
+        row.appendChild(d); b.appendChild(row);
+      });
+    }
+
+    function renderTiers() {
+      var box = $('#bl-tiers'); box.textContent = '';
+      TIERS.forEach(function (t) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', t.name));
+        left.appendChild(el('p', 'cn__s', t.fee + (t.id === current ? ' · yours' : '')));
+        left.appendChild(el('p', 'cn__m', t.n));
+        var acts = el('div', 'cn__acts');
+        if (t.id !== current) {
+          var up = TIERS.indexOf(t) > TIERS.map(function (x) { return x.id; }).indexOf(current);
+          var b = el('button', 'btn btn--quiet', up ? 'Move up to this' : 'Move down to this');
+          b.type = 'button';
+          b.addEventListener('click', function () {
+            current = t.id;
+            $('#bl-tier-note').textContent = up
+              ? 'Noted. C. Vasseur telephones before anything changes — a membership is never raised by a button alone, and the difference is charged pro rata from the day it starts.'
+              : 'Noted. Nothing changes until the current year ends on 14 March; you keep everything you hold until then, and nothing is refunded or clawed back.';
+            renderSummary(); renderTiers();
+          });
+          acts.appendChild(b);
+        } else {
+          acts.appendChild(el('span', 'pill pill--rest', 'Current'));
+        }
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+    }
+
+    function renderHistory() {
+      var box = $('#bl-hist'); box.textContent = '';
+      var rows = HISTORY.filter(function (h) { return kind === 'all' || h.k === kind; });
+      rows.forEach(function (h) {
+        var row = el('div', 'bl-row');
+        var left = el('div');
+        left.appendChild(el('p', 'bl-row__t', h.t));
+        left.appendChild(el('p', 'bl-row__d', h.d + ' · ' + h.no + ' · ' + h.s));
+        var right = el('div', 'bl-row__r');
+        right.appendChild(el('span', 'bl-row__a', h.a));
+        var dl = el('button', 'btn btn--quiet', h.k === 'invoice' ? 'Invoice' : 'Receipt');
+        dl.type = 'button';
+        dl.addEventListener('click', function () {
+          left.appendChild(el('p', 'bl-row__d', 'Sent to your address of record as a sealed document. Nothing is attached to an email.'));
+          dl.disabled = true;
+        });
+        right.appendChild(dl);
+        row.appendChild(left); row.appendChild(right); box.appendChild(row);
+      });
+      $('#bl-hist-n').textContent = rows.length + ' of ' + HISTORY.length;
+      $$('#bl-filters button').forEach(function (b) {
+        var on = b.getAttribute('data-k') === kind;
+        b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+    }
+
+    function renderMethods() {
+      var box = $('#bl-methods'); box.textContent = '';
+      METHODS.forEach(function (m) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', m.t));
+        left.appendChild(el('p', 'cn__s', m.d ? 'Default' : 'Secondary'));
+        left.appendChild(el('p', 'cn__m', m.n));
+        var acts = el('div', 'cn__acts');
+        if (!m.d) {
+          var b = el('button', 'btn btn--quiet', 'Make default'); b.type = 'button';
+          b.addEventListener('click', function () {
+            METHODS.forEach(function (x) { x.d = x === m; }); renderMethods();
+          });
+          acts.appendChild(b);
+        }
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+    }
+
+    function renderCodes() {
+      var box = $('#bl-codes'); box.textContent = '';
+      CODES.forEach(function (c) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', c.c));
+        left.appendChild(el('p', 'cn__s', c.t));
+        left.appendChild(el('p', 'cn__m', c.n));
+        row.appendChild(left); box.appendChild(row);
+      });
+    }
+
+    KINDS.forEach(function (k) {
+      var b = el('button', 'chip' + (k.id === kind ? ' is-on' : ''), k.label);
+      b.type = 'button'; b.setAttribute('data-k', k.id); b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', k.id === kind ? 'true' : 'false');
+      b.addEventListener('click', function () { kind = k.id; renderHistory(); });
+      $('#bl-filters').appendChild(b);
+    });
+
+    $('#bl-code-go').addEventListener('click', function () {
+      var v = $('#bl-code').value.trim().toUpperCase();
+      $('#bl-code-out').textContent = !v
+        ? 'Enter a code first.'
+        : v === 'MARCHAND-7'
+          ? 'That is your own code. It cannot be applied to your own membership.'
+          : 'Held against your file. Nothing is discounted automatically — the office confirms in writing what it is worth before it is applied.';
+    });
+
+    renderSummary(); renderTiers(); renderHistory(); renderMethods(); renderCodes();
+  })();
+
+  /* --- Privacy & security -------------------------------------------------
+     Everything closed by default. Each control states what it costs you when
+     it is closed, because a setting whose consequence is hidden is not a
+     choice. */
+  (function () {
+    if (!$('#view-privacy')) return;
+    var el = MATCH.el;
+
+    var VIS = [
+      { k: 'Your name', v: 'Nobody', fixed: true,
+        n: 'Released by you, in person, at a meeting. The house never discloses it, and this cannot be changed here.' },
+      { k: 'Your photographs', v: 'On acceptance', opts: ['Nobody', 'On acceptance', 'After meeting'],
+        n: 'Set item by item under How you appear.' },
+      { k: 'Your case, in full', v: 'Members your advisor proposes you to', opts: ['Nobody', 'Members your advisor proposes you to'],
+        n: 'Closing this ends every search being run for you. You would be held on the register and nothing more.' },
+      { k: 'Your city', v: 'From the case', opts: ['Nobody', 'From the case', 'On acceptance'],
+        n: 'Cases are written without it if you close it, which widens the field considerably.' },
+      { k: 'That you are a member at all', v: 'Nobody', fixed: true,
+        n: 'Never disclosed, to anyone, under any membership. This is the one thing the house does not negotiate.' }
+    ];
+
+    var CONTACT = [
+      { k: 'Approaches from members you have not been proposed to', v: 'Through your advisor only',
+        opts: ['Nobody', 'Through your advisor only'] },
+      { k: 'Second approaches after you have declined', v: 'Nobody',
+        opts: ['Nobody', 'Once, after six months'] },
+      { k: 'Invitations to gatherings', v: 'The house only', opts: ['Nobody', 'The house only'] },
+      { k: 'Anyone outside the register', v: 'Nobody', fixed: true }
+    ];
+
+    var BLOCKED = [
+      { n: 'A person named to C. Vasseur', d: '02 June', why: 'Named by you at the outset. Never shown to you, and never shown you.' },
+      { n: 'No. 09', d: '21 July', why: 'Blocked after an introduction. The reason you gave is held and is not disclosed to them.' }
+    ];
+
+    var SEC = [
+      { k: 'Passphrase', v: 'Changed 14 June', ok: true, act: 'Change it' },
+      { k: 'Two-factor authentication', v: 'Not enabled', ok: false, act: 'Enable it',
+        n: 'A code from your telephone, on every sign-in from a device we do not know. This is the one step outstanding on the account.' },
+      { k: 'Recovery', v: 'Telephone, verified', ok: true, act: 'Change it' },
+      { k: 'Sign-in alerts', v: 'Written, on every new device', ok: true, act: 'Change it' }
+    ];
+
+    var SESSIONS = [
+      { t: 'London · this device', d: 'Now', me: true },
+      { t: 'London · telephone', d: '18 August, 21:40', me: false },
+      { t: 'Hampshire · tablet', d: '03 August, 09:12', me: false }
+    ];
+
+    function pick(item, onChange) {
+      if (item.fixed) return el('span', 'nt-pref__v', item.v);
+      var s = el('select');
+      item.opts.forEach(function (o) {
+        var op = el('option', null, o); op.value = o;
+        if (o === item.v) op.selected = true;
+        s.appendChild(op);
+      });
+      s.addEventListener('change', function () { item.v = s.value; onChange(); });
+      return s;
+    }
+
+    function rows(list, box, onChange) {
+      box.textContent = '';
+      list.forEach(function (it, i) {
+        var row = el('div', 'pr-row');
+        var left = el('div');
+        left.appendChild(el('p', 'pr-row__k', it.k));
+        if (it.n) left.appendChild(el('p', 'pr-row__v', it.n));
+        var lab = el('label', 'sr-only', it.k);
+        var id = box.id + '-' + i; lab.setAttribute('for', id);
+        var c = pick(it, onChange); c.id = id;
+        row.appendChild(left); row.appendChild(lab); row.appendChild(c);
+        box.appendChild(row);
+      });
+    }
+
+    function renderVis() {
+      rows(VIS, $('#pv-visibility'), renderVis);
+      var open = VIS.filter(function (v) { return v.v !== 'Nobody'; }).length;
+      $('#pv-see').textContent = open + ' of ' + VIS.length + ' open at some stage';
+    }
+    function renderContact() { rows(CONTACT, $('#pv-contact'), renderContact); }
+
+    function renderBlocked() {
+      var box = $('#pv-blocked'); box.textContent = '';
+      BLOCKED.forEach(function (b) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', b.n));
+        left.appendChild(el('p', 'cn__s', 'Blocked ' + b.d));
+        left.appendChild(el('p', 'cn__m', b.why));
+        var acts = el('div', 'cn__acts');
+        var un = el('button', 'btn btn--quiet', 'Lift it'); un.type = 'button';
+        un.addEventListener('click', function () {
+          BLOCKED.splice(BLOCKED.indexOf(b), 1); renderBlocked();
+        });
+        acts.appendChild(un);
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#pv-block-n').textContent = BLOCKED.length ? BLOCKED.length + ' held' : 'None';
+      $('#pv-block-empty').hidden = BLOCKED.length > 0;
+    }
+
+    function renderSec() {
+      var box = $('#pv-security'); box.textContent = '';
+      SEC.forEach(function (s) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', s.k));
+        left.appendChild(el('p', 'cn__s', s.v));
+        if (s.n) left.appendChild(el('p', 'cn__m', s.n));
+        var acts = el('div', 'cn__acts');
+        var b = el('button', 'btn ' + (s.ok ? 'btn--quiet' : 'btn--solid'), s.act); b.type = 'button';
+        b.addEventListener('click', function () {
+          if (!s.ok) { s.ok = true; s.v = 'Enabled — code to your telephone'; s.act = 'Change it'; s.n = null; }
+          else { left.appendChild(el('p', 'cn__m', 'The office telephones to confirm it is you before anything is changed.')); b.disabled = true; return; }
+          renderSec();
+        });
+        acts.appendChild(b);
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      var out = SEC.filter(function (s) { return !s.ok; }).length;
+      $('#pv-sec-n').textContent = out ? out + ' step outstanding' : 'Nothing outstanding';
+    }
+
+    function renderSessions() {
+      var box = $('#pv-sessions'); box.textContent = '';
+      SESSIONS.forEach(function (s) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', s.t));
+        left.appendChild(el('p', 'cn__s', s.me ? 'This session' : 'Last used ' + s.d));
+        var acts = el('div', 'cn__acts');
+        if (!s.me) {
+          var b = el('button', 'btn btn--quiet', 'End it'); b.type = 'button';
+          b.addEventListener('click', function () {
+            SESSIONS.splice(SESSIONS.indexOf(s), 1); renderSessions();
+          });
+          acts.appendChild(b);
+        }
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#pv-sess-n').textContent = SESSIONS.length + ' open';
+    }
+
+    $('#pv-sess-end').addEventListener('click', function () {
+      for (var i = SESSIONS.length - 1; i >= 0; i--) { if (!SESSIONS[i].me) SESSIONS.splice(i, 1); }
+      renderSessions();
+    });
+
+    renderVis(); renderContact(); renderBlocked(); renderSec(); renderSessions();
+  })();
+
+  /* --- Help --------------------------------------------------------------- */
+  (function () {
+    if (!$('#view-help')) return;
+    var el = MATCH.el;
+
+    var FAQ = [
+      { g: 'Membership', q: 'Can I pause my membership?',
+        a: 'Yes, once in any year and for up to six months. The search stops, your file is closed to every advisor but your own, and the unused part of the year is held rather than refunded.' },
+      { g: 'Membership', q: 'What happens if I meet someone outside the house?',
+        a: 'Tell your advisor and the search stops the same day. Nothing further is charged, and your file is closed but not destroyed unless you ask.' },
+      { g: 'Introductions', q: 'Why has nothing been proposed for months?',
+        a: 'Because nothing was worth proposing. An advisor who has nothing writes to say so rather than sending something to look busy. If three months pass in silence, ask — the answer should be specific.' },
+      { g: 'Introductions', q: 'Can I decline without a reason?',
+        a: 'Always, and the other person is told only that it will not go further. A reason helps the search, but no reason is ever required and none is ever passed on.' },
+      { g: 'Introductions', q: 'Am I shown to people I have not been told about?',
+        a: 'Your case can be read by an advisor searching for another member, and only by an advisor. No member sees anything about you until you have both accepted.' },
+      { g: 'Privacy', q: 'Who at the house can read my file?',
+        a: 'Your advisor, a named second who holds it if she is unreachable, and nobody else. Every reading is logged, and you can see the log under What we hold.' },
+      { g: 'Privacy', q: 'Is my name ever written down?',
+        a: 'Yes, in your file, which does not leave the house. It is never written in a case, never given to another member, and never given to a venue.' },
+      { g: 'Safety', q: 'What happens if I report someone?',
+        a: 'It goes to a duty advisor within the hour, not to a queue. You are never put in a room with them again, and you are told what was done — even where the answer is that we could not act.' },
+      { g: 'Account', q: 'How do I get everything you hold about me?',
+        a: 'Ask under What we hold. It is assembled within thirty days, sent as a sealed document, and includes the parts that are unflattering.' }
+    ];
+    var TOPICS = ['Everything', 'Membership', 'Introductions', 'Privacy', 'Safety', 'Account'];
+    var topic = 'Everything';
+
+    var CHANNELS = [
+      { t: 'C. Vasseur, your advisor', n: 'Anything about your search, an introduction, or a case. Replies within a day.', a: '#messages', al: 'Write to her' },
+      { t: 'The office', n: 'Membership, billing, papers, and arrangements. Weekdays, nine to six, London.', a: '#assistant', al: 'Make a request' },
+      { t: 'The duty advisor', n: 'Anything urgent, and anything about your safety. A person answers at any hour.', tel: '+44 20 7946 0000' }
+    ];
+
+    var KINDS = [
+      { id: 'report', label: 'Report a member',
+        n: 'Conduct at a meeting or in correspondence. It reaches a duty advisor within the hour, and the person is never told you raised it.' },
+      { id: 'dispute', label: 'Dispute something',
+        n: 'A fee, an invoice, or a decision the house made. Answered in writing by someone who was not party to it, within ten working days.' },
+      { id: 'complaint', label: 'Make a complaint',
+        n: 'How you were treated by the house or by an advisor. It goes to the partner on duty, not to the advisor concerned.' },
+      { id: 'account', label: 'Account assistance',
+        n: 'Sign-in, verification, documents, or anything that is simply not working.' }
+    ];
+    var kind = KINDS[0];
+
+    var OPEN = [
+      { t: 'Invoice LP-2025-0044 — Formation charged in full', s: 'Dispute · opened 06 August', m: 'With the partner on duty. An answer is due by 20 August.' }
+    ];
+
+    function renderFaq() {
+      var box = $('#hp-faq'); box.textContent = '';
+      FAQ.filter(function (f) { return topic === 'Everything' || f.g === topic; }).forEach(function (f) {
+        var d = el('details', 'hp-q');
+        var s = el('summary', null, f.q);
+        d.appendChild(s);
+        d.appendChild(el('p', 'hp-a', f.a));
+        d.appendChild(el('p', 'hp-g', f.g));
+        box.appendChild(d);
+      });
+    }
+
+    function renderOpen() {
+      var box = $('#hp-open'); box.textContent = '';
+      OPEN.forEach(function (o) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', o.t));
+        left.appendChild(el('p', 'cn__s', o.s));
+        left.appendChild(el('p', 'cn__m', o.m));
+        row.appendChild(left); box.appendChild(row);
+      });
+      $('#hp-open-n').textContent = OPEN.length ? OPEN.length + ' open' : 'None';
+      $('#hp-open-empty').hidden = OPEN.length > 0;
+    }
+
+    TOPICS.forEach(function (t) {
+      var b = el('button', 'chip' + (t === topic ? ' is-on' : ''), t);
+      b.type = 'button'; b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', t === topic ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        topic = t;
+        $$('#hp-topics button').forEach(function (o) {
+          o.classList.toggle('is-on', o === b);
+          o.setAttribute('aria-checked', o === b ? 'true' : 'false');
+        });
+        renderFaq();
+      });
+      $('#hp-topics').appendChild(b);
+    });
+
+    var ch = $('#hp-channels');
+    CHANNELS.forEach(function (c) {
+      var row = el('div', 'cn');
+      var left = el('div');
+      left.appendChild(el('p', 'cn__n', c.t));
+      left.appendChild(el('p', 'cn__m', c.n));
+      if (c.tel) left.appendChild(el('p', 'cn__s', c.tel));
+      var acts = el('div', 'cn__acts');
+      if (c.a) {
+        var a = el('a', 'btn'); a.href = c.a; a.setAttribute('data-go', c.a.replace('#', ''));
+        a.appendChild(el('span', null, c.al));
+        a.appendChild(el('i', 'arrow'));
+        acts.appendChild(a);
+      }
+      row.appendChild(left); row.appendChild(acts); ch.appendChild(row);
+    });
+
+    KINDS.forEach(function (k) {
+      var b = el('button', 'chip' + (k === kind ? ' is-on' : ''), k.label);
+      b.type = 'button'; b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', k === kind ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        kind = k;
+        $$('#hp-kinds button').forEach(function (o) {
+          o.classList.toggle('is-on', o === b);
+          o.setAttribute('aria-checked', o === b ? 'true' : 'false');
+        });
+        $('#hp-kind-note').textContent = k.n;
+        $('#hp-kind-name').textContent = k.label;
+      });
+      $('#hp-kinds').appendChild(b);
+    });
+    $('#hp-kind-note').textContent = kind.n;
+    $('#hp-kind-name').textContent = kind.label;
+
+    $('#hp-send').addEventListener('click', function () {
+      var v = $('#hp-text').value.trim();
+      if (!v) { $('#hp-sent').textContent = 'Write what has happened first.'; return; }
+      OPEN.unshift({
+        t: v.length > 70 ? v.slice(0, 68).trim() + '…' : v,
+        s: kind.label + ' · opened today',
+        m: kind.id === 'report'
+          ? 'With the duty advisor. You will be telephoned within the hour.'
+          : 'Received. Someone who was not party to it will answer in writing.'
+      });
+      $('#hp-text').value = '';
+      $('#hp-sent').textContent = 'Sent. It is listed under Open matters, and you are told the outcome even where the answer is that we could not act.';
+      renderOpen();
+    });
+
+    renderFaq(); renderOpen();
+  })();
+
+  /* --- Legend Verified: status, code, badge, history, disclosure ----------- */
+  (function () {
+    if (!$('#vf-steps')) return;
+    var el = MATCH.el;
+
+    var STEPS = [
+      { k: 'Identity', v: 'Passport, seen in person by C. Vasseur', ok: true, d: '14 March 2024' },
+      { k: 'Address', v: 'Two documents, one dated within three months', ok: true, d: '14 March 2024' },
+      { k: 'Means', v: 'Confirmed by your solicitor, in writing', ok: true, d: '19 March 2024' },
+      { k: 'Marital status', v: 'Declared and checked against the register', ok: true, d: '14 March 2024' },
+      { k: 'Conduct', v: 'No matter recorded against you', ok: true, d: '14 March 2025' },
+      { k: 'The interview', v: 'Two hours, in person, London', ok: true, d: '02 April 2024' },
+      { k: 'Renewal', v: 'Due 14 March 2026 — a half-hour, in person', ok: false, d: 'Outstanding' }
+    ];
+
+    var HIST = [
+      { d: '14 March 2025', t: 'Annual renewal', by: 'C. Vasseur', n: 'Half an hour, London. Nothing had changed.' },
+      { d: '02 April 2024', t: 'Interview', by: 'C. Vasseur', n: 'Two hours. The note from it is in your file and you may read it.' },
+      { d: '19 March 2024', t: 'Means confirmed', by: 'H. Okonjo', n: 'By letter from your solicitor. The letter was returned to you, not kept.' },
+      { d: '14 March 2024', t: 'Identity, address, status', by: 'C. Vasseur', n: 'Documents seen in person and not copied.' }
+    ];
+
+    var BADGE = [
+      { k: 'On a case written about you', v: 'Shown', n: 'The mark and the date of the last check. Nothing about what was checked.' },
+      { k: 'At a gathering of the house', v: 'Shown', n: 'Against your Legend Code at the door, and to nobody else in the room.' },
+      { k: 'To a venue or a partner house', v: 'On request', n: 'Confirms you are verified. Discloses no name, no document, and no detail.' },
+      { k: 'Anywhere public', v: 'Never', n: 'There is no page anywhere that shows your mark.' }
+    ];
+
+    var DISC = [
+      { k: 'That you are verified', v: 'Shown on every case', opts: ['Shown on every case'] },
+      { k: 'The date of your last check', v: 'Shown', opts: ['Shown', 'Hidden'] },
+      { k: 'Which checks were made', v: 'Hidden', opts: ['Shown', 'Hidden'] },
+      { k: 'The advisor who made them', v: 'On request', opts: ['Shown', 'On request', 'Hidden'] },
+      { k: 'The documents themselves', v: 'Never', opts: ['Never'] }
+    ];
+
+    function renderSteps() {
+      var box = $('#vf-steps'); box.textContent = '';
+      STEPS.forEach(function (s) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', s.k));
+        left.appendChild(el('p', 'cn__s', s.ok ? 'Checked · ' + s.d : s.d));
+        left.appendChild(el('p', 'cn__m', s.v));
+        var acts = el('div', 'cn__acts');
+        if (!s.ok) {
+          var b = el('button', 'btn btn--solid', 'Arrange it'); b.type = 'button';
+          b.addEventListener('click', function () {
+            s.ok = true; s.d = 'Arranged — C. Vasseur will confirm the hour';
+            renderSteps(); renderState();
+          });
+          acts.appendChild(b);
+        } else {
+          acts.appendChild(el('span', 'pill pill--rest', 'Done'));
+        }
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+    }
+
+    function renderState() {
+      var done = STEPS.filter(function (s) { return s.ok; }).length;
+      var pct = Math.round(done / STEPS.length * 100);
+      $('#vf-pct').textContent = pct;
+      $('#vf-pct').appendChild(el('small', null, '%'));
+      $('#vf-pct').lastChild.style.fontSize = '.4em';
+      $('#vf-bar').style.width = pct + '%';
+      $('#vf-state').textContent = done === STEPS.length ? 'Verified' : 'Verified · renewal due';
+      var next = STEPS.filter(function (s) { return !s.ok; })[0];
+      $('#vf-next').textContent = next
+        ? 'Outstanding: ' + next.k + '. ' + v_next(next)
+        : 'Nothing outstanding. The next renewal falls twelve months from the last.';
+    }
+    function v_next(s) {
+      return s.k === 'Renewal'
+        ? 'Half an hour in person, once a year. Your mark does not lapse the day it is due — you have a month.'
+        : s.v;
+    }
+
+    function renderHist() {
+      var box = $('#vf-hist'); box.textContent = '';
+      HIST.forEach(function (h) {
+        var row = el('div', 'act-row');
+        row.appendChild(el('span', 'act-row__d', h.d));
+        var d = el('div');
+        d.appendChild(el('p', 'cn__n', h.t));
+        d.appendChild(el('p', 'cn__s', 'By ' + h.by));
+        d.appendChild(el('p', 'act-row__t', h.n));
+        row.appendChild(d); box.appendChild(row);
+      });
+      $('#vf-hist-n').textContent = HIST.length + ' entries';
+    }
+
+    function renderBadge() {
+      var box = $('#vf-badge'); box.textContent = '';
+      BADGE.forEach(function (b) {
+        var row = el('div', 'nt-pref');
+        row.appendChild(el('span', 'nt-pref__k', b.k));
+        row.appendChild(el('span', 'nt-pref__v', b.v));
+        box.appendChild(row);
+        box.appendChild(el('p', 'pr-vis__n', b.n));
+      });
+    }
+
+    function renderDisc() {
+      var box = $('#vf-privacy'); box.textContent = '';
+      DISC.forEach(function (d, i) {
+        var row = el('div', 'pr-row');
+        var left = el('div');
+        left.appendChild(el('p', 'pr-row__k', d.k));
+        var ctrl;
+        if (d.opts.length === 1) {
+          ctrl = el('span', 'nt-pref__v', d.v);
+        } else {
+          var lab = el('label', 'sr-only', d.k);
+          lab.setAttribute('for', 'vf-d-' + i);
+          ctrl = el('select'); ctrl.id = 'vf-d-' + i;
+          d.opts.forEach(function (o) {
+            var op = el('option', null, o); op.value = o;
+            if (o === d.v) op.selected = true;
+            ctrl.appendChild(op);
+          });
+          ctrl.addEventListener('change', function () { d.v = ctrl.value; });
+          row.appendChild(left); row.appendChild(lab); row.appendChild(ctrl);
+          box.appendChild(row); return;
+        }
+        row.appendChild(left); row.appendChild(ctrl); box.appendChild(row);
+      });
+    }
+
+    $('#vf-code').textContent = 'LGND–4471–MRC';
+    $('#vf-copy').addEventListener('click', function () {
+      $('#vf-copied').textContent = 'Copied. It identifies you to us and to nobody else; a stranger holding it learns only that the holder is verified.';
+    });
+
+    renderSteps(); renderState(); renderHist(); renderBadge(); renderDisc();
+  })();
+
+  /* --- Legend Academy: the rooms, what you are taking, certificates -------- */
+  (function () {
+    if (!$('#ac-list')) return;
+    var el = MATCH.el;
+
+    var ROOMS = [
+      { g: 'Dating', t: 'Reading a first meeting', n: 'What is worth noticing in the first hour, and what almost everyone mistakes for a signal.', f: 'Four evenings, six people', who: 'A former negotiator', s: 'taking' },
+      { g: 'Dating', t: 'The second and third meeting', n: 'Where most introductions fail, and why it is almost never about the first one.', f: 'Three evenings, six people', who: 'C. Vasseur' },
+      { g: 'Relationships', t: 'The first year', n: 'Merging two established lives — money, houses, children, and the conversations couples postpone.', f: 'Six sessions, in pairs', who: 'A psychotherapist', s: 'taking' },
+      { g: 'Relationships', t: 'When it stops resolving itself', n: 'A difficulty that has been going the same way for a year, and what actually changes it.', f: 'Four sessions, private', who: 'A psychotherapist' },
+      { g: 'Communication', t: 'Saying the difficult thing', n: 'How to open a conversation you have been avoiding, and how not to close it in the first sentence.', f: 'Two evenings, eight people', who: 'A former diplomat', s: 'done', cert: '11 June 2025' },
+      { g: 'Communication', t: 'Disagreeing well', n: 'Argument as a working method rather than a failure of one.', f: 'Three evenings, eight people', who: 'A former negotiator' },
+      { g: 'Social skills', t: 'A room of strangers', n: 'Arriving, leaving, and the ninety seconds in between. Taught by people who do it professionally.', f: 'One evening, ten people', who: 'A former diplomat', s: 'done', cert: '04 March 2025' },
+      { g: 'Social skills', t: 'Being seen without being known', n: 'Attending as a couple where you are recognised, and keeping the private part private.', f: 'Two evenings, six people', who: 'The house' },
+      { g: 'Personal development', t: 'What you are actually looking for', n: 'Separating what you want from what you have been told to want. Uncomfortable, and the most useful room we run.', f: 'Five sessions, private', who: 'A psychotherapist' },
+      { g: 'Personal development', t: 'After a long marriage', n: 'For members beginning again at fifty and sixty, taught by people who did.', f: 'Four sessions, six people', who: 'The house' },
+      { g: 'Lifestyle', t: 'The table', n: 'Wine, ordering, and hosting twelve without anyone noticing the work.', f: 'Two evenings, eight people', who: 'A restaurateur' },
+      { g: 'Lifestyle', t: 'Travelling together, the first time', n: 'What to agree before departure, taught as a practical matter rather than a romantic one.', f: 'One evening, eight people', who: 'The house' }
+    ];
+    var CATS = ['Everything', 'Dating', 'Relationships', 'Communication', 'Social skills', 'Personal development', 'Lifestyle'];
+    var cat = 'Everything';
+
+    function render() {
+      var box = $('#ac-list'); box.textContent = '';
+      var rows = ROOMS.filter(function (r) { return cat === 'Everything' || r.g === cat; });
+      rows.forEach(function (r) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', r.t));
+        left.appendChild(el('p', 'cn__s', r.g + ' · ' + r.f + ' · ' + r.who));
+        left.appendChild(el('p', 'cn__m', r.n));
+        var acts = el('div', 'cn__acts');
+        if (r.s === 'done') { acts.appendChild(el('span', 'pill pill--rest', 'Completed')); }
+        else if (r.s === 'taking') {
+          var lv = el('button', 'btn btn--quiet', 'Withdraw'); lv.type = 'button';
+          lv.addEventListener('click', function () { r.s = null; renderAll(); });
+          acts.appendChild(el('span', 'pill pill--action', 'Taking'));
+          acts.appendChild(lv);
+        } else {
+          var b = el('button', 'btn btn--quiet', 'Ask to join'); b.type = 'button';
+          b.addEventListener('click', function () { r.s = 'taking'; renderAll(); });
+          acts.appendChild(b);
+        }
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#ac-n').textContent = rows.length + ' of ' + ROOMS.length;
+      $('#ac-note').textContent = cat === 'Everything'
+        ? 'Every room the house runs. Small by design — a room is never opened for more than ten.'
+        : cat + ' — ' + rows.length + ' room' + (rows.length === 1 ? '' : 's') + '. Each is taught by a named person, told to you before you agree.';
+      $$('#ac-cats button').forEach(function (b) {
+        var on = b.textContent === cat;
+        b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+    }
+
+    function renderMine() {
+      var box = $('#ac-mine'); box.textContent = '';
+      var mine = ROOMS.filter(function (r) { return r.s === 'taking'; });
+      mine.forEach(function (r) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', r.t));
+        left.appendChild(el('p', 'cn__s', r.f));
+        left.appendChild(el('p', 'cn__m', 'Taught by ' + r.who + '. The office writes with the dates once the room is full.'));
+        row.appendChild(left); box.appendChild(row);
+      });
+      $('#ac-mine-n').textContent = mine.length ? mine.length + ' room' + (mine.length === 1 ? '' : 's') : 'None';
+      $('#ac-mine-empty').hidden = mine.length > 0;
+    }
+
+    function renderCerts() {
+      var box = $('#ac-certs'); box.textContent = '';
+      var done = ROOMS.filter(function (r) { return r.s === 'done'; });
+      done.forEach(function (r) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', r.t));
+        left.appendChild(el('p', 'cn__s', 'Completed ' + r.cert + ' · ' + r.who));
+        var acts = el('div', 'cn__acts');
+        var b = el('button', 'btn btn--quiet', 'Send it to me'); b.type = 'button';
+        b.addEventListener('click', function () {
+          left.appendChild(el('p', 'cn__m', 'Sent to your address of record, sealed and unaddressed on the outside.'));
+          b.disabled = true;
+        });
+        acts.appendChild(b);
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#ac-cert-n').textContent = done.length ? done.length + ' held' : 'None yet';
+    }
+
+    function renderAll() { render(); renderMine(); renderCerts(); }
+
+    CATS.forEach(function (c) {
+      var b = el('button', 'chip' + (c === cat ? ' is-on' : ''), c);
+      b.type = 'button'; b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', c === cat ? 'true' : 'false');
+      b.addEventListener('click', function () { cat = c; render(); });
+      $('#ac-cats').appendChild(b);
+    });
+    renderAll();
+  })();
+
+  /* --- Account: locale, how we write, and closing ------------------------- */
+  (function () {
+    if (!$('#st-locale')) return;
+    var el = MATCH.el;
+
+    var LOCALE = [
+      { k: 'Language', v: 'English', opts: ['English', 'Français', 'Italiano', 'Deutsch', 'العربية', 'فارسی'],
+        n: 'Everything written to you, including cases, in this language. Your advisor writes in it too, or tells you plainly if she cannot.' },
+      { k: 'Currency', v: 'GBP £', opts: ['GBP £', 'EUR €', 'USD $', 'CHF'],
+        n: 'Fees are quoted and settled in this currency. The rate on the day of the invoice is the one used, and it is printed on it.' },
+      { k: 'Where you are', v: 'London', opts: ['London', 'Paris', 'Geneva', 'Milan', 'New York', 'Dubai'],
+        n: 'Decides which advisor holds your file and which gatherings you are told about. Not shown to any member unless you open it.' },
+      { k: 'Time', v: 'London (GMT/BST)', opts: ['London (GMT/BST)', 'Paris (CET)', 'Geneva (CET)', 'New York (ET)', 'Dubai (GST)'],
+        n: 'Nothing is sent to you at night in this zone, whatever hour it is at the house.' }
+    ];
+
+    var COMMS = [
+      { k: 'By post', v: 'Sealed, unaddressed on the outside', opts: ['Sealed, unaddressed on the outside', 'Not by post'] },
+      { k: 'By email', v: 'No sender name, no subject line', opts: ['No sender name, no subject line', 'Full sender name', 'Not by email'] },
+      { k: 'By telephone', v: 'Withheld number, no message left', opts: ['Withheld number, no message left', 'Number shown', 'Not by telephone'] },
+      { k: 'What we may say if someone else answers', v: 'Nothing at all', opts: ['Nothing at all', 'A first name and a callback number'] },
+      { k: 'About gatherings and rooms', v: 'Written, once a season', opts: ['Written, once a season', 'Nothing is sent'] },
+      { k: 'Anything resembling marketing', v: 'Never sent', fixed: true }
+    ];
+
+    var CLOSE = [
+      { t: 'Suspend the engagement', n: 'The search stops the same day. Your file is closed to every advisor but your own, nothing further is charged, and you may resume within six months on a word.', b: 'Suspend it',
+        c: 'Noted. C. Vasseur telephones today to hear the reason, or not to, as you prefer. Nothing is charged from tomorrow.' },
+      { t: 'Close the account and have everything destroyed', n: 'The file, the cases, the notes, the reflections, the consent ledger — destroyed within thirty days, and confirmed to you in writing. The parts we are required by law to keep are listed to you first. It cannot be undone.', b: 'Begin it',
+        c: 'A partner telephones within the day. Nothing is destroyed until you have confirmed it to a person, and you are sent the list of what the law obliges us to keep before anything is touched.' }
+    ];
+
+    function rows(list, box) {
+      box.textContent = '';
+      list.forEach(function (it, i) {
+        var row = el('div', 'pr-row');
+        var left = el('div');
+        left.appendChild(el('p', 'pr-row__k', it.k));
+        if (it.n) left.appendChild(el('p', 'pr-row__v', it.n));
+        var ctrl;
+        if (it.fixed) {
+          ctrl = el('span', 'nt-pref__v', it.v);
+          row.appendChild(left); row.appendChild(ctrl);
+        } else {
+          var lab = el('label', 'sr-only', it.k);
+          var id = box.id + '-' + i; lab.setAttribute('for', id);
+          ctrl = el('select'); ctrl.id = id;
+          it.opts.forEach(function (o) {
+            var op = el('option', null, o); op.value = o;
+            if (o === it.v) op.selected = true;
+            ctrl.appendChild(op);
+          });
+          ctrl.addEventListener('change', function () {
+            it.v = ctrl.value;
+            if (box.id === 'st-locale') {
+              $('#st-locale-note').textContent =
+                it.k + ' set to ' + it.v + '. It takes effect on the next thing written to you; nothing already sent is re-sent.';
+            }
+          });
+          row.appendChild(left); row.appendChild(lab); row.appendChild(ctrl);
+        }
+        box.appendChild(row);
+      });
+    }
+
+    rows(LOCALE, $('#st-locale'));
+    rows(COMMS, $('#st-comms'));
+
+    var box = $('#st-close');
+    CLOSE.forEach(function (c) {
+      var row = el('div', 'cn');
+      var left = el('div');
+      left.appendChild(el('p', 'cn__n', c.t));
+      left.appendChild(el('p', 'cn__m', c.n));
+      var acts = el('div', 'cn__acts');
+      var b = el('button', 'btn btn--quiet', c.b); b.type = 'button';
+      b.addEventListener('click', function () { $('#st-close-note').textContent = c.c; });
+      acts.appendChild(b);
+      row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+    });
+  })();
+
+  /* --- Correspondence: folders and settings -------------------------------
+     The advisor thread stays where it is, at the top, because it is the one
+     that matters. Everything else is filed. */
+  (function () {
+    if (!$('#ms-list')) return;
+    var el = MATCH.el;
+
+    var MAIL = [
+      { g: 'inbox', n: 'C. Vasseur', s: 'Your advisor · 18 August', unread: true,
+        m: 'On No. 07 — the answer about Singapore was about a parent, not the business. I would rather they told you themselves.' },
+      { g: 'inbox', n: 'The office', s: 'Arrangements · 05 August',
+        m: 'Marylebone, 28 August, 20:00. Corner table, no music, held under our name.' },
+      { g: 'inbox', n: 'The house', s: 'Gatherings · 30 July',
+        m: 'The autumn weekend in Hampshire, 3–5 October. Twelve places, and you are one of the twelve if you want it.' },
+      { g: 'requests', n: 'No. 11', s: 'Asked of you · 15 August',
+        m: 'An advisor in Geneva has written a case naming you. Nothing is disclosed to them unless you accept.' },
+      { g: 'archived', n: 'C. Vasseur', s: 'Your advisor · 02 July',
+        m: 'On No. 04, and why the timing was wrong rather than the person.' },
+      { g: 'archived', n: 'The office', s: 'Billing · 30 April',
+        m: 'Formation, first year, invoiced in full. You have since disputed the manner of it.' },
+      { g: 'blocked', n: 'No. 09', s: 'Blocked 21 July',
+        m: 'Nothing from this member reaches you. It is held here so that you can see it exists, and it is deleted after a year.' }
+    ];
+
+    var TABS = [
+      { id: 'inbox',    label: 'Inbox',     note: 'Everything current, from the house and from your advisor' },
+      { id: 'requests', label: 'Requests',  note: 'Approaches waiting on an answer from you' },
+      { id: 'archived', label: 'Archived',  note: 'Filed by you, and still searchable' },
+      { id: 'blocked',  label: 'Blocked',   note: 'Held but never delivered, and deleted after a year' }
+    ];
+    var tab = 'inbox';
+
+    var PREFS = [
+      { k: 'Who may write to you here', v: 'Your advisor and the office only' },
+      { k: 'Approaches from members', v: 'Through your advisor, never directly' },
+      { k: 'Read receipts', v: 'Not sent, in either direction' },
+      { k: 'How long a thread is kept', v: 'Until you delete it' },
+      { k: 'Who else at the house reads this', v: 'Nobody' }
+    ];
+
+    function render() {
+      var box = $('#ms-list'); box.textContent = '';
+      var rows = MAIL.filter(function (m) { return m.g === tab; });
+      rows.forEach(function (m) {
+        var row = el('div', 'cn' + (m.unread ? ' is-new' : ''));
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', m.n));
+        left.appendChild(el('p', 'cn__s', m.s + (m.unread ? ' · unread' : '')));
+        left.appendChild(el('p', 'cn__m', m.m));
+        var acts = el('div', 'cn__acts');
+        if (m.g === 'requests') {
+          var a = el('a', 'btn btn--quiet'); a.href = '#requests'; a.setAttribute('data-go', 'requests');
+          a.appendChild(el('span', null, 'Open it')); a.appendChild(el('i', 'arrow'));
+          acts.appendChild(a);
+        } else if (m.g === 'inbox') {
+          var ar = el('button', 'btn btn--quiet', 'Archive'); ar.type = 'button';
+          ar.addEventListener('click', function () { m.g = 'archived'; m.unread = false; render(); });
+          acts.appendChild(ar);
+        } else if (m.g === 'archived') {
+          var un = el('button', 'btn btn--quiet', 'Back to inbox'); un.type = 'button';
+          un.addEventListener('click', function () { m.g = 'inbox'; render(); });
+          acts.appendChild(un);
+        } else if (m.g === 'blocked') {
+          var lift = el('button', 'btn btn--quiet', 'Lift the block'); lift.type = 'button';
+          lift.addEventListener('click', function () { m.g = 'inbox'; render(); });
+          acts.appendChild(lift);
+        }
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#ms-empty').hidden = rows.length > 0;
+      var t = TABS.filter(function (x) { return x.id === tab; })[0];
+      $('#ms-note').textContent = rows.length
+        ? t.label + ' — ' + rows.length + '. ' + t.note + '.'
+        : t.note + '.';
+      var unread = MAIL.filter(function (m) { return m.unread; }).length;
+      $('#ms-n').textContent = unread ? unread + ' unread' : 'Nothing unread';
+      $$('#ms-tabs button').forEach(function (b) {
+        b.setAttribute('aria-selected', b.getAttribute('data-ms') === tab ? 'true' : 'false');
+      });
+    }
+
+    TABS.forEach(function (t) {
+      var b = el('button', null, t.label); b.type = 'button';
+      b.setAttribute('data-ms', t.id); b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', t.id === tab ? 'true' : 'false');
+      b.addEventListener('click', function () { tab = t.id; render(); });
+      $('#ms-tabs').appendChild(b);
+    });
+
+    var pb = $('#ms-prefs');
+    PREFS.forEach(function (p) {
+      var row = el('div', 'nt-pref');
+      row.appendChild(el('span', 'nt-pref__k', p.k));
+      row.appendChild(el('span', 'nt-pref__v', p.v));
+      pb.appendChild(row);
+    });
+
     render();
   })();
 

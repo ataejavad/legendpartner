@@ -126,6 +126,21 @@
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="M16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88Z"/></svg></span>
           <span>Relationship management<span class="cat__n">Formation, counsel, continuity</span></span>
         </a>
+        <a class="cat" href="#advisor" data-view="advisor" data-label="Ask the advisor">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 12.4c0 4-3.8 7.2-8.5 7.2a10 10 0 0 1-2.6-.34L4.3 21l1.2-3.5a6.7 6.7 0 0 1-2-4.7c0-4 3.8-7.2 8.5-7.2s8.5 3.2 8.5 7.2Z"/><path d="M12 15.2v-.5c0-1.1.7-1.7 1.5-2.2.7-.5 1.2-1 1.2-1.9 0-1.3-1.2-2.2-2.7-2.2-1.3 0-2.4.7-2.7 1.8"/><path d="M12 17.4h.01"/></svg></span>
+          <span>Ask the advisor<span class="cat__n">Advice, analysis, at any hour</span></span>
+        </a>
+        <a class="cat" href="#activity" data-view="activity" data-label="Activity"
+           aria-expanded="false" aria-controls="rail-sub-activity">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.4 12h4l2.2-5.4 3.4 11 2.4-5.6h5.2"/></svg></span>
+          <span>Activity<span class="cat__n">What is waiting, and what you asked</span></span>
+        </a>
+        <div class="rail__sub" id="rail-sub-activity" data-branch="activity" hidden>
+          <a class="sub" href="#notifications" data-view="notifications">Notifications</a>
+          <a class="sub" href="#connections" data-view="connections">My connections</a>
+          <a class="sub" href="#saved" data-view="saved">Favourites &amp; saved</a>
+          <a class="sub" href="#messages" data-view="messages">Correspondence</a>
+        </div>
         <a class="cat" href="#verified" data-view="verified" data-label="Legend Verified">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.9 20 6v6.1c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6Z"/><polyline points="8.8 12 11.2 14.4 15.4 10.2"/></svg></span>
           <span>Legend Verified<span class="cat__n">Who has been checked, and how</span></span>
@@ -134,10 +149,17 @@
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 8.4 12 4.2l9.2 4.2L12 12.6Z"/><path d="M6.6 10.5v4.9c0 1.6 2.4 2.9 5.4 2.9s5.4-1.3 5.4-2.9v-4.9"/><path d="M21.2 8.4v5.2"/></svg></span>
           <span>Legend Academy<span class="cat__n">What the house has learned, taught</span></span>
         </a>
-        <a class="cat" href="#me" data-view="me" data-label="Profile &amp; Persona">
+        <a class="cat" href="#me" data-view="me" data-label="Profile &amp; Persona"
+           aria-expanded="false" aria-controls="rail-sub-me">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4.6"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></span>
           <span>Profile &amp; Persona<span class="cat__n">Who you are, as we hold it</span></span>
         </a>
+        <div class="rail__sub" id="rail-sub-me" data-branch="me" hidden>
+          <a class="sub" href="#profile" data-view="profile">My profile</a>
+          <a class="sub" href="#presentation" data-view="presentation">How you appear</a>
+          <a class="sub" href="#persona" data-view="persona">Your persona</a>
+          <a class="sub" href="#intentions" data-view="intentions">Relationship goals</a>
+        </div>
         <a class="cat" href="#settings" data-view="settings" data-label="Settings">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4h-7"/><path d="M10 4H3"/><path d="M21 12h-9"/><path d="M8 12H3"/><path d="M21 20h-5"/><path d="M12 20H3"/><path d="M14 2v4"/><path d="M8 10v4"/><path d="M16 18v4"/></svg></span>
           <span>Settings<span class="cat__n">Privacy, consent, account</span></span>
@@ -352,76 +374,142 @@
 
 
       <!-- ============================================= EVENTS -->
-      <section class="view" id="view-occasions" tabindex="-1" aria-label="Events">
-        <p class="lede">Events</p>
+      <section class="view" id="view-occasions" tabindex="-1" aria-label="Events and companionship">
+        <p class="lede">Events &amp; Companionship</p>
         <p class="sub">
-          Where you are seen, and with whom. Five kinds of occasion, each arranged on terms agreed
-          in advance by both people — so nobody improvises an answer in front of a room.
+          Curated events and private companionship for meaningful social experiences. The house
+          finds the evening, and the person for it — you are not searching a marketplace.
         </p>
 
-        <div class="cols cols--7-5" style="margin-top:2.6rem">
+        <div class="ev-flow" aria-label="How this works">
+          <span>Discover</span><span>Curate</span><span>Match</span><span>Request</span>
+          <span>Confirm</span><span>Experience</span><span>Concierge</span>
+        </div>
+
+        <!-- 1. what is already arranged -------------------------------------- -->
+        <div class="panel" style="margin-top:1.8rem">
+          <div class="panel__head">
+            <h2>My upcoming experiences</h2>
+            <span class="pill pill--rest" id="ev-upcoming-n">—</span>
+          </div>
+          <div class="panel__body">
+            <div id="ev-upcoming"></div>
+          </div>
+        </div>
+
+        <div class="ev-tabs" role="tablist" aria-label="Events or companionship">
+          <button type="button" role="tab" data-ev="discover" aria-selected="true">Discover events</button>
+          <button type="button" role="tab" data-ev="companion" aria-selected="false">Find a companion</button>
+          <button type="button" role="tab" data-ev="prefs" aria-selected="false">Preferences &amp; privacy</button>
+          <button type="button" role="tab" data-ev="concierge" aria-selected="false">Concierge</button>
+        </div>
+
+        <!-- ========================= DISCOVER ============================ -->
+        <div class="ev-pane" id="ev-pane-discover">
+          <div class="ltr-sections" id="ev-cats" role="tablist" aria-label="Event categories"></div>
+          <p class="cas-curated" id="ev-note"></p>
+          <p class="ltr-empty" id="ev-empty" hidden>
+            Nothing in this category answers to your preferences just now. The house curates rather
+            than lists, so a quiet category is ordinary — the concierge will find something if you ask.
+          </p>
+          <div class="ev-grid" id="ev-grid" aria-live="polite"></div>
+        </div>
+
+        <!-- ======================== COMPANION ============================ -->
+        <div class="ev-pane" id="ev-pane-companion" hidden>
           <div class="panel">
-            <div class="panel__head"><h2>The five</h2></div>
+            <div class="panel__head">
+              <h2>Find your companion</h2>
+              <span class="pill pill--action" id="ev-for-pill">Choose an evening</span>
+            </div>
             <div class="panel__body">
-              <div class="convo">
-                <div class="convo__item"><span class="no">01</span><div>
-                  <p class="nm">Parties</p>
-                  <p class="ds">The house's own gatherings, and private ones you are invited to. Small, unpublished, and never photographed.</p>
-                  <a class="btn" href="#occasions-parties" data-go="occasions-parties"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
-                <div class="convo__item"><span class="no">02</span><div>
-                  <p class="nm">Events</p>
-                  <p class="ds">Openings, dinners, benefits, a box at something. An evening with a host, a guest list and an hour it ends.</p>
-                  <a class="btn" href="#occasions-events" data-go="occasions-events"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
-                <div class="convo__item"><span class="no">03</span><div>
-                  <p class="nm">Business events</p>
-                  <p class="ds">Where the evening is work. Someone briefed on the room, who will be useful in it and will not become the subject of it.</p>
-                  <a class="btn" href="#occasions-business" data-go="occasions-business"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
-                <div class="convo__item"><span class="no">04</span><div>
-                  <p class="nm">Travel companionship</p>
-                  <p class="ds">Days rather than hours, and a different set of questions. Arranged only where both people have met beforehand.</p>
-                  <a class="btn" href="#occasions-travel" data-go="occasions-travel"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
-                <div class="convo__item"><span class="no">05</span><div>
-                  <p class="nm">Social occasions</p>
-                  <p class="ds">A wedding, a family lunch, a reunion. The rooms where the questions are personal and the answers should be settled in advance.</p>
-                  <a class="btn" href="#occasions-social" data-go="occasions-social"><span>Open</span><i class="arrow"></i></a>
-                </div></div>
+              <p class="ask__lbl">Which evening?</p>
+              <div class="chips" id="ev-for" role="radiogroup" aria-label="The occasion"></div>
+
+              <p class="ask__lbl" style="margin-top:1.6rem">What kind of company</p>
+              <div class="chips" id="ev-kind" role="radiogroup" aria-label="Companion type"></div>
+
+              <div class="ltr-filters" id="ev-cprefs" style="margin-top:1.8rem"></div>
+
+              <div class="ltr-toggles">
+                <label class="ltr-toggle">
+                  <input type="checkbox" id="ev-verified-only" checked><span>Legend Verified companions only</span>
+                </label>
               </div>
             </div>
           </div>
 
-          <div class="stack" style="gap:1.6rem">
+          <p class="cas-curated" id="ev-cnote"></p>
+          <p class="ltr-empty" id="ev-cempty" hidden>
+            Nobody the house would put forward for that evening is free on those terms. Change one
+            of them, or ask the concierge — that is what it is for.
+          </p>
+          <div class="ltr-grid cas-grid" id="ev-companions" aria-live="polite"></div>
+        </div>
+
+        <!-- ========================= PREFERENCES ========================= -->
+        <div class="ev-pane" id="ev-pane-prefs" hidden>
+          <div class="cols cols--7-5">
             <div class="panel">
-              <div class="panel__head"><h2>True of all five</h2></div>
+              <div class="panel__head"><h2>My event preferences</h2></div>
               <div class="panel__body">
-                <ul class="includes">
-                  <li>The terms of the occasion are written and agreed by both people before it, not during it.</li>
-                  <li>What is said about how you know each other is decided by you, and both are told the same words.</li>
-                  <li>No photographs, by standing agreement, unless you ask for them.</li>
-                  <li>An occasion ends the moment either person says it does, and nothing is asked afterwards.</li>
-                </ul>
+                <div class="ltr-filters" id="ev-prefs"></div>
                 <div class="note-inline">
-                  Company for an occasion is company for an occasion. Both people are told so in the
-                  same sentence, and neither is led to expect anything else.
+                  These weight what is curated to you. An evening that fails one of them is not
+                  hidden — it is shown lower, and told you why.
                 </div>
               </div>
             </div>
             <div class="panel">
-              <div class="panel__head"><h2>Also here</h2></div>
+              <div class="panel__head"><h2>Who sees what</h2></div>
               <div class="panel__body">
-                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
-                  The five above are arrangements for an occasion already in your diary. If what you
-                  want is the companion rather than the occasion, that is here too.
-                </p>
-              </div>
-              <div class="panel__foot">
-                <a class="btn" href="#find-companion" data-go="find-companion"><span>Event &amp; party companion</span><i class="arrow"></i></a>
+                <div class="ltr-filters" id="ev-privacy"></div>
+                <div class="note-inline">
+                  Attendance is never shown on your profile, to anyone, at any setting. Who you
+                  attended with is shown to nobody but the two of you and your advisor.
+                </div>
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- ========================== CONCIERGE ========================== -->
+        <div class="ev-pane" id="ev-pane-concierge" hidden>
+          <div class="cols cols--7-5">
+            <div class="panel">
+              <div class="panel__head"><h2>Contact the concierge</h2><span class="pill pill--live">Answers today</span></div>
+              <div class="panel__body">
+                <p class="ask__lbl">What do you need?</p>
+                <div class="chips" id="ev-conc-kinds" role="radiogroup" aria-label="Kind of request"></div>
+                <div class="p-field" style="margin-top:1.4rem">
+                  <label for="ev-conc-text">In your own words</label>
+                  <textarea id="ev-conc-text" rows="4" placeholder="A sentence is enough. The concierge telephones rather than writes, unless you ask otherwise."></textarea>
+                </div>
+                <button class="btn btn--solid" type="button" id="ev-conc-send">Send to the concierge</button>
+                <div id="ev-conc-out"></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>What the concierge does</h2></div>
+              <div class="panel__body">
+                <ul class="includes">
+                  <li>Finds a companion for an evening already in your diary.</li>
+                  <li>Changes or cancels an arrangement, on either side, without a reason being given.</li>
+                  <li>Arranges the table, the car and the hour, and tells the venue nothing about why.</li>
+                  <li>Creates a private experience of your own and invites whom you name.</li>
+                </ul>
+                <div class="note-inline">
+                  A person, by name, in your own time zone. Not a queue, not a form that disappears.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          <b>Design preview.</b> Every evening and every companion below is illustrative sample
+          content, and the compatibility figures are computed here in the page — written rules, not a
+          language model, and nothing you do on this page leaves it.
         </div>
       </section>
 
@@ -632,6 +720,89 @@
       </section>
 
 
+
+      <!-- ============================================= MY ACTIVITY -->
+      <section class="view" id="view-activity" tabindex="-1" aria-label="My activity">
+        <p class="lede">My activity</p>
+        <p class="sub">
+          What you have done, what is waiting on you, and the few things worth doing next. Yours
+          alone — none of it is shown to another member, and none of it is a score.
+        </p>
+
+        <div class="panel" style="margin-top:2rem">
+          <div class="panel__head"><h2>Quick actions</h2><span class="pill pill--rest">One click each</span></div>
+          <div class="panel__body"><div class="qa" id="act-quick"></div></div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Recent activity</h2><span class="pill pill--rest" id="act-n">—</span></div>
+            <div class="panel__body"><div id="act-feed"></div></div>
+          </div>
+          <div class="stack" style="gap:1.2rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Where you stand</h2></div>
+              <div class="panel__body">
+                <dl class="kv" id="act-figures"></dl>
+                <div class="note-inline">
+                  Counts, not judgements. The house does not rank members by activity and an empty
+                  month is not held against you.
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Waiting on you</h2><span class="pill pill--action" id="act-todo-n">—</span></div>
+              <div class="panel__body"><div id="act-todo"></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= NOTIFICATIONS -->
+      <section class="view" id="view-notifications" tabindex="-1" aria-label="Notifications">
+        <p class="lede">Notifications</p>
+        <p class="sub">
+          Everything the house has told you, in one place, with the reason it told you. Nothing here
+          is marketing, and nothing arrives to make you open the portal more often.
+        </p>
+
+        <div class="panel" style="margin-top:2rem">
+          <div class="panel__head">
+            <h2>What you are told about</h2>
+            <button type="button" class="btn btn--quiet" id="nt-read">Mark all as read</button>
+          </div>
+          <div class="panel__body">
+            <div class="chips" id="nt-filters" role="group" aria-label="Filter notifications"></div>
+            <div id="nt-list" style="margin-top:1.4rem"></div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head"><h2>What reaches you, and how</h2></div>
+          <div class="panel__body">
+            <div id="nt-prefs"></div>
+            <div class="note-inline">
+              The house telephones for anything that matters and writes for everything else. Nothing
+              is sent at night in your own time zone, and nothing is sent twice.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= CONNECTIONS -->
+      <section class="view" id="view-connections" tabindex="-1" aria-label="My connections">
+        <p class="lede">My connections</p>
+        <p class="sub">
+          Everyone you are in touch with, everyone who is waiting on an answer, and everyone you
+          asked. Each with its state, and each endable from here without a reason being given.
+        </p>
+
+        <div class="ev-tabs" id="cn-tabs" role="tablist" aria-label="Which connections"></div>
+        <p class="cas-curated" id="cn-note"></p>
+        <p class="ltr-empty" id="cn-empty" hidden>Nothing in this group.</p>
+        <div id="cn-list" aria-live="polite"></div>
+      </section>
+
       <!-- ============================================= LEGEND VERIFIED -->
       <section class="view" id="view-verified" tabindex="-1" aria-label="Legend Verified">
         <p class="lede">Legend Verified</p>
@@ -700,7 +871,69 @@
             </div>
           </div>
         </div>
-      </section>
+      
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Your verification</h2><span class="pill pill--rest" id="vf-state">—</span></div>
+            <div class="panel__body">
+              <div class="persona-state" style="margin:0 0 1.6rem">
+                <span class="pct" id="vf-pct">0<small style="font-size:.4em">%</small></span>
+                <div>
+                  <p style="font-size:.88rem;color:#EDEAE3;margin:0">Checks completed</p>
+                  <div class="bar"><i id="vf-bar" style="width:0%"></i></div>
+                  <p class="sub" style="margin:.6rem 0 0" id="vf-next">—</p>
+                </div>
+              </div>
+              <div id="vf-steps"></div>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.2rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Your Legend Code</h2><span class="pill pill--rest">Yours alone</span></div>
+              <div class="panel__body">
+                <p class="vf-code" id="vf-code">—</p>
+                <p class="sub" style="margin:0 0 1rem">
+                  The reference a member, a venue or a house of ours can check you against without
+                  being told your name. It confirms one thing — that you are who we say — and
+                  discloses nothing else.
+                </p>
+                <div class="ad-acts">
+                  <button class="btn btn--quiet" type="button" id="vf-copy">Copy the code</button>
+                  <a class="btn btn--quiet" href="#credential" data-go="credential"><span>Your mark</span><i class="arrow"></i></a>
+                </div>
+                <p class="cas-curated" id="vf-copied" aria-live="polite"></p>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Where your mark is shown</h2></div>
+              <div class="panel__body"><div id="vf-badge"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Verification history</h2><span class="pill pill--rest" id="vf-hist-n">—</span></div>
+            <div class="panel__body">
+              <div id="vf-hist"></div>
+              <div class="note-inline">
+                Every check is dated and carries the name of the advisor who made it. A check that
+                lapses is shown as lapsed, never quietly renewed.
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>What verification discloses</h2></div>
+            <div class="panel__body">
+              <div id="vf-privacy"></div>
+              <div class="note-inline">
+                Being verified never means being visible. These settings decide what a member is
+                told about your checks, and the documents behind them are shown to nobody.
+              </div>
+            </div>
+          </div>
+        </div>
+        </section>
 
       <!-- ============================================= LEGEND ACADEMY -->
       <section class="view" id="view-academy" tabindex="-1" aria-label="Legend Academy">
@@ -766,7 +999,36 @@
             </div>
           </div>
         </div>
-      </section>
+      
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head"><h2>The rooms</h2><span class="pill pill--rest" id="ac-n">—</span></div>
+          <div class="panel__body">
+            <div class="chips" id="ac-cats" role="group" aria-label="Filter by subject"></div>
+            <p class="cas-curated" id="ac-note"></p>
+            <div id="ac-list" style="margin-top:1.2rem" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>What you are taking</h2><span class="pill pill--rest" id="ac-mine-n">—</span></div>
+            <div class="panel__body">
+              <div id="ac-mine"></div>
+              <p class="ltr-empty" id="ac-mine-empty" hidden>You are not enrolled in anything.</p>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>Certificates</h2><span class="pill pill--rest" id="ac-cert-n">—</span></div>
+            <div class="panel__body">
+              <div id="ac-certs"></div>
+              <div class="note-inline">
+                A certificate is issued privately and is yours to show or not. It is never attached
+                to your file, and no member is told what you have studied.
+              </div>
+            </div>
+          </div>
+        </div>
+        </section>
 
       <!-- ============================================= FIND A PARTNER -->
       <section class="view" id="view-find" tabindex="-1" aria-label="Find a partner">
@@ -1524,7 +1786,29 @@
             <button class="btn btn--quiet" type="submit">Send</button>
           </form>
         </div>
-      </section>
+      
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head"><h2>Everything else</h2><span class="pill pill--rest" id="ms-n">—</span></div>
+          <div class="panel__body">
+            <div class="ev-tabs" id="ms-tabs" role="tablist" aria-label="Which correspondence"></div>
+            <p class="cas-curated" id="ms-note"></p>
+            <p class="ltr-empty" id="ms-empty" hidden>Nothing here.</p>
+            <div id="ms-list" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head"><h2>Correspondence settings</h2></div>
+          <div class="panel__body">
+            <div id="ms-prefs"></div>
+            <div class="note-inline">
+              No member has your address, and nothing you write here leaves the house. An approach
+              that you have not agreed to sits in Asked of you until you answer, or does not arrive
+              at all.
+            </div>
+          </div>
+        </div>
+        </section>
 
       <!-- ============================================== PROFILE -->
       <section class="view" id="view-profile" tabindex="-1" aria-label="Private profile">
@@ -3224,7 +3508,34 @@
             </div>
           </div>
         </div>
-      </section>
+      
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Language, currency, place</h2></div>
+            <div class="panel__body">
+              <div id="st-locale"></div>
+              <p class="cas-curated" id="st-locale-note"></p>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>How we write to you</h2></div>
+            <div class="panel__body">
+              <div id="st-comms"></div>
+              <div class="panel__foot">
+                <a class="btn" href="#notifications" data-go="notifications"><span>Notification settings</span><i class="arrow"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head"><h2>Closing the account</h2><span class="pill pill--rest">Two ways</span></div>
+          <div class="panel__body">
+            <div id="st-close"></div>
+            <p class="cas-curated" id="st-close-note" aria-live="polite"></p>
+          </div>
+        </div>
+        </section>
 
       <!-- ============================================ CREDENTIAL -->
       <section class="view" id="view-credential" tabindex="-1" aria-label="Your verification mark">
@@ -3680,38 +3991,150 @@
       </section>
 
       <!-- ================================================= PROFILE -->
-      <section class="view" id="view-me" tabindex="-1" aria-label="Profile">
+      <section class="view" id="view-me" tabindex="-1" aria-label="Profile and persona">
         <p class="lede">Profile &amp; Persona</p>
         <p class="sub">
-          Who you are, as this house holds it. Built from four directions — what you write, what a
-          conversation surfaces, what you tell us after a meeting, and what your advisor observes.
+          Two different things, kept apart on purpose. Your profile is what you tell us. Your
+          persona is what the house has understood from talking to you — every piece of it shown
+          with where it came from and how sure we are, and none of it beyond your reach.
         </p>
-        <div class="hub">
-          <a href="#profile" data-go="profile">
-            <span class="no">01</span>
-            <span><span class="nm">Private profile</span><span class="ds">Eighteen fields across four sections. Facts save directly; judgments are discussed before the search changes.</span></span>
-            <span class="go">72% complete</span>
-          </a>
-          <a href="#persona" data-go="persona">
-            <span class="no">02</span>
-            <span><span class="nm">Persona</span><span class="ds">Built from conversation, not a questionnaire. With your permission it speaks first, so you do not spend an evening finding an incompatibility.</span></span>
-            <span class="go">72% built</span>
-          </a>
-          <a href="#preferences" data-go="preferences">
-            <span class="no">03</span>
-            <span><span class="nm">The brief</span><span class="ds">What we search against, and how it has changed since March.</span></span>
-            <span class="go">4 revisions</span>
-          </a>
-          <a href="#intentions" data-go="intentions">
-            <span class="no">04</span>
-            <span><span class="nm">Intentions</span><span class="ds">What you are seeking, on the record. Matched only against members who stated the same.</span></span>
-            <span class="go">Set</span>
-          </a>
-          <a href="#reflections" data-go="reflections">
-            <span class="no">05</span>
-            <span><span class="nm">Reflections &amp; standing</span><span class="ds">Private to you and your advisor. Never shown to anyone you meet, never attributed.</span></span>
-            <span class="go">4.6 of 5</span>
-          </a>
+
+        <!-- header: completion, verification, preview ---------------------- -->
+        <div class="pp-head">
+          <div class="pp-head__who">
+            <img class="pp-head__plate" id="pp-plate" alt="" aria-hidden="true">
+            <div>
+              <h2 class="pp-head__name">A. Marchand, 41</h2>
+              <p class="pp-head__where">London, United Kingdom</p>
+              <span class="ltr-vfd"><i>✓</i><span>Legend Verified · 14 March 2026</span></span>
+            </div>
+          </div>
+          <div class="pp-head__meter">
+            <div class="pp-meter">
+              <span class="pp-meter__n" id="pp-pct">—</span>
+              <span class="pp-meter__l">Profile complete</span>
+              <span class="pp-meter__bar"><i id="pp-bar"></i></span>
+            </div>
+            <div class="pp-head__acts">
+              <button type="button" class="btn" id="pp-preview"><span>Preview as another member</span><i class="arrow"></i></button>
+              <a class="btn" href="#profile" data-go="profile"><span>Edit profile</span><i class="arrow"></i></a>
+              <a class="btn btn--quiet" href="#credential" data-go="credential">Verification</a>
+            </div>
+          </div>
+        </div>
+
+        <p class="pp-todo" id="pp-todo"></p>
+
+        <div class="pp-tabs" role="tablist" aria-label="Profile or persona">
+          <button type="button" role="tab" data-pp="profile" aria-selected="true">My profile</button>
+          <button type="button" role="tab" data-pp="persona" aria-selected="false">My persona</button>
+          <button type="button" role="tab" data-pp="settings" aria-selected="false">Settings &amp; permissions</button>
+        </div>
+
+        <!-- ============================ PROFILE ======================== -->
+        <div class="pp-pane" id="pp-pane-profile">
+          <div class="dash-grid pp-grid" id="pp-profile-grid"></div>
+          <div class="note-inline">
+            Everything above is yours: you wrote it, and nothing is inferred. Where a field is empty
+            it stays empty — the house does not guess at a profile and does not fill one in for you.
+          </div>
+        </div>
+
+        <!-- ============================ PERSONA ======================== -->
+        <div class="pp-pane" id="pp-pane-persona" hidden>
+          <div class="panel">
+            <div class="panel__head">
+              <h2>Your persona</h2>
+              <span class="pill pill--rest" id="pp-updated">—</span>
+            </div>
+            <div class="panel__body">
+              <p class="pp-label" id="pp-persona-label">—</p>
+              <p class="pp-summary" id="pp-persona-summary">—</p>
+              <div class="pp-evo" id="pp-evo"></div>
+            </div>
+            <div class="panel__foot">
+              <button type="button" class="btn btn--solid" id="pp-interview">Continue the interview</button>
+              <button type="button" class="btn btn--quiet" id="pp-ask">Ask about my persona</button>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:1.2rem">
+            <div class="panel__head">
+              <h2>What the house has understood</h2>
+              <span class="pill pill--rest"><span id="pp-confirmed">0</span> of <span id="pp-total">0</span> confirmed</span>
+            </div>
+            <div class="panel__body">
+              <p class="quiet" style="margin-top:0">
+                Every line says where it came from and how sure we are. Nothing here is treated as
+                true about you until you say it is, and anything you remove is removed — from
+                matching as well as from this page.
+              </p>
+              <div class="pp-traits" id="pp-traits"></div>
+            </div>
+          </div>
+
+          <div class="cols cols--7-5" style="margin-top:1.2rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Compatibility profile</h2><span class="pill pill--rest">Used for matching</span></div>
+              <div class="panel__body">
+                <div class="ltr-bars" id="pp-compat"></div>
+                <div class="note-inline">
+                  This is the part of your persona the matching engine reads. Only confirmed lines
+                  reach it; anything still marked as detected is excluded until you confirm it.
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Insights</h2></div>
+              <div class="panel__body">
+                <div id="pp-insights"></div>
+                <div class="ask__chips" id="pp-ask-chips"></div>
+                <div class="ltr-ai-thread" id="pp-ai-thread"></div>
+                <p class="quiet">Written rules over your own file, not a language model, and only over what you have permitted below.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================= SETTINGS ============================ -->
+        <div class="pp-pane" id="pp-pane-settings" hidden>
+          <div class="cols cols--7-5">
+            <div class="panel">
+              <div class="panel__head"><h2>What the assistant may read</h2><span class="pill pill--rest" id="pp-perm-count">—</span></div>
+              <div class="panel__body">
+                <div class="pp-perms" id="pp-perms"></div>
+                <div class="note-inline">
+                  Your persona is built only from what is ticked here. Untick something and the
+                  lines that came from it are marked as unsourced and stop being used for matching —
+                  immediately, not at the next review.
+                </div>
+              </div>
+            </div>
+            <div class="stack" style="gap:1.2rem">
+              <div class="panel">
+                <div class="panel__head"><h2>Who sees what</h2></div>
+                <div class="panel__body">
+                  <div class="ltr-filters" id="pp-visibility"></div>
+                </div>
+              </div>
+              <div class="panel">
+                <div class="panel__head"><h2>Your data</h2></div>
+                <div class="panel__body">
+                  <div class="pp-data" id="pp-data"></div>
+                  <p class="quiet" style="margin-top:1rem">
+                    Resetting the persona does not touch your profile. Deleting the conversation
+                    history removes what the persona was built from, and the persona with it.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-inline" style="margin-top:1.6rem">
+          <b>Design preview.</b> The persona below is illustrative sample content and every figure is
+          computed here in the page — written rules, not a language model, and nothing you do on this
+          page leaves it.
         </div>
       </section>
 
@@ -3752,8 +4175,335 @@
             <span><span class="nm">Documents</span><span class="ds">Engagement papers and the written record of each introduction.</span></span>
             <span class="go">6 held</span>
           </a>
+          <a href="#billing" data-go="billing">
+            <span class="no">07</span>
+            <span><span class="nm">Membership &amp; billing</span><span class="ds">What you hold, what it includes, every sum that has passed between us, and how it was paid.</span></span>
+            <span class="go">Renews 14 Mar</span>
+          </a>
+          <a href="#privacy" data-go="privacy">
+            <span class="no">08</span>
+            <span><span class="nm">Privacy &amp; security</span><span class="ds">Who may see you, who may reach you, who is blocked, and how this account itself is protected.</span></span>
+            <span class="go">1 step outstanding</span>
+          </a>
+          <a href="#help" data-go="help">
+            <span class="no">09</span>
+            <span><span class="nm">Help</span><span class="ds">Common questions, a person to reach, and how to report or dispute something.</span></span>
+            <span class="go">Open</span>
+          </a>
         </div>
       </section>
+      <!-- ============================================= ASK THE ADVISOR -->
+      <section class="view" id="view-advisor" tabindex="-1" aria-label="Ask the advisor">
+        <p class="lede">Ask the advisor</p>
+        <p class="sub">
+          The house's own counsel, available at any hour, on what to say, what to make of something,
+          and whether a thing is worth worrying about. It reads only what you allow it, it never
+          writes to another member, and C. Vasseur sees nothing here unless you send it to her.
+        </p>
+
+        <div class="panel" style="margin-top:2rem">
+          <div class="panel__head">
+            <h2>What would you like help with?</h2>
+            <span class="pill pill--rest">Private to you</span>
+          </div>
+          <div class="panel__body">
+            <div class="chips" id="ad-modes" role="group" aria-label="Kind of advice"></div>
+            <p class="cas-curated" id="ad-note"></p>
+            <label class="sr-only" for="ad-input">Your question</label>
+            <textarea id="ad-input" rows="3" class="ad-input"></textarea>
+            <div class="ad-acts">
+              <button class="btn btn--solid" type="button" id="ad-send">Ask</button>
+              <button class="btn btn--quiet" type="button" id="ad-save">Save this conversation</button>
+              <button class="btn btn--quiet" type="button" id="ad-hand">Send it to C. Vasseur instead</button>
+            </div>
+            <div id="ad-thread" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Analysis</h2><span class="pill pill--rest">Four kinds</span></div>
+            <div class="panel__body">
+              <div class="qa" id="ad-tools"></div>
+              <div id="ad-tool-out" aria-live="polite"></div>
+              <div class="note-inline">
+                Every analysis shows what it was based on. Where it had nothing to go on it says so
+                rather than filling the gap, and none of it is a verdict on a person.
+              </div>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.2rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Saved conversations</h2><span class="pill pill--rest" id="ad-saved-n">—</span></div>
+              <div class="panel__body">
+                <div id="ad-saved"></div>
+                <p class="ltr-empty" id="ad-saved-empty" hidden>Nothing saved yet.</p>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Longer reading</h2></div>
+              <div class="panel__body">
+                <p class="sub" style="margin:0 0 1rem">
+                  What your advisor has recorded across the engagement, written so you can disagree
+                  with it, sits apart from anything said here.
+                </p>
+                <a class="btn" href="#insights" data-go="insights"><span>Relationship insights</span><i class="arrow"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= FAVOURITES &amp; SAVED -->
+      <section class="view" id="view-saved" tabindex="-1" aria-label="Favourites and saved">
+        <p class="lede">Favourites &amp; saved</p>
+        <p class="sub">
+          Everything you set aside to come back to. Nobody is told they were saved, saving is not a
+          signal, and removing something here leaves no trace of it having been there.
+        </p>
+
+        <div class="ev-tabs" id="sv-tabs" role="tablist" aria-label="What is saved"></div>
+        <p class="cas-curated" id="sv-note"></p>
+        <p class="ltr-empty" id="sv-empty" hidden>Nothing in this group.</p>
+        <div id="sv-list" aria-live="polite"></div>
+      </section>
+
+      <!-- ============================================= HOW YOU APPEAR -->
+      <section class="view" id="view-presentation" tabindex="-1" aria-label="How you appear">
+        <p class="lede">How you appear</p>
+        <p class="sub">
+          What another member sees of you, and when. Nothing here is public: each item is released
+          to one person at one point in an introduction, and you set that point yourself.
+        </p>
+
+        <div class="panel" style="margin-top:2rem">
+          <div class="panel__head"><h2>Photographs</h2><span class="pill pill--rest" id="pr-photo-n">—</span></div>
+          <div class="panel__body">
+            <div class="pr-photos" id="pr-photos"></div>
+            <div class="note-inline">
+              Held, never published. A photograph is released to one member at the stage you choose
+              below, and is withdrawn again the moment an introduction ends.
+            </div>
+          </div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Lifestyle, interests, availability</h2></div>
+            <div class="panel__body">
+              <div id="pr-facets"></div>
+              <div class="panel__foot">
+                <a class="btn" href="#intentions" data-go="intentions"><span>Relationship goals</span><i class="arrow"></i></a>
+                <a class="btn" href="#preferences" data-go="preferences"><span>The brief</span><i class="arrow"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>Who sees what</h2><span class="pill pill--rest">You decide the stage</span></div>
+            <div class="panel__body">
+              <div id="pr-vis"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head">
+            <h2>Preview</h2>
+            <span class="pill pill--rest" id="pr-stage-name">—</span>
+          </div>
+          <div class="panel__body">
+            <p class="sub" style="margin:0 0 1.2rem">
+              Exactly what a member at each stage of an introduction would see. Nothing is
+              paraphrased for this preview — it is read from the same record they would be shown.
+            </p>
+            <div class="chips" id="pr-stages" role="group" aria-label="Preview at stage"></div>
+            <div class="pr-card" id="pr-preview" style="margin-top:1.4rem"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= MEMBERSHIP &amp; BILLING -->
+      <section class="view" id="view-billing" tabindex="-1" aria-label="Membership and billing">
+        <p class="lede">Membership &amp; billing</p>
+        <p class="sub">
+          What you hold, what it includes, and every sum that has passed between us. Fees are
+          quoted before work begins and never taken automatically without a stated line.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Your membership</h2><span class="pill pill--rest" id="bl-tier">—</span></div>
+            <div class="panel__body">
+              <dl class="kv" id="bl-summary"></dl>
+              <div class="note-inline">
+                A membership is not a subscription that renews while you are not looking. It is
+                dated, and we write to you a month before it ends.
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>What it includes</h2></div>
+            <div class="panel__body"><div id="bl-benefits"></div></div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head"><h2>Other memberships</h2><span class="pill pill--rest">Change at any time</span></div>
+          <div class="panel__body">
+            <div id="bl-tiers"></div>
+            <p class="cas-curated" id="bl-tier-note"></p>
+          </div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Billing history</h2><span class="pill pill--rest" id="bl-hist-n">—</span></div>
+            <div class="panel__body">
+              <div class="chips" id="bl-filters" role="group" aria-label="Filter billing history"></div>
+              <div id="bl-hist" style="margin-top:1.2rem"></div>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.2rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Payment methods</h2></div>
+              <div class="panel__body">
+                <div id="bl-methods"></div>
+                <div class="panel__foot">
+                  <button class="btn btn--quiet" type="button" data-note="The office will telephone to take the details. Card numbers are never typed into this portal.">Add a method</button>
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Codes</h2></div>
+              <div class="panel__body">
+                <label class="sr-only" for="bl-code">Promotional or referral code</label>
+                <div class="bl-code">
+                  <input id="bl-code" type="text" placeholder="Promotional or referral code">
+                  <button class="btn btn--quiet" type="button" id="bl-code-go">Apply</button>
+                </div>
+                <p class="cas-curated" id="bl-code-out"></p>
+                <div id="bl-codes" style="margin-top:1rem"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= PRIVACY &amp; SECURITY -->
+      <section class="view" id="view-privacy" tabindex="-1" aria-label="Privacy and security">
+        <p class="lede">Privacy &amp; security</p>
+        <p class="sub">
+          Who may see you, who may reach you, and how this account itself is protected. Every
+          control here is set to the closed position by default, and stays there until you move it.
+        </p>
+
+        <div class="panel" style="margin-top:2rem">
+          <div class="panel__head"><h2>Who may see you</h2><span class="pill pill--rest" id="pv-see">—</span></div>
+          <div class="panel__body"><div id="pv-visibility"></div></div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Who may reach you</h2></div>
+            <div class="panel__body">
+              <div id="pv-contact"></div>
+              <div class="note-inline">
+                Nobody writes to you directly. Every approach reaches your advisor first, and these
+                settings decide which ones she is permitted to put in front of you at all.
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>Blocked</h2><span class="pill pill--action" id="pv-block-n">—</span></div>
+            <div class="panel__body">
+              <div id="pv-blocked"></div>
+              <p class="ltr-empty" id="pv-block-empty" hidden>Nobody is blocked.</p>
+              <div class="note-inline">
+                A blocked person is never shown to you, never shown you, and is never told. The
+                exclusion survives them changing anything about their account.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Sign-in &amp; security</h2><span class="pill pill--action" id="pv-sec-n">—</span></div>
+            <div class="panel__body"><div id="pv-security"></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>Where this account is open</h2><span class="pill pill--rest" id="pv-sess-n">—</span></div>
+            <div class="panel__body">
+              <div id="pv-sessions"></div>
+              <div class="panel__foot">
+                <button class="btn btn--quiet" type="button" id="pv-sess-end">End every other session</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head"><h2>Your data</h2></div>
+          <div class="panel__body">
+            <p class="sub" style="margin:0 0 1.2rem">
+              What the house holds, why it exists, how long it is kept, and how to have it
+              corrected or destroyed — with the record of every disclosure we asked you about.
+            </p>
+            <div class="pv-links">
+              <a class="btn" href="#data" data-go="data"><span>What we hold</span><i class="arrow"></i></a>
+              <a class="btn" href="#consent" data-go="consent"><span>Consent ledger</span><i class="arrow"></i></a>
+              <a class="btn" href="#safety" data-go="safety"><span>Safety &amp; conduct</span><i class="arrow"></i></a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= HELP -->
+      <section class="view" id="view-help" tabindex="-1" aria-label="Help">
+        <p class="lede">Help</p>
+        <p class="sub">
+          A person answers here, not a queue. If the matter is urgent or concerns your safety, say
+          so in the first line and it goes to the duty advisor rather than the office.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Common questions</h2></div>
+            <div class="panel__body">
+              <div class="chips" id="hp-topics" role="group" aria-label="Filter questions"></div>
+              <div id="hp-faq" style="margin-top:1.2rem"></div>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.2rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Reach someone</h2></div>
+              <div class="panel__body"><div id="hp-channels"></div></div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Open matters</h2><span class="pill pill--rest" id="hp-open-n">—</span></div>
+              <div class="panel__body">
+                <div id="hp-open"></div>
+                <p class="ltr-empty" id="hp-open-empty" hidden>Nothing open.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head"><h2>Raise something</h2><span class="pill pill--rest" id="hp-kind-name">—</span></div>
+          <div class="panel__body">
+            <div class="chips" id="hp-kinds" role="group" aria-label="What kind of matter"></div>
+            <p class="cas-curated" id="hp-kind-note"></p>
+            <label class="sr-only" for="hp-text">What has happened</label>
+            <textarea id="hp-text" rows="4" class="ad-input"></textarea>
+            <div class="ad-acts">
+              <button class="btn btn--solid" type="button" id="hp-send">Send</button>
+            </div>
+            <p class="cas-curated" id="hp-sent" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 </div>

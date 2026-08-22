@@ -12,6 +12,9 @@
 
   // Six categories in the rail; everything else is a section beneath one of them.
   var TITLES = {
+    activity:        'My activity',
+    notifications:   'Notifications',
+    connections:     'My connections',
     verified:        'Legend Verified',
     academy:         'Legend Academy',
     find:            'Find a partner',
@@ -54,7 +57,13 @@
     credential: 'Your verification mark',
     data: 'What we hold',
     safety: 'Safety & conduct',
-    account: 'Account & security'
+    account: 'Account & security',
+    advisor: 'Ask the advisor',
+    saved: 'Favourites & saved',
+    presentation: 'How you appear',
+    billing: 'Membership & billing',
+    privacy: 'Privacy & security',
+    help: 'Help'
   };
 
   /* --- Dates & greeting --------------------------------------------------- */
@@ -108,6 +117,7 @@
   // once you have gone one level down.
   var PARENT = {
     'find-long': 'find', 'find-short': 'find',
+    notifications: 'activity', connections: 'activity',
     'find-casual': 'find',
     // Companionship moved under Events & Companionship; the page stays where it
     // is and this is what gives it the right way back up.
@@ -123,7 +133,10 @@
     parties: 'events',
     consent: 'settings', data: 'settings', account: 'settings', safety: 'settings',
     mandate: 'settings', documents: 'settings',
-    messages: null, assistant: null, overview: null
+    saved: 'activity', messages: 'activity',
+    presentation: 'me',
+    billing: 'settings', privacy: 'settings', help: 'settings',
+    assistant: null, overview: null
   };
 
   /* --- Routing ------------------------------------------------------------ */
@@ -3326,6 +3339,2531 @@
       $('#cas-filters').textContent = '';
       build(FILTERS, '#cas-filters', STATE.filters, 'cas');
       render(); announce('Filters cleared.');
+    });
+
+    render();
+  })();
+
+  /* --- Profile & Persona ---------------------------------------------------
+     Two entities, not one page with two headings. The profile is what the
+     member wrote. The persona is what the house inferred, and the governing
+     rule is that it is never a black box: every line carries where it came
+     from, how sure we are, and whether the member has confirmed it — and only
+     confirmed lines reach the matching engine. Removing a permission unsources
+     the lines that came from it, on the spot.                                */
+  var ppView = $('#view-me');
+  if (ppView && typeof MATCH !== 'undefined') (function () {
+    var el = MATCH.el, field = MATCH.field;
+
+    var SOURCES = {
+      user:        'You told us',
+      interview:   'Persona interview',
+      conversation:'Conversation with the assistant',
+      behaviour:   'How you have used the portal',
+      corrected:   'You corrected this'
+    };
+    // which permission each source depends on
+    var SOURCE_PERM = { user:'profile', interview:'interview', conversation:'conversation',
+                        behaviour:'activity', corrected:'profile' };
+
+    var PERMS = [
+      { k:'profile',      label:'My profile and preferences', on:true,  note:'What you have written yourself' },
+      { k:'interview',    label:'My persona interview',       on:true,  note:'The questions you have answered' },
+      { k:'conversation', label:'My conversations with the assistant', on:true, note:'What you have asked it' },
+      { k:'messages',     label:'My correspondence with members', on:false, note:'Never on by default' },
+      { k:'history',      label:'My relationship history',    on:false, note:'Formation, counsel and continuity notes' },
+      { k:'activity',     label:'How I use the portal',       on:false, note:'What you open, and how long you stay' }
+    ];
+    var PERM = {}; PERMS.forEach(function (p) { PERM[p.k] = p.on; });
+
+    /* -- the persona, as rows rather than prose ---------------------------- */
+    // trait · value · confidence · source · confirmed · updated
+    var TRAITS = [
+      { g:'Personality', k:'Independence',   v:'High',     c:.87, s:'conversation', ok:true,  d:'12 Aug' },
+      { g:'Personality', k:'Curiosity',      v:'High',     c:.81, s:'interview',    ok:true,  d:'2 Aug' },
+      { g:'Personality', k:'Social energy',  v:'Selective',c:.74, s:'conversation', ok:false, d:'19 Aug' },
+      { g:'Personality', k:'Ambition',       v:'High',     c:.69, s:'behaviour',    ok:false, d:'20 Aug' },
+      { g:'Communication', k:'Style',        v:'Direct',   c:.91, s:'interview',    ok:true,  d:'2 Aug' },
+      { g:'Communication', k:'Pace',         v:'Considered',c:.72,s:'conversation', ok:false, d:'18 Aug' },
+      { g:'Relationship', k:'Closeness',     v:'Independent, warm', c:.79, s:'interview', ok:true, d:'2 Aug' },
+      { g:'Relationship', k:'Structure',     v:'Spontaneous', c:.63, s:'behaviour',  ok:false, d:'21 Aug' },
+      { g:'Values', k:'Trust',               v:'Central',  c:.93, s:'interview',    ok:true,  d:'2 Aug' },
+      { g:'Values', k:'Privacy',             v:'Central',  c:.88, s:'user',         ok:true,  d:'14 Mar' },
+      { g:'Values', k:'Freedom',             v:'High',     c:.76, s:'conversation', ok:false, d:'12 Aug' },
+      { g:'Values', k:'Family',              v:'Open',     c:.58, s:'conversation', ok:false, d:'12 Aug' },
+      { g:'Interests', k:'Travel',           v:'Confirmed',c:.95, s:'user',         ok:true,  d:'14 Mar' },
+      { g:'Interests', k:'Art',              v:'Confirmed',c:.94, s:'user',         ok:true,  d:'14 Mar' },
+      { g:'Interests', k:'Architecture',     v:'Detected', c:.71, s:'conversation', ok:false, d:'18 Aug' },
+      { g:'Interests', k:'Sailing',          v:'Detected', c:.66, s:'behaviour',    ok:false, d:'20 Aug' }
+    ];
+    var GROUPS = ['Personality','Communication','Relationship','Values','Interests'];
+
+    // what the matching engine is allowed to read: confirmed, and sourced from
+    // something still permitted
+    function usable(t) { return t.ok && PERM[SOURCE_PERM[t.s]]; }
+
+    var COMPAT = [
+      { k:'Communication', from:['Style','Pace'] },
+      { k:'Lifestyle',     from:['Curiosity','Structure'] },
+      { k:'Social style',  from:['Social energy'] },
+      { k:'Adventure',     from:['Curiosity','Sailing','Travel'] },
+      { k:'Independence',  from:['Independence','Freedom'] },
+      { k:'Emotional style', from:['Closeness','Trust'] }
+    ];
+    function compatScore(row) {
+      var ts = TRAITS.filter(function (t) { return row.from.indexOf(t.k) > -1 && usable(t); });
+      if (!ts.length) return null;
+      return Math.round(ts.reduce(function (a, t) { return a + t.c; }, 0) / ts.length * 100);
+    }
+
+    /* -- profile completion, computed from real gaps ------------------------ */
+    var PROFILE = [
+      { k:'Identity',   done:true,  what:'Name, age, city, languages',
+        v:'A. Marchand · 41 · London · English, French' },
+      { k:'About me',   done:true,  what:'How you describe yourself',
+        v:'Reads more than he writes. Keeps two evenings a week for nothing in particular.' },
+      { k:'Photographs',done:false, what:'A portrait, and two more',
+        v:'One held on file, none released', todo:'Add two photographs' },
+      { k:'Lifestyle',  done:true,  what:'Occupation, education, how you live',
+        v:'Investor · Doctorate · Travels monthly' },
+      { k:'Interests',  done:false, what:'At least six',
+        v:'Travel, Art, Sailing, Wine', todo:'Add two more interests' },
+      { k:'Location',   done:true,  what:'City, and where you often are',
+        v:'London · often Geneva, New York' },
+      { k:'Relationship goals', done:true, what:'What you are looking for',
+        v:'Long-term partner' },
+      { k:'Preferences', done:false, what:'Age, place, family, lifestyle',
+        v:'Age and place set; family and lifestyle not', todo:'Complete relationship preferences' },
+      { k:'Verification', done:true, what:'Seen in person by an advisor',
+        v:'Legend Verified · 14 March 2026' },
+      { k:'Privacy',    done:true,  what:'Who sees what',
+        v:'City only · persona private' }
+    ];
+
+    var VIS = [
+      { k:'profile', label:'Profile visible to', type:'select',
+        options:['Members I am introduced to','Verified members','Nobody until I agree'] },
+      { k:'photos', label:'Photographs visible to', type:'select',
+        options:['Members I have accepted','Members I am introduced to','Nobody until I agree'] },
+      { k:'location', label:'Location shown as', type:'select', options:['City only','Country only','Hidden'] },
+      { k:'persona', label:'Persona visible to', type:'select',
+        options:['Nobody — the house only','Members I have accepted','Members I am introduced to'] },
+      { k:'online', label:'Online status', type:'select', options:['Hidden','Shown to accepted members'] }
+    ];
+    var VISV = {};
+
+    /* -- rendering ----------------------------------------------------------- */
+    var live = el('p', 'sr-only'); live.setAttribute('role','status'); live.setAttribute('aria-live','polite');
+    ppView.appendChild(live);
+    function announce(t) { live.textContent = t; }
+
+    $('#pp-plate').src = MATCH.plate('A. Marchand');
+
+    function completion() {
+      var done = PROFILE.filter(function (r) { return r.done; }).length;
+      return Math.round(done / PROFILE.length * 100);
+    }
+    function renderHead() {
+      var pct = completion();
+      $('#pp-pct').textContent = pct + '%';
+      $('#pp-bar').style.width = pct + '%';
+      var todo = PROFILE.filter(function (r) { return !r.done; }).map(function (r) { return r.todo; });
+      var unconfirmed = TRAITS.filter(function (t) { return !t.ok; }).length;
+      if (unconfirmed) todo.push('Confirm or remove ' + unconfirmed + ' persona line' + (unconfirmed === 1 ? '' : 's'));
+      $('#pp-todo').textContent = todo.length
+        ? 'To finish: ' + todo.join(' · ') + '.'
+        : 'Nothing outstanding. Your profile is complete and every persona line is confirmed.';
+    }
+
+    function renderProfile() {
+      var g = $('#pp-profile-grid'); g.textContent = '';
+      PROFILE.forEach(function (r) {
+        var p = el('div', 'panel');
+        var h = el('div', 'panel__head');
+        h.appendChild(el('h2', null, r.k));
+        h.appendChild(el('span', 'pill ' + (r.done ? 'pill--rest' : 'pill--action'), r.done ? 'Complete' : 'Outstanding'));
+        p.appendChild(h);
+        var b = el('div', 'panel__body');
+        b.appendChild(el('p', 'pp-what', r.what));
+        b.appendChild(el('p', 'pp-val', r.v));
+        if (r.todo) b.appendChild(el('p', 'pp-todo-line', r.todo));
+        p.appendChild(b);
+        g.appendChild(p);
+      });
+    }
+
+    function traitRow(t) {
+      var row = el('div', 'pp-trait' + (t.ok ? ' is-ok' : '') + (usable(t) ? '' : ' is-unused'));
+      var main = el('div', 'pp-trait__main');
+      main.appendChild(el('span', 'pp-trait__k', t.k));
+      main.appendChild(el('span', 'pp-trait__v', t.v));
+      row.appendChild(main);
+
+      var meta = el('div', 'pp-trait__meta');
+      var conf = el('span', 'pp-conf');
+      conf.appendChild(el('i', null, ''));
+      conf.lastChild.style.width = Math.round(t.c * 100) + '%';
+      meta.appendChild(conf);
+      // a word, not a decimal: a probability read as a verdict is the thing to avoid
+      var word = t.c >= .85 ? 'High confidence' : t.c >= .7 ? 'Moderate confidence' : 'Low confidence';
+      meta.appendChild(el('span', 'pp-trait__c', word));
+      meta.appendChild(el('span', 'pp-trait__s', SOURCES[t.s] + ' · ' + t.d));
+      if (!PERM[SOURCE_PERM[t.s]]) meta.appendChild(el('span', 'pp-trait__off', 'Source switched off — not used'));
+      row.appendChild(meta);
+
+      var acts = el('div', 'pp-trait__acts');
+      var ok = el('button', 'pp-btn' + (t.ok ? ' is-on' : '')); ok.type = 'button';
+      ok.textContent = t.ok ? '✓ Confirmed' : 'Confirm';
+      ok.setAttribute('aria-pressed', t.ok ? 'true' : 'false');
+      ok.addEventListener('click', function () {
+        t.ok = !t.ok; if (t.ok) { t.s = 'corrected'; t.c = Math.max(t.c, .95); }
+        render(); announce(t.k + (t.ok ? ' confirmed.' : ' unconfirmed.'));
+      });
+      var edit = el('button', 'pp-btn', 'Edit'); edit.type = 'button';
+      edit.addEventListener('click', function () {
+        var v = prompt('What should ' + t.k.toLowerCase() + ' say?', t.v);
+        if (v == null) return;
+        t.v = v.trim() || t.v; t.ok = true; t.s = 'corrected'; t.c = 1; t.d = 'today';
+        render(); announce(t.k + ' corrected.');
+      });
+      var del = el('button', 'pp-btn pp-btn--rm', 'Remove'); del.type = 'button';
+      del.addEventListener('click', function () {
+        TRAITS.splice(TRAITS.indexOf(t), 1);
+        render(); announce(t.k + ' removed from your persona.');
+      });
+      [ok, edit, del].forEach(function (b) { acts.appendChild(b); });
+      row.appendChild(acts);
+      return row;
+    }
+
+    function renderTraits() {
+      var host = $('#pp-traits'); host.textContent = '';
+      GROUPS.forEach(function (g) {
+        var rows = TRAITS.filter(function (t) { return t.g === g; });
+        if (!rows.length) return;
+        host.appendChild(el('p', 'ask__lbl', g));
+        rows.forEach(function (t) { host.appendChild(traitRow(t)); });
+      });
+      $('#pp-confirmed').textContent = TRAITS.filter(function (t) { return t.ok; }).length;
+      $('#pp-total').textContent = TRAITS.length;
+    }
+
+    function renderCompat() {
+      var host = $('#pp-compat'); host.textContent = '';
+      COMPAT.forEach(function (row) {
+        var v = compatScore(row);
+        var r = el('div', 'ltr-bars__row');
+        r.appendChild(el('span', 'k', row.k));
+        var b = el('span', 'b'); var f = el('i');
+        f.style.width = (v || 0) + '%'; b.appendChild(f); r.appendChild(b);
+        r.appendChild(el('span', 'v', v == null ? '—' : v + '%'));
+        host.appendChild(r);
+      });
+    }
+
+    function label() {
+      var ind = TRAITS.filter(function (t) { return t.k === 'Independence' && usable(t); })[0];
+      var cur = TRAITS.filter(function (t) { return t.k === 'Curiosity' && usable(t); })[0];
+      if (ind && cur) return 'The Independent Explorer';
+      if (ind) return 'The Independent';
+      if (cur) return 'The Explorer';
+      return 'Not yet drawn';
+    }
+    function summary() {
+      var used = TRAITS.filter(usable);
+      if (!used.length) return 'Nothing is confirmed yet, so there is no persona to show. Confirm a line below, or answer a few more questions, and it will draw itself.';
+      var vals = used.filter(function (t) { return t.g === 'Values'; }).map(function (t) { return t.k.toLowerCase(); });
+      var style = used.filter(function (t) { return t.k === 'Style'; })[0];
+      return 'Drawn from ' + used.length + ' confirmed line' + (used.length === 1 ? '' : 's') + '. ' +
+        (style ? style.v.toLowerCase() + ' in conversation' : 'Style not yet confirmed') +
+        (vals.length ? ', and holds ' + vals.slice(0, 3).join(', ') + ' at the centre' : '') + '.';
+    }
+    function renderPersona() {
+      $('#pp-persona-label').textContent = label();
+      $('#pp-persona-summary').textContent = summary();
+      var recent = TRAITS.filter(function (t) { return /Aug/.test(t.d); }).length;
+      $('#pp-updated').textContent = 'Last updated 21 Aug';
+      var evo = $('#pp-evo'); evo.textContent = '';
+      evo.appendChild(el('p', 'ask__lbl', 'What changed'));
+      var ul = el('ul', 'includes');
+      [recent + ' line' + (recent === 1 ? '' : 's') + ' added or revised this month',
+       'Communication pace detected from your last three conversations',
+       'Two interests detected that you have not yet confirmed']
+        .forEach(function (t) { ul.appendChild(el('li', null, t)); });
+      evo.appendChild(ul);
+    }
+
+    function renderInsights() {
+      var host = $('#pp-insights'); host.textContent = '';
+      var used = TRAITS.filter(usable);
+      var ind = used.filter(function (t) { return t.k === 'Independence'; })[0];
+      var soc = used.filter(function (t) { return t.k === 'Social energy'; })[0];
+      var lines = [];
+      if (ind) lines.push('You are likely to connect best with people who keep their own life running alongside yours.');
+      if (soc) lines.push('Small rooms suit you better than large ones, and the house weights introductions accordingly.');
+      if (!lines.length) lines.push('Too little is confirmed to say anything useful yet. That is the honest position rather than a placeholder.');
+      lines.forEach(function (t) { host.appendChild(el('p', 'ltr-insight', t)); });
+
+      var chips = $('#pp-ask-chips'); chips.textContent = '';
+      var thread = $('#pp-ai-thread');
+      [ { q:'What does the house think it knows?', a:function () {
+            return used.length + ' of ' + TRAITS.length + ' lines are confirmed and in use. ' +
+              (TRAITS.length - used.length) + ' are either unconfirmed or come from a source you have switched off, and none of those reach matching.'; } },
+        { q:'Where did this come from?', a:function () {
+            var by = {};
+            TRAITS.forEach(function (t) { by[t.s] = (by[t.s] || 0) + 1; });
+            return Object.keys(by).map(function (k) { return SOURCES[k] + ': ' + by[k]; }).join('. ') + '.'; } },
+        { q:'What is it least sure about?', a:function () {
+            var low = TRAITS.slice().sort(function (a, b) { return a.c - b.c; })[0];
+            return low ? low.k + ' — "' + low.v + '", at ' + Math.round(low.c * 100) + ' per cent, from ' +
+              SOURCES[low.s].toLowerCase() + '. Worth correcting or removing rather than leaving.' : 'Nothing is left.'; } },
+        { q:'What is used for matching?', a:function () {
+            return 'Only confirmed lines from permitted sources: ' + used.map(function (t) { return t.k.toLowerCase(); }).join(', ') + '. Nothing else.'; } }
+      ].forEach(function (item) {
+        var b = el('button', null, item.q); b.type = 'button';
+        b.addEventListener('click', function () {
+          thread.appendChild(el('p', 'ltr-ai-q', item.q));
+          thread.appendChild(el('p', 'ltr-ai-a', item.a()));
+          b.remove();
+        });
+        chips.appendChild(b);
+      });
+    }
+
+    function renderPerms() {
+      var host = $('#pp-perms'); host.textContent = '';
+      PERMS.forEach(function (p) {
+        var row = el('label', 'pp-perm');
+        var cb = el('input'); cb.type = 'checkbox'; cb.checked = PERM[p.k];
+        cb.addEventListener('change', function () {
+          PERM[p.k] = cb.checked; render();
+          announce(p.label + (cb.checked ? ' switched on.' : ' switched off; lines from it are no longer used.'));
+        });
+        row.appendChild(cb);
+        var t = el('span');
+        t.appendChild(el('b', null, p.label));
+        t.appendChild(el('span', 'pp-perm__n', p.note));
+        var n = TRAITS.filter(function (x) { return SOURCE_PERM[x.s] === p.k; }).length;
+        if (n) t.appendChild(el('span', 'pp-perm__n', n + ' persona line' + (n === 1 ? '' : 's') + ' come from this'));
+        row.appendChild(t);
+        host.appendChild(row);
+      });
+      $('#pp-perm-count').textContent = PERMS.filter(function (p) { return PERM[p.k]; }).length + ' of ' + PERMS.length + ' on';
+    }
+
+    function renderData() {
+      var host = $('#pp-data'); host.textContent = '';
+      [ ['Export my persona', 'A file of every line, its source and its confidence.'],
+        ['Reset my persona', 'Clears every inferred line. Your profile is untouched.'],
+        ['Delete conversation history', 'Removes what the persona was built from, and the persona with it.'] ]
+        .forEach(function (r) {
+          var b = el('button', 'btn btn--quiet', r[0]); b.type = 'button';
+          b.addEventListener('click', function () {
+            if (r[0] === 'Reset my persona') {
+              TRAITS.length = 0; render();
+              note(b, 'Persona cleared. Your profile is untouched, and nothing is used for matching until you build it again.');
+            } else {
+              note(b, r[1] + ' In service this is done the same day, by a person, and you are told when it is finished.');
+            }
+          });
+          host.appendChild(b);
+        });
+    }
+
+    function render() {
+      renderHead(); renderProfile(); renderTraits(); renderCompat();
+      renderPersona(); renderInsights(); renderPerms();
+    }
+
+    /* -- tabs, and the rest ---------------------------------------------------- */
+    $$('.pp-tabs button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var which = b.getAttribute('data-pp');
+        $$('.pp-tabs button').forEach(function (o) {
+          o.setAttribute('aria-selected', o === b ? 'true' : 'false');
+        });
+        ['profile','persona','settings'].forEach(function (p) {
+          $('#pp-pane-' + p).hidden = p !== which;
+        });
+      });
+    });
+    VIS.forEach(function (def) { $('#pp-visibility').appendChild(field(def, VISV, function () {}, 'pp-v')); });
+    renderData();
+
+    $('#pp-preview').addEventListener('click', function (e) {
+      note(e.target, 'Opens your profile exactly as a member you have been introduced to would see it — ' +
+        'city only, no surname, and your persona withheld unless you have said otherwise.');
+    });
+    $('#pp-interview').addEventListener('click', function (e) {
+      note(e.target, 'Six questions, about twenty minutes, and you can stop at any of them. ' +
+        'Every answer becomes a line you can see, correct or remove — never a score you cannot.');
+    });
+    $('#pp-ask').addEventListener('click', function () {
+      $$('.pp-tabs button').forEach(function (o) { o.setAttribute('aria-selected', o.getAttribute('data-pp') === 'persona' ? 'true' : 'false'); });
+      ['profile','persona','settings'].forEach(function (p) { $('#pp-pane-' + p).hidden = p !== 'persona'; });
+      var c = $('#pp-ask-chips'); if (c.firstChild) c.firstChild.focus();
+    });
+
+    render();
+  })();
+
+  /* --- Events & Companionship ----------------------------------------------
+     Discover, curate, match, request, confirm — in that order, and the page is
+     built so it cannot be short-circuited into search-and-book. A companion is
+     requested against a named evening, never in the abstract; the request has
+     real states rather than a boolean; and the concierge is a person on the
+     page rather than a support link at the bottom.                           */
+  var evView = $('#view-occasions');
+  if (evView && typeof MATCH !== 'undefined') (function () {
+    var el = MATCH.el, field = MATCH.field;
+
+    var WEIGHTS = { event:25, availability:20, location:15, social:15,
+                    interests:10, communication:5, lifestyle:5, persona:5 };
+    var LABELS = { event:'Event fit', availability:'Availability', location:'Location',
+                   social:'Social style', interests:'Interests',
+                   communication:'Communication', lifestyle:'Lifestyle', persona:'Persona' };
+
+    var DAY = 86400000, t0 = new Date(); t0.setHours(0,0,0,0);
+    function iso(d) { return d.toISOString().slice(0,10); }
+    function plus(n) { return iso(new Date(t0.getTime() + n*DAY)); }
+    function fmt(s) {
+      return new Date(s + 'T00:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+    }
+
+    var ME = { city:'Munich', social:'Confident, selective', comms:'Direct',
+               lifestyle:'Arts & Culture', interests:['Art','Fine Dining','Travel','Culture'] };
+
+    /* -- the evenings the house is holding --------------------------------- */
+    var CATS = [
+      { id:'curated',  label:'Curated for you', note:'Weighted to your preferences' },
+      { id:'private',  label:'Private',   note:'Dinners, gatherings, celebrations' },
+      { id:'social',   label:'Social',    note:'Cocktails, dinners, gatherings' },
+      { id:'business', label:'Business',  note:'Dinners, conferences, networking' },
+      { id:'culture',  label:'Culture & lifestyle', note:'Art, music, theatre, dining' },
+      { id:'travel',   label:'Travel',    note:'Weekends and city experiences' }
+    ];
+    var EVENTS = [
+      { id:'e1', cat:'private', name:'Private dinner', city:'Munich', date:plus(23), time:'19:30',
+        venue:'A private room, Lehel', guests:8, privacy:'Invitation only', dress:'Black tie optional',
+        host:'The house', curated:true, interests:['Fine Dining','Art'],
+        about:'Eight people, one table, and a house rule that nobody discusses what they do until the second course.' },
+      { id:'e2', cat:'culture', name:'Private view — Blaue Reiter', city:'Munich', date:plus(9), time:'18:00',
+        venue:'Lenbachhaus, after hours', guests:24, privacy:'Members only', dress:'Informal',
+        host:'The house', curated:true, interests:['Art','Culture'],
+        about:'The rooms to ourselves for two hours, with the curator who hung them.' },
+      { id:'e3', cat:'business', name:'Business dinner — technology', city:'Munich', date:plus(15), time:'20:00',
+        venue:'Restaurant, Maxvorstadt', guests:12, privacy:'Members only', dress:'Business',
+        host:'A member', curated:false, interests:['Business','Fine Dining'],
+        about:'Twelve people who build things, and a companion briefed on the room rather than scripted for it.' },
+      { id:'e4', cat:'social', name:'Autumn cocktails', city:'Munich', date:plus(5), time:'19:00',
+        venue:'A private bar, Altstadt', guests:30, privacy:'Members only', dress:'Cocktail',
+        host:'The house', curated:true, interests:['Culture','Fine Dining'],
+        about:'The largest room the house uses, which is still only thirty people.' },
+      { id:'e5', cat:'travel', name:'A weekend in Salzburg', city:'Salzburg', date:plus(31), time:'—',
+        venue:'Two nights, arranged', guests:6, privacy:'Invitation only', dress:'As you like',
+        host:'The house', curated:true, interests:['Culture','Travel','Art'],
+        about:'Six people, two nights, one concert, and no obligation to be sociable at breakfast.' },
+      { id:'e6', cat:'private', name:'A celebration', city:'Vienna', date:plus(44), time:'20:00',
+        venue:'A private house', guests:16, privacy:'Invitation only', dress:'Black tie',
+        host:'A member', curated:false, interests:['Fine Dining','Culture'],
+        about:'A member marking something, and asking the house to fill four of the sixteen chairs.' },
+      { id:'e7', cat:'culture', name:'Opera, and dinner after', city:'Munich', date:plus(12), time:'17:30',
+        venue:'Nationaltheater, then Schwabing', guests:4, privacy:'Invitation only', dress:'Formal',
+        host:'The house', curated:true, interests:['Culture','Art','Fine Dining'],
+        about:'Four seats the house keeps, and a table held for afterwards whether or not it is wanted.' },
+      { id:'e8', cat:'business', name:'Founders, off the record', city:'Zurich', date:plus(27), time:'19:00',
+        venue:'A private room', guests:10, privacy:'Invitation only', dress:'Business',
+        host:'The house', curated:false, interests:['Business'],
+        about:'No press, no notes, no attribution. That is the whole proposition.' }
+    ];
+
+    var KINDS = ['Social companion','Dinner companion','Event companion',
+                 'Business event companion','Travel companion'];
+    var COMPANIONS = [
+      { id:'k1', name:'Sophia', age:34, city:'Munich', verified:true,
+        social:'Confident, selective', comms:'Direct', lifestyle:'Arts & Culture',
+        interests:['Art','Travel','Fine Dining','Culture'], langs:['German','English','French'],
+        kinds:['Event companion','Dinner companion','Social companion'],
+        free:[plus(3), plus(30)], attended:14,
+        about:'At ease in a room of strangers and uninterested in being the reason anyone remembers it.' },
+      { id:'k2', name:'Katharina', age:37, city:'Munich', verified:true,
+        social:'Warm, sociable', comms:'Warm', lifestyle:'Social',
+        interests:['Fine Dining','Music','Fashion','Culture'], langs:['German','English'],
+        kinds:['Social companion','Dinner companion'],
+        free:[plus(0), plus(20)], attended:31,
+        about:'Talks to everyone, remembers all of it, and repeats none of it.' },
+      { id:'k3', name:'Elisa', age:32, city:'Munich', verified:true,
+        social:'Quiet, observant', comms:'Considered', lifestyle:'Arts & Culture',
+        interests:['Art','Culture','Travel','Photography'], langs:['Italian','German','English'],
+        kinds:['Event companion','Travel companion'],
+        free:[plus(6), plus(40)], attended:9,
+        about:'Reads a room before she speaks in it, which is rarer than it should be.' },
+      { id:'k4', name:'Johanna', age:39, city:'Munich', verified:true,
+        social:'Confident, selective', comms:'Direct', lifestyle:'Business',
+        interests:['Business','Fine Dining','Travel','Technology'], langs:['German','English','Mandarin'],
+        kinds:['Business event companion','Event companion','Dinner companion'],
+        free:[plus(10), plus(35)], attended:22,
+        about:'Briefed rather than scripted. Will not claim an expertise she does not have.' },
+      { id:'k5', name:'Marta', age:30, city:'Vienna', verified:false,
+        social:'Warm, sociable', comms:'Warm', lifestyle:'Social',
+        interests:['Music','Fashion','Culture','Nightlife'], langs:['German','English'],
+        kinds:['Social companion'],
+        free:[plus(20), plus(60)], attended:3,
+        about:'New to the house, and verification is not yet finished.' },
+      { id:'k6', name:'Ines', age:35, city:'Salzburg', verified:true,
+        social:'Quiet, observant', comms:'Considered', lifestyle:'Arts & Culture',
+        interests:['Culture','Art','Travel','Wellness'], langs:['German','English'],
+        kinds:['Travel companion','Event companion'],
+        free:[plus(25), plus(50)], attended:11,
+        about:'Comfortable with two days of somebody else’s company, and honest when she is not.' }
+    ];
+
+    /* -- states, per the brief --------------------------------------------- */
+    var FLOW = ['Requested','Accepted','Confirmed','Completed'];
+    var REQ = {};                                     // eventId+companionId -> state
+    var BOOKED = [
+      { ev:'e2', comp:'k1', state:'Confirmed' }
+    ];
+    BOOKED.forEach(function (b) { REQ[b.ev + '|' + b.comp] = b.state; });
+
+    /* -- matching ------------------------------------------------------------ */
+    var STATE = { cat:'curated', forEvent:null, kind:'Event companion',
+                  verifiedOnly:true, cprefs:{}, prefs:{}, priv:{} };
+
+    function ev(id) { return EVENTS.filter(function (e) { return e.id === id; })[0]; }
+    function freeFor(c, e) {
+      return e && c.free[0] <= e.date && c.free[1] >= e.date;
+    }
+    function factors(c, e) {
+      var shared = c.interests.filter(function (i) { return (e ? e.interests : ME.interests).indexOf(i) > -1; });
+      return {
+        event: e ? (c.kinds.indexOf(STATE.kind) > -1 ? 100 : 62) : 70,
+        availability: e ? (freeFor(c, e) ? 100 : 35) : 80,
+        location: e ? (c.city === e.city ? 100 : 62) : (c.city === ME.city ? 100 : 62),
+        social: c.social === ME.social ? 100 : 74,
+        interests: Math.round(shared.length / 4 * 100),
+        communication: c.comms === ME.comms ? 100 : 78,
+        lifestyle: c.lifestyle === ME.lifestyle ? 100 : 76,
+        persona: Math.min(100, 60 + c.attended * 2)
+      };
+    }
+    function score(f) {
+      var t = 0, s = 0;
+      Object.keys(WEIGHTS).forEach(function (k) { t += WEIGHTS[k]; s += WEIGHTS[k] * f[k]; });
+      return Math.round(s / t);
+    }
+    function eventFit(e) {
+      var shared = e.interests.filter(function (i) { return ME.interests.indexOf(i) > -1; });
+      var here = e.city === ME.city ? 1 : .78;
+      return Math.round((60 + shared.length * 12) * here);
+    }
+
+    /* -- rendering ----------------------------------------------------------- */
+    var live = el('p', 'sr-only'); live.setAttribute('role','status'); live.setAttribute('aria-live','polite');
+    evView.appendChild(live);
+    function announce(t) { live.textContent = t; }
+
+    function renderUpcoming() {
+      var host = $('#ev-upcoming'); host.textContent = '';
+      var mine = Object.keys(REQ).map(function (k) {
+        var p = k.split('|');
+        return { e: ev(p[0]), c: COMPANIONS.filter(function (x) { return x.id === p[1]; })[0], s: REQ[k] };
+      }).filter(function (r) { return r.e && r.c && r.s !== 'Declined'; });
+      $('#ev-upcoming-n').textContent = mine.length + (mine.length === 1 ? ' arrangement' : ' arrangements');
+      if (!mine.length) {
+        host.appendChild(el('p', 'quiet', 'Nothing arranged. Choose an evening below, or ask the concierge to find one.'));
+        return;
+      }
+      mine.forEach(function (r) {
+        var row = el('div', 'ev-up');
+        var l = el('div');
+        l.appendChild(el('p', 'ev-up__n', r.e.name));
+        l.appendChild(el('p', 'ev-up__d', fmt(r.e.date) + ' · ' + r.e.time + ' · ' + r.e.city + ' · ' + r.e.venue));
+        l.appendChild(el('p', 'ev-up__c', 'Companion: ' + r.c.name + (r.s === 'Confirmed' || r.s === 'Completed' ? ' ✓' : '')));
+        row.appendChild(l);
+        var right = el('div', 'ev-up__r');
+        // the state machine, shown as a track rather than a word
+        var track = el('div', 'ev-track');
+        FLOW.forEach(function (st) {
+          var done = FLOW.indexOf(st) <= FLOW.indexOf(r.s);
+          track.appendChild(el('span', 'ev-track__s' + (done ? ' is-done' : ''), st));
+        });
+        right.appendChild(track);
+        var acts = el('div', 'ev-up__acts');
+        var det = el('button', 'btn'); det.type = 'button';
+        det.appendChild(el('span', null, 'Details')); det.appendChild(el('i', 'arrow'));
+        det.addEventListener('click', function () { openEvent(r.e, r.c); });
+        var conc = el('button', 'btn btn--quiet', 'Contact concierge'); conc.type = 'button';
+        conc.addEventListener('click', function () { showPane('concierge'); });
+        var canc = el('button', 'btn btn--quiet', 'Cancel'); canc.type = 'button';
+        canc.addEventListener('click', function () {
+          delete REQ[r.e.id + '|' + r.c.id];
+          renderUpcoming(); renderCompanions();
+          note(canc, 'Cancelled. ' + r.c.name + ' is told the evening is off and nothing else; the venue is released by the concierge today.');
+        });
+        [det, conc, canc].forEach(function (b) { acts.appendChild(b); });
+        right.appendChild(acts);
+        row.appendChild(right);
+        host.appendChild(row);
+      });
+    }
+
+    function eventCard(e) {
+      var a = el('article', 'ev-card');
+      var img = el('img', 'ev-card__img');
+      img.src = MATCH.plate(e.id + e.name); img.alt = ''; img.setAttribute('aria-hidden','true'); img.loading = 'lazy';
+      a.appendChild(img);
+      var b = el('div', 'ev-card__body');
+      b.appendChild(el('p', 'ev-card__cat', e.privacy));
+      b.appendChild(el('h3', 'ev-card__n', e.name));
+      b.appendChild(el('p', 'ev-card__d', e.city + ' · ' + fmt(e.date) + (e.time !== '—' ? ' · ' + e.time : '')));
+      b.appendChild(el('p', 'ev-card__g', e.guests + ' guests · ' + e.dress));
+      if (e.curated) {
+        var v = el('span', 'ltr-vfd'); v.appendChild(el('i', null, '✓'));
+        v.appendChild(el('span', null, 'Legend curated')); b.appendChild(v);
+      }
+      var open = el('button', 'btn'); open.type = 'button';
+      open.appendChild(el('span', null, 'View experience')); open.appendChild(el('i', 'arrow'));
+      open.addEventListener('click', function () { openEvent(e); });
+      b.appendChild(open);
+      a.appendChild(b);
+      return a;
+    }
+
+    function renderEvents() {
+      var list = EVENTS.filter(function (e) {
+        return STATE.cat === 'curated' ? e.curated : e.cat === STATE.cat;
+      }).sort(function (x, y) { return eventFit(y) - eventFit(x); });
+      var g = $('#ev-grid'); g.textContent = '';
+      list.forEach(function (e) { g.appendChild(eventCard(e)); });
+      $('#ev-empty').hidden = list.length > 0;
+      var cat = CATS.filter(function (c) { return c.id === STATE.cat; })[0];
+      $('#ev-note').textContent = list.length
+        ? cat.label + ' — ' + list.length + ' held. ' + cat.note + '.' : '';
+      $$('#ev-cats button').forEach(function (b) {
+        b.setAttribute('aria-selected', b.getAttribute('data-cat') === STATE.cat ? 'true' : 'false');
+      });
+    }
+
+    function companionCard(c, e) {
+      var f = factors(c, e), s = score(f);
+      var a = el('article', 'ltr-card cas-card');
+      var img = el('img', 'ltr-card__plate');
+      img.src = MATCH.plate(c.id + c.name); img.alt = ''; img.setAttribute('aria-hidden','true'); img.loading = 'lazy';
+      a.appendChild(img);
+      var b = el('div', 'ltr-card__body');
+      b.appendChild(MATCH.badge(c.verified));
+      b.appendChild(el('h3', 'ltr-card__name', c.name + ', ' + c.age));
+      b.appendChild(el('p', 'ltr-card__where', c.city));
+      var sc = el('div', 'ltr-score');
+      sc.appendChild(el('span', 'ltr-score__n', s + '%'));
+      sc.appendChild(el('span', 'ltr-score__l', 'Event compatibility'));
+      var bar = el('span', 'ltr-score__bar'); var fill = el('span');
+      fill.style.width = s + '%'; bar.appendChild(fill); sc.appendChild(bar);
+      b.appendChild(sc);
+      var shared = c.interests.filter(function (i) { return (e ? e.interests : ME.interests).indexOf(i) > -1; });
+      b.appendChild(el('p', 'ltr-card__tags', shared.length ? 'Shared: ' + shared.join(' · ') : 'No shared interest on file'));
+      b.appendChild(el('p', 'cas-avail' + (e && !freeFor(c, e) ? ' cas-avail--warn' : ''),
+        e ? (freeFor(c, e) ? 'Free on ' + fmt(e.date) : 'Not free on ' + fmt(e.date)) : 'Free ' + fmt(c.free[0]) + '–' + fmt(c.free[1])));
+      b.appendChild(el('p', 'ltr-card__goal', c.social));
+
+      var acts = el('div', 'cas-acts');
+      var view = el('button', 'btn'); view.type = 'button';
+      view.appendChild(el('span', null, 'View profile')); view.appendChild(el('i', 'arrow'));
+      view.addEventListener('click', function () { openCompanion(c, e); });
+      var req = el('button', 'btn btn--solid'); req.type = 'button';
+      var key = e ? e.id + '|' + c.id : null;
+      req.textContent = key && REQ[key] ? REQ[key] : 'Request companion';
+      req.disabled = !e || !!(key && REQ[key]);
+      if (!e) req.title = 'Choose an evening first';
+      req.addEventListener('click', function () { openCompanion(c, e, true); });
+      acts.appendChild(view); acts.appendChild(req);
+      b.appendChild(acts);
+      a.appendChild(b);
+      return a;
+    }
+
+    function renderCompanions() {
+      var e = STATE.forEvent ? ev(STATE.forEvent) : null;
+      var list = COMPANIONS.filter(function (c) {
+        if (STATE.verifiedOnly && !c.verified) return false;
+        var p = STATE.cprefs;
+        if (p.ageMin && c.age < +p.ageMin) return false;
+        if (p.ageMax && c.age > +p.ageMax) return false;
+        if (p.language && p.language !== 'Any' && c.langs.indexOf(p.language) < 0) return false;
+        if (p.social && p.social !== 'Any' && c.social !== p.social) return false;
+        if (p.comms && p.comms !== 'Any' && c.comms !== p.comms) return false;
+        return true;
+      }).sort(function (x, y) { return score(factors(y, e)) - score(factors(x, e)); }).slice(0, 6);
+      var g = $('#ev-companions'); g.textContent = '';
+      list.forEach(function (c) { g.appendChild(companionCard(c, e)); });
+      $('#ev-cempty').hidden = list.length > 0;
+      $('#ev-cnote').textContent = list.length
+        ? (e ? 'The house selected ' + list.length + ' members who may suit ' + e.name.toLowerCase() +
+               ' on ' + fmt(e.date) + '.' : 'Choose an evening above and these are re-scored against it.')
+        : '';
+      var pill = $('#ev-for-pill');
+      pill.textContent = e ? e.name + ' · ' + fmt(e.date) : 'Choose an evening';
+      pill.className = 'pill ' + (e ? 'pill--rest' : 'pill--action');
+    }
+
+    /* -- the sheet ------------------------------------------------------------ */
+    var sheet = $('#ltr-sheet'), sheetBody = $('#ltr-sheet-body');
+    function openEvent(e, withCompanion) {
+      sheetBody.textContent = '';
+      var head = el('div', 'ltr-sheet__head');
+      var img = el('img', 'ltr-sheet__plate'); img.src = MATCH.plate(e.id + e.name);
+      img.alt=''; img.setAttribute('aria-hidden','true'); head.appendChild(img);
+      var hb = el('div');
+      var h = el('h2', null, e.name); h.id = 'ltr-sheet-name'; hb.appendChild(h);
+      hb.appendChild(el('p', 'ltr-sheet__where', e.city + ' · ' + fmt(e.date) + (e.time !== '—' ? ' · ' + e.time : '')));
+      hb.appendChild(el('p', 'ltr-sheet__score', e.privacy + ' · ' + e.guests + ' guests'));
+      head.appendChild(hb); sheetBody.appendChild(head);
+
+      var p = el('div', 'panel');
+      p.appendChild(MATCH.head('The evening'));
+      var pb = el('div', 'panel__body');
+      pb.appendChild(el('p', 'ltr-about', e.about));
+      var dl = el('dl', 'kv');
+      [['Venue', e.venue], ['Dress', e.dress], ['Guests', String(e.guests)],
+       ['Host', e.host], ['Privacy', e.privacy],
+       ['Curated', e.curated ? 'By the house' : 'By a member, vetted by the house']]
+        .forEach(function (r) { dl.appendChild(el('dt',null,r[0])); dl.appendChild(el('dd',null,r[1])); });
+      pb.appendChild(dl);
+      if (withCompanion) {
+        pb.appendChild(el('p', 'ask__lbl', 'Your companion'));
+        pb.appendChild(el('p', 'pp-val', withCompanion.name + ' · ' + withCompanion.city +
+          ' · ' + (REQ[e.id + '|' + withCompanion.id] || 'Requested')));
+      }
+      pb.appendChild(el('div', 'note-inline',
+        'Your attendance is not shown on your profile, to anyone, at any setting. The venue is told a number and a name for the table, and nothing else.'));
+      p.appendChild(pb); sheetBody.appendChild(p);
+
+      var foot = el('div', 'ltr-sheet__acts');
+      var find = el('button', 'btn btn--solid', 'Find a companion for this'); find.type = 'button';
+      find.addEventListener('click', function () {
+        STATE.forEvent = e.id; closeSheet(); showPane('companion');
+        $$('#ev-for button').forEach(function (o) {
+          var on = o.getAttribute('data-ev-id') === e.id;
+          o.classList.toggle('is-on', on); o.setAttribute('aria-checked', on ? 'true':'false');
+        });
+        renderCompanions(); announce('Companions re-scored for ' + e.name + '.');
+      });
+      var conc = el('button', 'btn', 'Ask the concierge'); conc.type = 'button';
+      conc.addEventListener('click', function () { closeSheet(); showPane('concierge'); });
+      foot.appendChild(find); foot.appendChild(conc);
+      sheetBody.appendChild(foot);
+
+      sheet.hidden = false; document.body.style.overflow = 'hidden';
+      $('.ltr-sheet__close', sheet).focus();
+    }
+
+    function openCompanion(c, e, straightToRequest) {
+      sheetBody.textContent = '';
+      var f = factors(c, e), s = score(f);
+      var head = el('div', 'ltr-sheet__head');
+      var img = el('img', 'ltr-sheet__plate'); img.src = MATCH.plate(c.id + c.name);
+      img.alt=''; img.setAttribute('aria-hidden','true'); head.appendChild(img);
+      var hb = el('div');
+      if (c.verified) hb.appendChild(MATCH.badge(true));
+      var h = el('h2', null, c.name + ', ' + c.age); h.id = 'ltr-sheet-name'; hb.appendChild(h);
+      hb.appendChild(el('p', 'ltr-sheet__where', c.city + ' · ' + c.langs.join(', ')));
+      hb.appendChild(el('p', 'ltr-sheet__score', s + '% event compatibility' + (e ? ' for ' + e.name.toLowerCase() : '')));
+      head.appendChild(hb); sheetBody.appendChild(head);
+
+      var acts = el('div', 'ltr-sheet__acts');
+      var req = el('button', 'btn btn--solid'); req.type = 'button';
+      var report = el('button', 'btn btn--quiet', 'Report'); report.type = 'button';
+      var block = el('button', 'btn btn--quiet', 'Block'); block.type = 'button';
+      var box = el('div', 'ltr-connect'); box.hidden = true;
+      var key = e ? e.id + '|' + c.id : null;
+      function paint() {
+        req.textContent = !e ? 'Choose an evening first' : (REQ[key] || 'Request companion');
+        req.disabled = !e || !!REQ[key];
+      }
+      function openReq() {
+        if (!e) return;
+        box.hidden = false; box.textContent = '';
+        box.appendChild(el('p','ask__lbl','Request ' + c.name + ' for this evening'));
+        var dl = el('dl','kv');
+        [['Event', e.name], ['Date', fmt(e.date) + ' · ' + e.time], ['Location', e.city + ' · ' + e.venue],
+         ['Dress', e.dress], ['She is', freeFor(c, e) ? 'free that evening' : 'not free that evening']]
+          .forEach(function (r) { dl.appendChild(el('dt',null,r[0])); dl.appendChild(el('dd',null,r[1])); });
+        box.appendChild(dl);
+        var ta = el('textarea'); ta.rows = 3; ta.placeholder = 'Optional message';
+        ta.setAttribute('aria-label','Optional message to ' + c.name);
+        box.appendChild(ta);
+        var send = el('button','btn btn--solid','Send private request'); send.type='button';
+        send.addEventListener('click', function () {
+          REQ[key] = 'Requested';
+          box.textContent = '';
+          box.appendChild(el('p','ltr-sent',
+            'Requested. She sees the evening, the hour and the dress — not your surname, and nothing about why you are going. ' +
+            'If she accepts, the concierge confirms the table and writes to you both.'));
+          paint(); renderUpcoming(); renderCompanions();
+          announce('Companion requested for ' + e.name + '.');
+        });
+        box.appendChild(send); ta.focus();
+      }
+      req.addEventListener('click', openReq);
+      report.addEventListener('click', function () { note(report, 'Read by a person today, not a queue. She is never told who reported her.'); });
+      block.addEventListener('click', function () { note(block, c.name + ' is blocked and will not be curated to you again.'); });
+      [req, report, block].forEach(function (b) { acts.appendChild(b); });
+      paint(); sheetBody.appendChild(acts); sheetBody.appendChild(box);
+
+      var about = el('div','panel');
+      about.appendChild(MATCH.head('About ' + c.name));
+      var ab = el('div','panel__body');
+      ab.appendChild(el('p','ltr-about', c.about));
+      var dl2 = el('dl','kv');
+      [['Social style', c.social], ['Communication', c.comms], ['Lifestyle', c.lifestyle],
+       ['Interests', c.interests.join(', ')], ['Languages', c.langs.join(', ')],
+       ['Evenings attended', String(c.attended)], ['Available for', c.kinds.join(', ')]]
+        .forEach(function (r) { dl2.appendChild(el('dt',null,r[0])); dl2.appendChild(el('dd',null,r[1])); });
+      ab.appendChild(dl2);
+      ab.appendChild(el('div','note-inline',
+        'Which evenings she has attended, and with whom, is not shown here and is not shown to anyone. The count is all the house will say.'));
+      about.appendChild(ab); sheetBody.appendChild(about);
+
+      var why = el('div','panel');
+      why.appendChild(MATCH.head('Event compatibility', s + '%'));
+      var wb = el('div','panel__body');
+      var bars = el('div','ltr-bars');
+      Object.keys(f).forEach(function (k) {
+        var r = el('div','ltr-bars__row');
+        r.appendChild(el('span','k',LABELS[k]));
+        var bb = el('span','b'); var fi = el('i'); fi.style.width = f[k] + '%'; bb.appendChild(fi);
+        r.appendChild(bb); r.appendChild(el('span','v',f[k] + '%'));
+        bars.appendChild(r);
+      });
+      wb.appendChild(bars);
+      wb.appendChild(el('p','ltr-insight', e
+        ? 'For ' + e.name.toLowerCase() + ' on ' + fmt(e.date) + ': ' +
+          (freeFor(c,e) ? 'she is free' : 'she is not free that evening, which is the first thing to fix') +
+          ', ' + (c.city === e.city ? 'already in ' + e.city : 'she would travel from ' + c.city) +
+          (c.kinds.indexOf(STATE.kind) > -1 ? ', and she takes this kind of evening.' : ', though this is not a kind of evening she usually takes.')
+        : 'Choose an evening and this is recomputed against its date, its city and its kind — the three that move the figure most.'));
+      why.appendChild(wb); sheetBody.appendChild(why);
+
+      sheet.hidden = false; document.body.style.overflow = 'hidden';
+      $('.ltr-sheet__close', sheet).focus();
+      if (straightToRequest) openReq();
+    }
+    function closeSheet() { sheet.hidden = true; document.body.style.overflow = ''; }
+
+    /* -- controls -------------------------------------------------------------- */
+    function showPane(which) {
+      $$('.ev-tabs button').forEach(function (b) {
+        b.setAttribute('aria-selected', b.getAttribute('data-ev') === which ? 'true' : 'false');
+      });
+      ['discover','companion','prefs','concierge'].forEach(function (p) {
+        $('#ev-pane-' + p).hidden = p !== which;
+      });
+    }
+    $$('.ev-tabs button').forEach(function (b) {
+      b.addEventListener('click', function () { showPane(b.getAttribute('data-ev')); });
+    });
+
+    var catsWrap = $('#ev-cats');
+    CATS.forEach(function (c) {
+      var b = el('button'); b.type='button'; b.setAttribute('data-cat', c.id); b.setAttribute('role','tab');
+      b.setAttribute('aria-selected', c.id === STATE.cat ? 'true':'false');
+      b.appendChild(el('span','ltr-tab__l', c.label));
+      b.appendChild(el('span','ltr-tab__n', c.note));
+      b.addEventListener('click', function () { STATE.cat = c.id; renderEvents(); });
+      catsWrap.appendChild(b);
+    });
+
+    var forWrap = $('#ev-for');
+    EVENTS.forEach(function (e) {
+      var b = el('button','chip', e.name + ' · ' + fmt(e.date));
+      b.type='button'; b.setAttribute('role','radio'); b.setAttribute('aria-checked','false');
+      b.setAttribute('data-ev-id', e.id);
+      b.addEventListener('click', function () {
+        STATE.forEvent = e.id;
+        $$('button', forWrap).forEach(function (o) {
+          o.classList.toggle('is-on', o === b); o.setAttribute('aria-checked', o === b ? 'true':'false');
+        });
+        renderCompanions(); announce('Companions re-scored for ' + e.name + '.');
+      });
+      forWrap.appendChild(b);
+    });
+    var kindWrap = $('#ev-kind');
+    KINDS.forEach(function (k) {
+      var b = el('button', 'chip' + (k === STATE.kind ? ' is-on' : ''), k);
+      b.type='button'; b.setAttribute('role','radio');
+      b.setAttribute('aria-checked', k === STATE.kind ? 'true':'false');
+      b.addEventListener('click', function () {
+        STATE.kind = k;
+        $$('button', kindWrap).forEach(function (o) {
+          o.classList.toggle('is-on', o === b); o.setAttribute('aria-checked', o === b ? 'true':'false');
+        });
+        renderCompanions();
+      });
+      kindWrap.appendChild(b);
+    });
+
+    var langs = ['Any'].concat(COMPANIONS.reduce(function (a,c) { return a.concat(c.langs); }, [])
+      .filter(function (v,i,a) { return a.indexOf(v) === i; }).sort());
+    [ { k:'ageMin', label:'Minimum age', type:'number', value:28 },
+      { k:'ageMax', label:'Maximum age', type:'number', value:44 },
+      { k:'language', label:'Speaks', type:'select', options:langs },
+      { k:'social', label:'Social style', type:'select', options:['Any','Confident, selective','Warm, sociable','Quiet, observant'] },
+      { k:'comms', label:'Communication', type:'select', options:['Any','Direct','Warm','Considered'] }
+    ].forEach(function (d) { $('#ev-cprefs').appendChild(field(d, STATE.cprefs, renderCompanions, 'ev-c')); });
+
+    [ { k:'city', label:'Preferred city', type:'select', options:['Munich','Vienna','Zurich','Salzburg'], value:'Munich' },
+      { k:'size', label:'Group size', type:'select', options:['Any','Four to eight','Eight to sixteen','Sixteen or more'] },
+      { k:'time', label:'Preferred time', type:'select', options:['Any','Evening','Afternoon','Weekend'] },
+      { k:'dress', label:'Dress', type:'select', options:['Any','Informal','Business','Cocktail','Black tie'] }
+    ].forEach(function (d) { $('#ev-prefs').appendChild(field(d, STATE.prefs, renderEvents, 'ev-p')); });
+
+    [ { k:'activity', label:'My event activity visible to', type:'select', options:['Nobody','My advisor only','Members I have accepted'] },
+      { k:'travel', label:'My travel plans visible to', type:'select', options:['Nobody','My advisor only','Members I am introduced to'] },
+      { k:'companion', label:'Who I attended with', type:'select', options:['Nobody — the two of us and my advisor'] },
+      { k:'contact', label:'Who may request me as a companion', type:'select', options:['Verified members','Members I am introduced to','Nobody'] }
+    ].forEach(function (d) { $('#ev-privacy').appendChild(field(d, STATE.priv, function () {}, 'ev-pv')); });
+
+    var conciergeKinds = ['Find a companion','Change an arrangement','Arrange transport',
+                          'Recommend a restaurant','A private venue','A special request'];
+    var concPick = conciergeKinds[0];
+    conciergeKinds.forEach(function (k) {
+      var b = el('button','chip' + (k === concPick ? ' is-on' : ''), k);
+      b.type='button'; b.setAttribute('role','radio');
+      b.setAttribute('aria-checked', k === concPick ? 'true':'false');
+      b.addEventListener('click', function () {
+        concPick = k;
+        $$('#ev-conc-kinds button').forEach(function (o) {
+          o.classList.toggle('is-on', o === b); o.setAttribute('aria-checked', o === b ? 'true':'false');
+        });
+      });
+      $('#ev-conc-kinds').appendChild(b);
+    });
+    $('#ev-conc-send').addEventListener('click', function () {
+      var out = $('#ev-conc-out'); out.textContent = '';
+      out.appendChild(el('p','ltr-sent',
+        '"' + concPick + '" is with the concierge. A person, by name, in your own hours — they will telephone rather than write unless you have said otherwise, and you will hear today.'));
+      $('#ev-conc-text').value = '';
+      announce('Sent to the concierge.');
+    });
+    $('#ev-verified-only').addEventListener('change', function () {
+      STATE.verifiedOnly = this.checked; renderCompanions();
+    });
+
+    renderUpcoming(); renderEvents(); renderCompanions();
+  })();
+
+  /* --- Activity, notifications, connections --------------------------------
+     The three cross-cutting surfaces: what you did, what you were told, and
+     who you are in touch with. Deliberately plain — counts rather than scores,
+     reasons rather than badges, and every state endable from the row it is on. */
+  if ($('#view-activity') && typeof MATCH !== 'undefined') (function () {
+    var el = MATCH.el;
+
+    /* -- quick actions: the six things worth one click ---------------------- */
+    var QUICK = [
+      { t:'Ask the house',        n:'A question about your engagement', go:'overview' },
+      { t:'Read the open case',   n:'Introduction No. 07',              go:'introductions' },
+      { t:'Answer what is asked', n:'One consent request',              go:'requests' },
+      { t:'Record a reflection',  n:'Your advisor is waiting on the 28th', go:'reflections' },
+      { t:'Find a companion',     n:'For an evening in your diary',     go:'occasions' },
+      { t:'Contact your advisor', n:'C. Vasseur, London',              go:'messages' }
+    ];
+    var q = $('#act-quick');
+    QUICK.forEach(function (a) {
+      var b = el('button', 'qa__i'); b.type = 'button';
+      b.appendChild(el('span', 'qa__t', a.t));
+      b.appendChild(el('span', 'qa__n', a.n));
+      b.addEventListener('click', function () { location.hash = '#' + a.go; });
+      q.appendChild(b);
+    });
+
+    /* -- what you did ------------------------------------------------------- */
+    var FEED = [
+      { d:'Today',      t:'Asked the assistant what was waiting on you' },
+      { d:'Today',      t:'Opened Introduction No. 07' },
+      { d:'2 days ago', t:'Saved a profile to your shortlist' },
+      { d:'3 days ago', t:'Requested a companion for the private view on the 9th' },
+      { d:'6 days ago', t:'Confirmed four persona lines' },
+      { d:'11 days ago',t:'Declined an introduction, without giving a reason' },
+      { d:'14 days ago',t:'Attended the autumn dinner' },
+      { d:'21 days ago',t:'Updated the brief — age and place' }
+    ];
+    var feed = $('#act-feed');
+    FEED.forEach(function (f) {
+      var r = el('div', 'act-row');
+      r.appendChild(el('span', 'act-row__d', f.d));
+      r.appendChild(el('span', 'act-row__t', f.t));
+      feed.appendChild(r);
+    });
+    $('#act-n').textContent = FEED.length + ' this month';
+
+    var dl = $('#act-figures');
+    [['Introductions read', '4'], ['Brought to you this year', '4'],
+     ['Assessed and not brought', '17'], ['Evenings attended', '3'],
+     ['Requests you sent', '2'], ['Requests you answered', '5']]
+      .forEach(function (r) { dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1])); });
+
+    var TODO = [
+      { t:'One consent request', go:'requests' },
+      { t:'A reflection on the 28th', go:'reflections' },
+      { t:'Two persona lines to confirm or remove', go:'me' },
+      { t:'Two photographs on your profile', go:'profile' }
+    ];
+    var todo = $('#act-todo');
+    TODO.forEach(function (t) {
+      var a = el('button', 'act-todo'); a.type = 'button';
+      a.appendChild(el('span', null, t.t));
+      a.appendChild(el('i', 'arrow'));
+      a.addEventListener('click', function () { location.hash = '#' + t.go; });
+      todo.appendChild(a);
+    });
+    $('#act-todo-n').textContent = TODO.length + ' waiting';
+  })();
+
+  if ($('#view-notifications') && typeof MATCH !== 'undefined') (function () {
+    var el = MATCH.el;
+    var KINDS = ['All','Introductions','Requests','Events','Your advisor','The house'];
+    var NOTES = [
+      { k:'Introductions', d:'Today', t:'Introduction No. 07 is open',
+        w:'Because you asked to be told the day a case is written, rather than weekly.', unread:true, go:'introductions' },
+      { k:'Requests', d:'Today', t:'A consent request is waiting on you',
+        w:'Because nothing about you moves until you answer it.', unread:true, go:'requests' },
+      { k:'Events', d:'2 days ago', t:'Your companion confirmed the private view on the 9th',
+        w:'Because an arrangement changed state.', unread:true, go:'occasions' },
+      { k:'Your advisor', d:'2 days ago', t:'C. Vasseur wrote to you',
+        w:'Because she writes rather than telephones when it is not urgent.', unread:false, go:'messages' },
+      { k:'Events', d:'5 days ago', t:'A table is held for the 28th, Marylebone',
+        w:'Because you are expected somewhere, and the house books it in your name.', unread:false, go:'appointments' },
+      { k:'The house', d:'9 days ago', t:'Your verification was renewed',
+        w:'Because it renews annually, in person, and it has been done.', unread:false, go:'credential' },
+      { k:'Introductions', d:'12 days ago', t:'An introduction was declined on your behalf',
+        w:'Because you asked to be told when your advisor declines one for you.', unread:false, go:'introductions' }
+    ];
+    var filter = 'All';
+    var list = $('#nt-list');
+    function render() {
+      list.textContent = '';
+      NOTES.filter(function (n) { return filter === 'All' || n.k === filter; })
+        .forEach(function (n) {
+          var r = el('div', 'nt' + (n.unread ? ' is-new' : ''));
+          var l = el('div');
+          l.appendChild(el('p', 'nt__t', n.t));
+          l.appendChild(el('p', 'nt__w', n.w));
+          l.appendChild(el('p', 'nt__m', n.k + ' · ' + n.d));
+          r.appendChild(l);
+          var go = el('button', 'btn'); go.type = 'button';
+          go.appendChild(el('span', null, 'Open')); go.appendChild(el('i', 'arrow'));
+          go.addEventListener('click', function () { n.unread = false; location.hash = '#' + n.go; });
+          r.appendChild(go);
+          list.appendChild(r);
+        });
+    }
+    KINDS.forEach(function (k) {
+      var b = el('button', 'chip' + (k === filter ? ' is-on' : ''), k);
+      b.type = 'button'; b.setAttribute('role','radio');
+      b.setAttribute('aria-checked', k === filter ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        filter = k;
+        $$('#nt-filters button').forEach(function (o) {
+          o.classList.toggle('is-on', o === b); o.setAttribute('aria-checked', o === b ? 'true':'false');
+        });
+        render();
+      });
+      $('#nt-filters').appendChild(b);
+    });
+    $('#nt-read').addEventListener('click', function () {
+      NOTES.forEach(function (n) { n.unread = false; }); render();
+    });
+    var prefs = $('#nt-prefs');
+    [ ['An introduction is written for you', 'Telephone, the same day'],
+      ['Something is asked of you', 'Telephone, the same day'],
+      ['An arrangement changes state', 'Written, within the hour'],
+      ['Your advisor writes', 'Written'],
+      ['Your verification is due', 'Written, a month ahead'],
+      ['Anything else', 'Nothing is sent'] ]
+      .forEach(function (r) {
+        var row = el('div', 'nt-pref');
+        row.appendChild(el('span', 'nt-pref__k', r[0]));
+        row.appendChild(el('span', 'nt-pref__v', r[1]));
+        prefs.appendChild(row);
+      });
+    render();
+  })();
+
+  if ($('#view-connections') && typeof MATCH !== 'undefined') (function () {
+    var el = MATCH.el;
+    var TABS = [
+      { id:'current',  label:'Current relationships', note:'Formed, and running' },
+      { id:'connected',label:'Connected',             note:'In touch, nothing more implied' },
+      { id:'received', label:'Requests received',     note:'Waiting on your answer' },
+      { id:'sent',     label:'Requests sent',         note:'Waiting on theirs' },
+      { id:'saved',    label:'Favourites',            note:'Your private shortlist' },
+      { id:'past',     label:'History',               note:'Ended, and how' }
+    ];
+    var PEOPLE = [
+      { g:'current',  n:'Introduction No. 06', s:'Formation · month four',
+        m:'Two people, four months in, and the first year is the part the house stays for.', go:'formation' },
+      { g:'connected',n:'Sophia', s:'Connected · 2 days ago',
+        m:'Zurich. You accepted the case on the 9th and have written twice.', go:'messages' },
+      { g:'connected',n:'Marguerite', s:'Connected · 6 days ago',
+        m:'London. Introduced through your advisor rather than a search.', go:'messages' },
+      { g:'received', n:'A consent request', s:'Waiting on you',
+        m:'Another advisor believes you may suit their member. Nothing about you moves until you answer.', go:'requests' },
+      { g:'sent',     n:'Katharina', s:'Requested · 3 days ago',
+        m:'For the private view on the 9th. She has not answered, and is under no obligation to.', go:'occasions' },
+      { g:'sent',     n:'Isabelle', s:'Requested · 11 days ago',
+        m:'Long-term track. Expired requests are withdrawn quietly at thirty days.', go:'find-long' },
+      { g:'saved',    n:'Marguerite', s:'Saved · long-term', m:'Kept for later. She is not told.', go:'find-long' },
+      { g:'saved',    n:'Nour', s:'Shortlisted · casual', m:'Kept for later. She is not told.', go:'find-casual' },
+      { g:'past',     n:'Introduction No. 04', s:'Ended · March',
+        m:'Ended by you, without a reason given. Nothing was written to her about why.', go:'introductions' },
+      { g:'past',     n:'Introduction No. 02', s:'Ended · January',
+        m:'Ended by her. You were told that, and nothing more.', go:'introductions' }
+    ];
+    var tab = 'current';
+    var list = $('#cn-list');
+    function render() {
+      var rows = PEOPLE.filter(function (p) { return p.g === tab; });
+      list.textContent = '';
+      rows.forEach(function (p) {
+        var r = el('div', 'cn');
+        var l = el('div');
+        l.appendChild(el('p', 'cn__n', p.n));
+        l.appendChild(el('p', 'cn__s', p.s));
+        l.appendChild(el('p', 'cn__m', p.m));
+        r.appendChild(l);
+        var acts = el('div', 'cn__acts');
+        var go = el('button', 'btn'); go.type = 'button';
+        go.appendChild(el('span', null, 'Open')); go.appendChild(el('i', 'arrow'));
+        go.addEventListener('click', function () { location.hash = '#' + p.go; });
+        acts.appendChild(go);
+        if (tab === 'sent' || tab === 'connected' || tab === 'saved') {
+          var end = el('button', 'btn btn--quiet', tab === 'sent' ? 'Withdraw' : tab === 'saved' ? 'Remove' : 'End it');
+          end.type = 'button';
+          end.addEventListener('click', function () {
+            PEOPLE.splice(PEOPLE.indexOf(p), 1); render();
+            note(end, tab === 'sent'
+              ? 'Withdrawn. She is not told that you withdrew, only that the request is no longer open.'
+              : tab === 'saved' ? 'Removed from your shortlist. She was never told it existed.'
+              : 'Ended. No reason is given to her, and none is asked of you.');
+          });
+          acts.appendChild(end);
+        }
+        r.appendChild(acts);
+        list.appendChild(r);
+      });
+      $('#cn-empty').hidden = rows.length > 0;
+      var t = TABS.filter(function (x) { return x.id === tab; })[0];
+      $('#cn-note').textContent = rows.length ? t.label + ' — ' + rows.length + '. ' + t.note + '.' : '';
+      $$('#cn-tabs button').forEach(function (b) {
+        b.setAttribute('aria-selected', b.getAttribute('data-cn') === tab ? 'true' : 'false');
+      });
+    }
+    TABS.forEach(function (t) {
+      var b = el('button', null, t.label); b.type = 'button';
+      b.setAttribute('data-cn', t.id); b.setAttribute('role','tab');
+      b.setAttribute('aria-selected', t.id === tab ? 'true':'false');
+      b.addEventListener('click', function () { tab = t.id; render(); });
+      $('#cn-tabs').appendChild(b);
+    });
+    render();
+  })();
+
+  /* --- Ask the advisor ----------------------------------------------------
+     The house's own counsel. Two halves: advice, which is a conversation, and
+     analysis, which is a read-out. Both are built from the same rule — say what
+     the answer rests on, and say plainly where there was nothing to rest on. */
+  (function () {
+    if (!$('#view-advisor')) return;
+    var el = MATCH.el;
+
+    var MODES = [
+      { id: 'dating', label: 'Dating advice',
+        note: 'The practical part — a first meeting, a second, and what to do when one of them goes quiet.',
+        opening: 'Tell me what stage you are at and what is bothering you about it.' },
+      { id: 'relationship', label: 'Relationship advice',
+        note: 'Something inside a relationship you are already in, rather than a decision about entering one.',
+        opening: 'What has changed recently, and how long has it been going the way it is going?' },
+      { id: 'conversation', label: 'Conversation advice',
+        note: 'What to say, and when it is better to say nothing. Bring the actual words if you have them.',
+        opening: 'Paste what you want to say, or describe the conversation you are avoiding.' },
+      { id: 'situation', label: 'A situation',
+        note: 'Something that does not fit the other three. Awkward, unresolved, or simply strange.',
+        opening: 'Describe it as you would to a friend. Order does not matter.' }
+    ];
+
+    // Advice is assembled from what the situation actually contains rather than
+    // drawn from a bag of sayings, so the same question gives the same answer
+    // and the reasoning can be shown alongside it.
+    var READS = {
+      dating: [
+        ['You are reading silence as a verdict.', 'A gap of a few days after a good first meeting is the commonest thing there is, and it is almost never about you. Answer it once, plainly, and then let it be.'],
+        ['You are deciding on too little.', 'One meeting tells you whether you want a second. It does not tell you whether this is a person to build with, and treating it as though it does is what makes second meetings go badly.'],
+        ['The arrangement is doing the work the conversation should.', 'A better restaurant will not fix a first meeting that has nothing to say. Choose somewhere quiet and let the difficulty be interesting.']
+      ],
+      relationship: [
+        ['This is a recurring argument, not a new one.', 'A disagreement that returns in the same shape every few weeks is a standing difference wearing a new coat. Name the standing difference and the argument stops needing to happen.'],
+        ['One of you is keeping score.', 'Where effort is being counted, the count is the problem. Say what you actually need rather than what you are owed.'],
+        ['You are asking whether to leave, and answering whether you are unhappy.', 'They are different questions and the second cannot settle the first. Unhappiness is information about now; it is not a decision.']
+      ],
+      conversation: [
+        ['Say the difficult sentence first.', 'What you are dreading belongs in the opening, not at the end. Everything before it will be heard as a delay, and it will be.'],
+        ['Take the accusation out and the request stays.', 'Most of what makes a message hard to send is the part that assigns blame. Remove it and what remains is usually reasonable and usually gets a reasonable answer.'],
+        ['Do not send it tonight.', 'A message written after a difficult evening reads differently in the morning to the person who wrote it. That is the test worth applying.']
+      ],
+      situation: [
+        ['Separate what has happened from what you fear it means.', 'Write the facts in one column and the reading in the other. The second column is almost always longer, and that is the finding.'],
+        ['You have more than one obligation here and they conflict.', 'That is not a failure of judgement, it is the shape of the situation. Decide which obligation you are prepared to disappoint and the rest follows.'],
+        ['Nothing needs deciding this week.', 'Where a matter has no deadline, treating it as urgent is a choice, and usually the wrong one.']
+      ]
+    };
+
+    var mode = MODES[0];
+    var thread = [];
+    var saved = [
+      { d: '11 August', mode: 'Conversation advice', t: 'How to answer No. 06 without closing the door',
+        s: 'You wanted to decline a second meeting without making it a rejection of the person. We settled on saying the true thing shortly.' },
+      { d: '02 August', mode: 'Dating advice', t: 'Whether three weeks between meetings is a signal',
+        s: 'It was not. The reason was a parent in hospital, which you learned afterwards.' }
+    ];
+
+    function reply(text) {
+      var t = (text || '').toLowerCase();
+      var pool = READS[mode.id];
+      // Pick by what is in the question, deterministically, and fall through to
+      // the first reading when nothing in the text points anywhere.
+      var pick = 0;
+      if (/argu|again|always|never|every time|score|fair|owe/.test(t)) pick = 1;
+      else if (/leave|end it|should i|decide|worth/.test(t)) pick = 2;
+      else if (/quiet|silence|hasn.t|no reply|ignor|waiting/.test(t)) pick = 0;
+      else if (t.length > 220) pick = 2;
+      else if (t.length > 90) pick = 1;
+      var r = pool[Math.min(pick, pool.length - 1)];
+      var words = t.split(/\s+/).filter(Boolean).length;
+      return {
+        head: r[0], body: r[1],
+        basis: words < 12
+          ? 'Based on ' + words + ' words and nothing else. Give me more and this gets better — it is not being modest.'
+          : 'Based on what you wrote (' + words + ' words), the track you are on, and nothing from your file.'
+      };
+    }
+
+    function renderThread() {
+      var box = $('#ad-thread'); box.textContent = '';
+      thread.forEach(function (m) {
+        var w = el('div', 'msg msg--' + (m.me ? 'me' : 'them'));
+        w.appendChild(el('p', 'who', m.me ? 'You' : 'The advisor'));
+        var b = el('div', 'bubble');
+        if (m.me) { b.textContent = m.text; }
+        else {
+          b.appendChild(el('p', 'ad-head', m.head));
+          b.appendChild(el('p', 'ad-body', m.body));
+          b.appendChild(el('p', 'ad-basis', m.basis));
+        }
+        w.appendChild(b); box.appendChild(w);
+      });
+    }
+
+    function renderSaved() {
+      var box = $('#ad-saved'); box.textContent = '';
+      saved.forEach(function (c, i) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', c.t));
+        left.appendChild(el('p', 'cn__s', c.d + ' · ' + c.mode));
+        left.appendChild(el('p', 'cn__m', c.s));
+        var acts = el('div', 'cn__acts');
+        var del = el('button', 'btn btn--quiet', 'Forget it'); del.type = 'button';
+        del.addEventListener('click', function () { saved.splice(i, 1); renderSaved(); });
+        acts.appendChild(del);
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#ad-saved-n').textContent = saved.length ? saved.length + ' held' : 'None';
+      $('#ad-saved-empty').hidden = saved.length > 0;
+    }
+
+    MODES.forEach(function (m) {
+      var b = el('button', 'chip' + (m === mode ? ' is-on' : ''), m.label);
+      b.type = 'button'; b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', m === mode ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        mode = m; thread = []; renderThread();
+        $$('#ad-modes button').forEach(function (o) {
+          o.classList.toggle('is-on', o === b);
+          o.setAttribute('aria-checked', o === b ? 'true' : 'false');
+        });
+        $('#ad-note').textContent = m.note;
+        $('#ad-input').placeholder = m.opening;
+      });
+      $('#ad-modes').appendChild(b);
+    });
+    $('#ad-note').textContent = mode.note;
+    $('#ad-input').placeholder = mode.opening;
+
+    $('#ad-send').addEventListener('click', function () {
+      var v = $('#ad-input').value.trim();
+      if (!v) return;
+      thread.push({ me: true, text: v });
+      var r = reply(v); r.me = false; thread.push(r);
+      $('#ad-input').value = '';
+      renderThread();
+    });
+    $('#ad-save').addEventListener('click', function () {
+      var first = thread.filter(function (m) { return m.me; })[0];
+      if (!first) { $('#ad-note').textContent = 'Ask something first — there is nothing to save yet.'; return; }
+      saved.unshift({
+        d: 'Today', mode: mode.label,
+        t: first.text.length > 60 ? first.text.slice(0, 58).trim() + '…' : first.text,
+        s: thread.filter(function (m) { return !m.me; }).slice(-1)[0].head
+      });
+      renderSaved();
+    });
+    $('#ad-hand').addEventListener('click', function () {
+      $('#ad-note').textContent = thread.length
+        ? 'Sent to C. Vasseur with the whole exchange attached. She will read it before she replies, and she is not obliged to agree with any of it.'
+        : 'Nothing to send yet.';
+    });
+
+    /* Analysis — four read-outs, each stating what it worked from. */
+    var TOOLS = [
+      { id: 'message', ic: '✎', t: 'Message analysis', n: 'How something you were sent, or are about to send, is likely to land.',
+        ask: 'Paste the message.',
+        run: function (v) {
+          var q = (v.match(/\?/g) || []).length;
+          var words = v.split(/\s+/).filter(Boolean).length;
+          var warm = /thank|glad|looking forward|enjoyed|kind/i.test(v);
+          var hedge = (v.match(/\b(maybe|perhaps|possibly|sort of|i guess|just)\b/gi) || []).length;
+          return [
+            ['Length', words + ' words — ' + (words < 25 ? 'short enough to read as curt if the subject is delicate' : words > 140 ? 'long enough that the point will be missed' : 'about right')],
+            ['Questions', q === 0 ? 'None. A message with no question gives the other person nothing to answer' : q + ' — enough to carry the reply'],
+            ['Warmth', warm ? 'Present, and it is doing useful work' : 'Absent. Nothing here is unkind, but nothing is warm either'],
+            ['Hedging', hedge === 0 ? 'None' : hedge + ' hedging phrases. Each one invites a softer answer than you want'],
+            ['Based on', 'The text you pasted. Nothing from your file, and nothing about the person it is for']
+          ];
+        } },
+      { id: 'profile', ic: '❖', t: 'Profile analysis', n: 'What your own record says, and where it is thin.',
+        run: function () {
+          return [
+            ['Complete', '64% — the gaps are in Family & circumstances and in availability'],
+            ['Strongest', 'Standards. It is specific, and specific is what an advisor can actually work from'],
+            ['Weakest', 'Interests, which currently reads as a list rather than a life'],
+            ['Effect on matching', 'Two of the eight factors are being computed from very little. That widens the field rather than narrowing it wrongly'],
+            ['Based on', 'Your private profile and persona, both of which only you and C. Vasseur can read']
+          ];
+        } },
+      { id: 'compat', ic: '≈', t: 'Compatibility analysis', n: 'Why a particular case scored the way it did.',
+        ask: 'Which case? A number, or a name.',
+        run: function (v) {
+          var n = (v.match(/\d+/) || ['7'])[0];
+          return [
+            ['Case', 'No. ' + ('0' + n).slice(-2)],
+            ['Strongest agreement', 'What you both want from the next decade — the heaviest factor, and it is close'],
+            ['Real difference', 'Pace. You would meet again within the fortnight; they would take a month'],
+            ['Not scored', 'Chemistry. Nothing here measures it and nothing here pretends to'],
+            ['Based on', 'The eight factors behind the score, weighted as shown on the case itself']
+          ];
+        } },
+      { id: 'situation', ic: '◷', t: 'Situation analysis', n: 'An unresolved matter, separated into what is known and what is feared.',
+        ask: 'Describe the situation.',
+        run: function (v) {
+          var facts = v.split(/[.;\n]/).map(function (x) { return x.trim(); }).filter(function (x) { return x.length > 3; });
+          var fear = facts.filter(function (x) { return /think|feel|worry|afraid|might|probably|maybe|seems/i.test(x); });
+          return [
+            ['Statements given', facts.length],
+            ['Of those, readings rather than facts', fear.length + (fear.length ? ' — they are doing most of the work' : '')],
+            ['What is actually established', facts.length - fear.length + ' statement' + (facts.length - fear.length === 1 ? '' : 's')],
+            ['What would settle it', 'One question asked directly of the person concerned, which is usually the thing being avoided'],
+            ['Based on', 'Only what you typed. This is a way of sorting it, not a judgement of it']
+          ];
+        } }
+    ];
+
+    var tool = null;
+    function renderTool() {
+      var box = $('#ad-tool-out'); box.textContent = '';
+      if (!tool) return;
+      var wrap = el('div', 'ad-tool');
+      wrap.appendChild(el('h3', 'ad-tool__t', tool.t));
+      if (tool.ask) {
+        var lab = el('label', 'sr-only', tool.ask); lab.setAttribute('for', 'ad-tool-in');
+        var inp = el('textarea', 'ad-input'); inp.id = 'ad-tool-in'; inp.rows = 3; inp.placeholder = tool.ask;
+        var go = el('button', 'btn btn--solid', 'Run it'); go.type = 'button';
+        var out = el('dl', 'kv');
+        go.addEventListener('click', function () {
+          var v = inp.value.trim();
+          out.textContent = '';
+          if (!v) { out.appendChild(el('dt', null, 'Nothing to read')); out.appendChild(el('dd', null, 'Give it something and it will.')); return; }
+          tool.run(v).forEach(function (r) {
+            out.appendChild(el('dt', null, r[0])); out.appendChild(el('dd', null, String(r[1])));
+          });
+        });
+        wrap.appendChild(lab); wrap.appendChild(inp);
+        var acts = el('div', 'ad-acts'); acts.appendChild(go); wrap.appendChild(acts);
+        wrap.appendChild(out);
+      } else {
+        var dl = el('dl', 'kv');
+        tool.run('').forEach(function (r) {
+          dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, String(r[1])));
+        });
+        wrap.appendChild(dl);
+      }
+      box.appendChild(wrap);
+    }
+
+    TOOLS.forEach(function (t) {
+      var b = el('button', 'qa__i'); b.type = 'button'; b.setAttribute('data-tool', t.id);
+      b.appendChild(el('span', 'qa__ic', t.ic));
+      b.appendChild(el('span', 'qa__t', t.t));
+      b.appendChild(el('span', 'qa__n', t.n));
+      b.addEventListener('click', function () {
+        tool = tool === t ? null : t;
+        $$('#ad-tools .qa__i').forEach(function (o) { o.classList.toggle('is-on', tool === t && o === b); });
+        renderTool();
+      });
+      $('#ad-tools').appendChild(b);
+    });
+
+    renderThread();
+    renderSaved();
+  })();
+
+  /* --- Favourites & saved -------------------------------------------------
+     One place for everything set aside, in five kinds. Saving is deliberately
+     inert: nobody is told, and it feeds nothing. */
+  (function () {
+    if (!$('#view-saved')) return;
+    var el = MATCH.el;
+
+    var ITEMS = [
+      { g: 'favourites', n: 'No. 07', s: 'Long-term · London', d: '18 August',
+        m: 'Kept because of the Singapore decade, which you wanted to understand before deciding.' },
+      { g: 'favourites', n: 'No. 04', s: 'Long-term · Paris', d: '02 July',
+        m: 'Declined at the time. You asked that the case stay readable in case the timing changed.' },
+      { g: 'profiles', n: 'No. 11', s: 'Short-term · Geneva', d: '15 August',
+        m: 'Set aside without a decision. It expires from here in three weeks unless you act.' },
+      { g: 'profiles', n: 'No. 12', s: 'Casual · London', d: '13 August',
+        m: 'Set aside without a decision.' },
+      { g: 'searches', n: 'Long-term · 38–48 · London or Paris', s: 'Saved search', d: '09 August',
+        m: 'Two new cases have matched since you saved it. You are not written to about them unless you ask.' },
+      { g: 'searches', n: 'Short-term · discreet · within 90 minutes of London', s: 'Saved search', d: '21 July',
+        m: 'Nothing new since you saved it.' },
+      { g: 'events', n: 'The Marylebone dinner', s: '28 August · London', d: '10 August',
+        m: 'Twelve at table. You have not accepted; the place is held until the 24th.' },
+      { g: 'events', n: 'Autumn weekend, Hampshire', s: '3–5 October', d: '04 August',
+        m: 'Saved to consider. Nothing is reserved.' },
+      { g: 'recs', n: 'Reading a first meeting', s: 'Academy · recommended by C. Vasseur', d: '12 August',
+        m: 'Suggested after your note about second meetings going quiet.' },
+      { g: 'recs', n: 'Formation', s: 'Relationship management', d: '30 July',
+        m: 'Recommended if an introduction reaches a second season. You are already retained for it.' }
+    ];
+
+    var TABS = [
+      { id: 'favourites', label: 'Favourite profiles', note: 'Kept deliberately, with your reason attached' },
+      { id: 'profiles',   label: 'Saved profiles',     note: 'Set aside without a decision, and they expire' },
+      { id: 'searches',   label: 'Saved searches',     note: 'The brief you wrote, held so you need not write it again' },
+      { id: 'events',     label: 'Saved events',       note: 'Considered, not accepted' },
+      { id: 'recs',       label: 'Saved recommendations', note: 'Suggested to you, and why' }
+    ];
+    var tab = TABS[0].id;
+
+    function render() {
+      var box = $('#sv-list'); box.textContent = '';
+      var rows = ITEMS.filter(function (i) { return i.g === tab; });
+      rows.forEach(function (it) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', it.n));
+        left.appendChild(el('p', 'cn__s', it.s + ' · saved ' + it.d));
+        left.appendChild(el('p', 'cn__m', it.m));
+        var acts = el('div', 'cn__acts');
+        var open = el('button', 'btn btn--quiet', it.g === 'searches' ? 'Run it again' : 'Open'); open.type = 'button';
+        open.addEventListener('click', function () {
+          left.appendChild(el('p', 'cn__m', it.g === 'searches'
+            ? 'Run. Two cases match; C. Vasseur is asked to read them before you are shown anything.'
+            : 'Opened for C. Vasseur, who will write before anything is arranged.'));
+          open.disabled = true;
+        });
+        var rm = el('button', 'btn btn--quiet', 'Remove'); rm.type = 'button';
+        rm.addEventListener('click', function () {
+          ITEMS.splice(ITEMS.indexOf(it), 1); render();
+        });
+        acts.appendChild(open); acts.appendChild(rm);
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#sv-empty').hidden = rows.length > 0;
+      var t = TABS.filter(function (x) { return x.id === tab; })[0];
+      $('#sv-note').textContent = rows.length
+        ? t.label + ' — ' + rows.length + '. ' + t.note + '.'
+        : t.note + '.';
+      $$('#sv-tabs button').forEach(function (b) {
+        b.setAttribute('aria-selected', b.getAttribute('data-sv') === tab ? 'true' : 'false');
+      });
+    }
+
+    TABS.forEach(function (t) {
+      var b = el('button', null, t.label); b.type = 'button';
+      b.setAttribute('data-sv', t.id); b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', t.id === tab ? 'true' : 'false');
+      b.addEventListener('click', function () { tab = t.id; render(); });
+      $('#sv-tabs').appendChild(b);
+    });
+    render();
+  })();
+
+  /* --- How you appear -----------------------------------------------------
+     Photographs, facets and visibility are one subject, because a member never
+     sees a whole profile: they see whatever the stage of the introduction has
+     released. The preview is built from the same records, so it cannot drift. */
+  (function () {
+    if (!$('#view-presentation')) return;
+    var el = MATCH.el;
+
+    var STAGES = [
+      { id: 'proposed', label: 'When a case is written', n: 'Your advisor has proposed you. They know nothing that identifies you.' },
+      { id: 'accepted', label: 'When you both accept',   n: 'An introduction is open. Enough is released for a conversation to be possible.' },
+      { id: 'met',      label: 'After you have met',     n: 'You have met in person. What remains closed stays closed until you move it.' }
+    ];
+    var ORDER = { proposed: 0, accepted: 1, met: 2 };
+    var stage = 'proposed';
+
+    var PHOTOS = [
+      { t: 'Standing, Hampshire',  at: 'accepted' },
+      { t: 'At the piano',         at: 'met' },
+      { t: 'Portrait, 2024',       at: 'accepted' },
+      { t: 'With the dogs',        at: 'met' },
+      { t: 'Milan, 2023',          at: 'never' }
+    ];
+
+    var FACETS = [
+      { g: 'Lifestyle', k: 'How the week runs', v: 'Four days in London, the rest in Hampshire', at: 'accepted' },
+      { g: 'Lifestyle', k: 'Drinking',          v: 'Wine at dinner, rarely otherwise',           at: 'accepted' },
+      { g: 'Lifestyle', k: 'Smoking',           v: 'No',                                          at: 'proposed' },
+      { g: 'Lifestyle', k: 'Children at home',  v: 'One, sixteen, most weeks',                    at: 'accepted' },
+      { g: 'Interests', k: 'Held longest',      v: 'Chamber music — playing it, badly, not attending it', at: 'accepted' },
+      { g: 'Interests', k: 'Recent',            v: 'Restoring a 1962 saloon, unfinished',         at: 'accepted' },
+      { g: 'Interests', k: 'Would rather not',  v: 'Anything competitive on a weekend',           at: 'met' },
+      { g: 'Availability', k: 'Evenings',       v: 'Tuesday to Thursday',                          at: 'accepted' },
+      { g: 'Availability', k: 'Weekends',       v: 'Alternate, and not in term-time',              at: 'accepted' },
+      { g: 'Availability', k: 'Travel',         v: 'Will travel for a second meeting, not a first', at: 'proposed' },
+      { g: 'Availability', k: 'Notice needed',  v: 'A week for dinner, a month for a weekend',      at: 'accepted' }
+    ];
+
+    var CHOICES = [
+      { v: 'proposed', label: 'From the case' },
+      { v: 'accepted', label: 'On acceptance' },
+      { v: 'met',      label: 'After meeting' },
+      { v: 'never',    label: 'Never' }
+    ];
+
+    function selector(item, onChange) {
+      var s = el('select');
+      CHOICES.forEach(function (c) {
+        var o = el('option', null, c.label); o.value = c.v;
+        if (item.at === c.v) o.selected = true;
+        s.appendChild(o);
+      });
+      s.addEventListener('change', function () { item.at = s.value; onChange(); });
+      return s;
+    }
+
+    function visible(at) { return at !== 'never' && ORDER[at] <= ORDER[stage]; }
+
+    function renderPhotos() {
+      var box = $('#pr-photos'); box.textContent = '';
+      PHOTOS.forEach(function (p, i) {
+        var c = el('div', 'pr-photo');
+        var img = el('img'); img.src = MATCH.plate('photo-' + i + '-' + p.t);
+        img.alt = ''; img.setAttribute('aria-hidden', 'true');
+        c.appendChild(img);
+        c.appendChild(el('p', 'pr-photo__t', p.t));
+        var lab = el('label', 'sr-only', 'When ' + p.t + ' is released');
+        var id = 'pr-photo-' + i; lab.setAttribute('for', id);
+        var sel = selector(p, renderAll); sel.id = id;
+        c.appendChild(lab); c.appendChild(sel);
+        box.appendChild(c);
+      });
+      var held = PHOTOS.filter(function (p) { return p.at !== 'never'; }).length;
+      $('#pr-photo-n').textContent = PHOTOS.length + ' held · ' + held + ' released at some stage';
+    }
+
+    function renderFacets() {
+      var box = $('#pr-facets'); box.textContent = '';
+      ['Lifestyle', 'Interests', 'Availability'].forEach(function (g) {
+        box.appendChild(el('h3', 'pr-g', g));
+        FACETS.filter(function (f) { return f.g === g; }).forEach(function (f, i) {
+          var row = el('div', 'pr-row');
+          var left = el('div');
+          left.appendChild(el('p', 'pr-row__k', f.k));
+          left.appendChild(el('p', 'pr-row__v', f.v));
+          var lab = el('label', 'sr-only', 'When ' + f.k + ' is released');
+          var id = 'pr-f-' + g.toLowerCase() + '-' + i; lab.setAttribute('for', id);
+          var sel = selector(f, renderAll); sel.id = id;
+          row.appendChild(left); row.appendChild(lab); row.appendChild(sel);
+          box.appendChild(row);
+        });
+      });
+    }
+
+    function renderVis() {
+      var box = $('#pr-vis'); box.textContent = '';
+      STAGES.forEach(function (s) {
+        var n = PHOTOS.filter(function (p) { return p.at === s.id; }).length +
+                FACETS.filter(function (f) { return f.at === s.id; }).length;
+        var row = el('div', 'nt-pref');
+        row.appendChild(el('span', 'nt-pref__k', s.label));
+        row.appendChild(el('span', 'nt-pref__v', n + ' item' + (n === 1 ? '' : 's')));
+        box.appendChild(row);
+        box.appendChild(el('p', 'pr-vis__n', s.n));
+      });
+      var never = PHOTOS.filter(function (p) { return p.at === 'never'; }).length +
+                  FACETS.filter(function (f) { return f.at === 'never'; }).length;
+      var row = el('div', 'nt-pref');
+      row.appendChild(el('span', 'nt-pref__k', 'Never released'));
+      row.appendChild(el('span', 'nt-pref__v', never + ' item' + (never === 1 ? '' : 's')));
+      box.appendChild(row);
+    }
+
+    function renderPreview() {
+      var box = $('#pr-preview'); box.textContent = '';
+      var st = STAGES.filter(function (s) { return s.id === stage; })[0];
+      $('#pr-stage-name').textContent = st.label;
+      box.appendChild(el('p', 'pr-card__s', st.n));
+
+      var ph = PHOTOS.filter(function (p) { return visible(p.at); });
+      var strip = el('div', 'pr-strip');
+      if (ph.length) {
+        ph.forEach(function (p, i) {
+          var img = el('img'); img.src = MATCH.plate('photo-' + PHOTOS.indexOf(p) + '-' + p.t);
+          img.alt = ''; img.setAttribute('aria-hidden', 'true');
+          strip.appendChild(img);
+        });
+      } else {
+        strip.appendChild(el('p', 'ltr-empty', 'No photograph at this stage.'));
+      }
+      box.appendChild(strip);
+
+      var dl = el('dl', 'kv');
+      var shown = FACETS.filter(function (f) { return visible(f.at); });
+      shown.forEach(function (f) {
+        dl.appendChild(el('dt', null, f.k));
+        dl.appendChild(el('dd', null, f.v));
+      });
+      if (!shown.length) {
+        dl.appendChild(el('dt', null, 'Nothing'));
+        dl.appendChild(el('dd', null, 'At this stage they are told what you are looking for and nothing about you.'));
+      }
+      box.appendChild(dl);
+      box.appendChild(el('p', 'pr-card__f',
+        shown.length + ' of ' + FACETS.length + ' details and ' + ph.length + ' of ' + PHOTOS.length +
+        ' photographs. Your name is not among them at any stage — that is released by you, in person.'));
+    }
+
+    function renderAll() { renderPhotos(); renderFacets(); renderVis(); renderPreview(); }
+
+    STAGES.forEach(function (s) {
+      var b = el('button', 'chip' + (s.id === stage ? ' is-on' : ''), s.label);
+      b.type = 'button'; b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', s.id === stage ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        stage = s.id;
+        $$('#pr-stages button').forEach(function (o) {
+          o.classList.toggle('is-on', o === b);
+          o.setAttribute('aria-checked', o === b ? 'true' : 'false');
+        });
+        renderPreview();
+      });
+      $('#pr-stages').appendChild(b);
+    });
+
+    renderAll();
+  })();
+
+  /* --- Membership & billing ----------------------------------------------- */
+  (function () {
+    if (!$('#view-billing')) return;
+    var el = MATCH.el;
+
+    var TIERS = [
+      { id: 'reg',  name: 'Register',   fee: '£4,000 a year',
+        n: 'Your file is held and read. You are proposed to others; nothing is searched on your behalf.',
+        inc: ['Verification, renewed annually', 'Considered for introductions others are searching for', 'Access to gatherings of the house'] },
+      { id: 'ret',  name: 'Retained',   fee: '£24,000 a year',
+        n: 'An advisor is retained for you. A search is run, cases are written, and the arrangements are handled.',
+        inc: ['A named advisor, and a second who knows the file', 'Searches run for you across all four tracks', 'Cases written in full, in person', 'The assistant, for arrangements around an introduction', 'Formation, for the first year'] },
+      { id: 'con',  name: 'Continuity', fee: '£60,000 a year',
+        n: 'The retainer, and an advisor who holds the whole history across the years rather than the engagement.',
+        inc: ['Everything in Retained', 'Counsel, without a separate fee', 'A standing advisor across decades', 'The house available at any hour'] }
+    ];
+    var current = 'ret';
+
+    var HISTORY = [
+      { d: '14 March 2026',  k: 'invoice', t: 'Membership — Retained, annual',        a: '£24,000.00', s: 'Due',      no: 'LP-2026-0031' },
+      { d: '14 March 2025',  k: 'invoice', t: 'Membership — Retained, annual',        a: '£24,000.00', s: 'Paid',     no: 'LP-2025-0027' },
+      { d: '02 August 2025', k: 'txn',     t: 'Arrangement — Marylebone, 28 August',  a: '£1,240.00',  s: 'Settled',  no: 'LP-A-1188' },
+      { d: '11 June 2025',   k: 'txn',     t: 'Arrangement — car, Mayfair',           a: '£310.00',    s: 'Settled',  no: 'LP-A-1121' },
+      { d: '30 April 2025',  k: 'invoice', t: 'Formation — first year, in full',      a: '£9,000.00',  s: 'Paid',     no: 'LP-2025-0044' },
+      { d: '18 March 2025',  k: 'credit',  t: 'Credit — introduction withdrawn by us', a: '−£2,000.00', s: 'Applied', no: 'LP-C-0009' },
+      { d: '14 March 2024',  k: 'invoice', t: 'Membership — Register, annual',        a: '£4,000.00',  s: 'Paid',     no: 'LP-2024-0019' }
+    ];
+    var KINDS = [
+      { id: 'all',     label: 'Everything' },
+      { id: 'invoice', label: 'Invoices' },
+      { id: 'txn',     label: 'Transactions' },
+      { id: 'credit',  label: 'Credits' }
+    ];
+    var kind = 'all';
+
+    var METHODS = [
+      { t: 'Coutts · account ending 4471', n: 'Bank transfer, by arrangement. The default for membership.', d: true },
+      { t: 'Amex · ending 1008',           n: 'Used for arrangements under £2,500 only.', d: false }
+    ];
+
+    var CODES = [
+      { c: 'MARCHAND-7', t: 'Your referral code', n: 'Given to someone you would vouch for. If they are accepted, a year of your membership is credited — and you are told only that they were accepted, never what they said.' }
+    ];
+
+    function renderSummary() {
+      var t = TIERS.filter(function (x) { return x.id === current; })[0];
+      $('#bl-tier').textContent = t.name;
+      var dl = $('#bl-summary'); dl.textContent = '';
+      [ ['Membership', t.name],
+        ['Fee', t.fee],
+        ['Held since', '14 March 2024'],
+        ['Renews', '14 March 2026 — we write on 14 February'],
+        ['Advisor', 'C. Vasseur, London'],
+        ['Outstanding', 'One invoice, LP-2026-0031, due 14 March'] ]
+        .forEach(function (r) { dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1])); });
+
+      var b = $('#bl-benefits'); b.textContent = '';
+      t.inc.forEach(function (line, i) {
+        var row = el('div', 'convo__item');
+        row.appendChild(el('span', 'no', ('0' + (i + 1)).slice(-2)));
+        var d = el('div'); d.appendChild(el('p', 'nm', line));
+        row.appendChild(d); b.appendChild(row);
+      });
+    }
+
+    function renderTiers() {
+      var box = $('#bl-tiers'); box.textContent = '';
+      TIERS.forEach(function (t) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', t.name));
+        left.appendChild(el('p', 'cn__s', t.fee + (t.id === current ? ' · yours' : '')));
+        left.appendChild(el('p', 'cn__m', t.n));
+        var acts = el('div', 'cn__acts');
+        if (t.id !== current) {
+          var up = TIERS.indexOf(t) > TIERS.map(function (x) { return x.id; }).indexOf(current);
+          var b = el('button', 'btn btn--quiet', up ? 'Move up to this' : 'Move down to this');
+          b.type = 'button';
+          b.addEventListener('click', function () {
+            current = t.id;
+            $('#bl-tier-note').textContent = up
+              ? 'Noted. C. Vasseur telephones before anything changes — a membership is never raised by a button alone, and the difference is charged pro rata from the day it starts.'
+              : 'Noted. Nothing changes until the current year ends on 14 March; you keep everything you hold until then, and nothing is refunded or clawed back.';
+            renderSummary(); renderTiers();
+          });
+          acts.appendChild(b);
+        } else {
+          acts.appendChild(el('span', 'pill pill--rest', 'Current'));
+        }
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+    }
+
+    function renderHistory() {
+      var box = $('#bl-hist'); box.textContent = '';
+      var rows = HISTORY.filter(function (h) { return kind === 'all' || h.k === kind; });
+      rows.forEach(function (h) {
+        var row = el('div', 'bl-row');
+        var left = el('div');
+        left.appendChild(el('p', 'bl-row__t', h.t));
+        left.appendChild(el('p', 'bl-row__d', h.d + ' · ' + h.no + ' · ' + h.s));
+        var right = el('div', 'bl-row__r');
+        right.appendChild(el('span', 'bl-row__a', h.a));
+        var dl = el('button', 'btn btn--quiet', h.k === 'invoice' ? 'Invoice' : 'Receipt');
+        dl.type = 'button';
+        dl.addEventListener('click', function () {
+          left.appendChild(el('p', 'bl-row__d', 'Sent to your address of record as a sealed document. Nothing is attached to an email.'));
+          dl.disabled = true;
+        });
+        right.appendChild(dl);
+        row.appendChild(left); row.appendChild(right); box.appendChild(row);
+      });
+      $('#bl-hist-n').textContent = rows.length + ' of ' + HISTORY.length;
+      $$('#bl-filters button').forEach(function (b) {
+        var on = b.getAttribute('data-k') === kind;
+        b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+    }
+
+    function renderMethods() {
+      var box = $('#bl-methods'); box.textContent = '';
+      METHODS.forEach(function (m) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', m.t));
+        left.appendChild(el('p', 'cn__s', m.d ? 'Default' : 'Secondary'));
+        left.appendChild(el('p', 'cn__m', m.n));
+        var acts = el('div', 'cn__acts');
+        if (!m.d) {
+          var b = el('button', 'btn btn--quiet', 'Make default'); b.type = 'button';
+          b.addEventListener('click', function () {
+            METHODS.forEach(function (x) { x.d = x === m; }); renderMethods();
+          });
+          acts.appendChild(b);
+        }
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+    }
+
+    function renderCodes() {
+      var box = $('#bl-codes'); box.textContent = '';
+      CODES.forEach(function (c) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', c.c));
+        left.appendChild(el('p', 'cn__s', c.t));
+        left.appendChild(el('p', 'cn__m', c.n));
+        row.appendChild(left); box.appendChild(row);
+      });
+    }
+
+    KINDS.forEach(function (k) {
+      var b = el('button', 'chip' + (k.id === kind ? ' is-on' : ''), k.label);
+      b.type = 'button'; b.setAttribute('data-k', k.id); b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', k.id === kind ? 'true' : 'false');
+      b.addEventListener('click', function () { kind = k.id; renderHistory(); });
+      $('#bl-filters').appendChild(b);
+    });
+
+    $('#bl-code-go').addEventListener('click', function () {
+      var v = $('#bl-code').value.trim().toUpperCase();
+      $('#bl-code-out').textContent = !v
+        ? 'Enter a code first.'
+        : v === 'MARCHAND-7'
+          ? 'That is your own code. It cannot be applied to your own membership.'
+          : 'Held against your file. Nothing is discounted automatically — the office confirms in writing what it is worth before it is applied.';
+    });
+
+    renderSummary(); renderTiers(); renderHistory(); renderMethods(); renderCodes();
+  })();
+
+  /* --- Privacy & security -------------------------------------------------
+     Everything closed by default. Each control states what it costs you when
+     it is closed, because a setting whose consequence is hidden is not a
+     choice. */
+  (function () {
+    if (!$('#view-privacy')) return;
+    var el = MATCH.el;
+
+    var VIS = [
+      { k: 'Your name', v: 'Nobody', fixed: true,
+        n: 'Released by you, in person, at a meeting. The house never discloses it, and this cannot be changed here.' },
+      { k: 'Your photographs', v: 'On acceptance', opts: ['Nobody', 'On acceptance', 'After meeting'],
+        n: 'Set item by item under How you appear.' },
+      { k: 'Your case, in full', v: 'Members your advisor proposes you to', opts: ['Nobody', 'Members your advisor proposes you to'],
+        n: 'Closing this ends every search being run for you. You would be held on the register and nothing more.' },
+      { k: 'Your city', v: 'From the case', opts: ['Nobody', 'From the case', 'On acceptance'],
+        n: 'Cases are written without it if you close it, which widens the field considerably.' },
+      { k: 'That you are a member at all', v: 'Nobody', fixed: true,
+        n: 'Never disclosed, to anyone, under any membership. This is the one thing the house does not negotiate.' }
+    ];
+
+    var CONTACT = [
+      { k: 'Approaches from members you have not been proposed to', v: 'Through your advisor only',
+        opts: ['Nobody', 'Through your advisor only'] },
+      { k: 'Second approaches after you have declined', v: 'Nobody',
+        opts: ['Nobody', 'Once, after six months'] },
+      { k: 'Invitations to gatherings', v: 'The house only', opts: ['Nobody', 'The house only'] },
+      { k: 'Anyone outside the register', v: 'Nobody', fixed: true }
+    ];
+
+    var BLOCKED = [
+      { n: 'A person named to C. Vasseur', d: '02 June', why: 'Named by you at the outset. Never shown to you, and never shown you.' },
+      { n: 'No. 09', d: '21 July', why: 'Blocked after an introduction. The reason you gave is held and is not disclosed to them.' }
+    ];
+
+    var SEC = [
+      { k: 'Passphrase', v: 'Changed 14 June', ok: true, act: 'Change it' },
+      { k: 'Two-factor authentication', v: 'Not enabled', ok: false, act: 'Enable it',
+        n: 'A code from your telephone, on every sign-in from a device we do not know. This is the one step outstanding on the account.' },
+      { k: 'Recovery', v: 'Telephone, verified', ok: true, act: 'Change it' },
+      { k: 'Sign-in alerts', v: 'Written, on every new device', ok: true, act: 'Change it' }
+    ];
+
+    var SESSIONS = [
+      { t: 'London · this device', d: 'Now', me: true },
+      { t: 'London · telephone', d: '18 August, 21:40', me: false },
+      { t: 'Hampshire · tablet', d: '03 August, 09:12', me: false }
+    ];
+
+    function pick(item, onChange) {
+      if (item.fixed) return el('span', 'nt-pref__v', item.v);
+      var s = el('select');
+      item.opts.forEach(function (o) {
+        var op = el('option', null, o); op.value = o;
+        if (o === item.v) op.selected = true;
+        s.appendChild(op);
+      });
+      s.addEventListener('change', function () { item.v = s.value; onChange(); });
+      return s;
+    }
+
+    function rows(list, box, onChange) {
+      box.textContent = '';
+      list.forEach(function (it, i) {
+        var row = el('div', 'pr-row');
+        var left = el('div');
+        left.appendChild(el('p', 'pr-row__k', it.k));
+        if (it.n) left.appendChild(el('p', 'pr-row__v', it.n));
+        var lab = el('label', 'sr-only', it.k);
+        var id = box.id + '-' + i; lab.setAttribute('for', id);
+        var c = pick(it, onChange); c.id = id;
+        row.appendChild(left); row.appendChild(lab); row.appendChild(c);
+        box.appendChild(row);
+      });
+    }
+
+    function renderVis() {
+      rows(VIS, $('#pv-visibility'), renderVis);
+      var open = VIS.filter(function (v) { return v.v !== 'Nobody'; }).length;
+      $('#pv-see').textContent = open + ' of ' + VIS.length + ' open at some stage';
+    }
+    function renderContact() { rows(CONTACT, $('#pv-contact'), renderContact); }
+
+    function renderBlocked() {
+      var box = $('#pv-blocked'); box.textContent = '';
+      BLOCKED.forEach(function (b) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', b.n));
+        left.appendChild(el('p', 'cn__s', 'Blocked ' + b.d));
+        left.appendChild(el('p', 'cn__m', b.why));
+        var acts = el('div', 'cn__acts');
+        var un = el('button', 'btn btn--quiet', 'Lift it'); un.type = 'button';
+        un.addEventListener('click', function () {
+          BLOCKED.splice(BLOCKED.indexOf(b), 1); renderBlocked();
+        });
+        acts.appendChild(un);
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#pv-block-n').textContent = BLOCKED.length ? BLOCKED.length + ' held' : 'None';
+      $('#pv-block-empty').hidden = BLOCKED.length > 0;
+    }
+
+    function renderSec() {
+      var box = $('#pv-security'); box.textContent = '';
+      SEC.forEach(function (s) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', s.k));
+        left.appendChild(el('p', 'cn__s', s.v));
+        if (s.n) left.appendChild(el('p', 'cn__m', s.n));
+        var acts = el('div', 'cn__acts');
+        var b = el('button', 'btn ' + (s.ok ? 'btn--quiet' : 'btn--solid'), s.act); b.type = 'button';
+        b.addEventListener('click', function () {
+          if (!s.ok) { s.ok = true; s.v = 'Enabled — code to your telephone'; s.act = 'Change it'; s.n = null; }
+          else { left.appendChild(el('p', 'cn__m', 'The office telephones to confirm it is you before anything is changed.')); b.disabled = true; return; }
+          renderSec();
+        });
+        acts.appendChild(b);
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      var out = SEC.filter(function (s) { return !s.ok; }).length;
+      $('#pv-sec-n').textContent = out ? out + ' step outstanding' : 'Nothing outstanding';
+    }
+
+    function renderSessions() {
+      var box = $('#pv-sessions'); box.textContent = '';
+      SESSIONS.forEach(function (s) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', s.t));
+        left.appendChild(el('p', 'cn__s', s.me ? 'This session' : 'Last used ' + s.d));
+        var acts = el('div', 'cn__acts');
+        if (!s.me) {
+          var b = el('button', 'btn btn--quiet', 'End it'); b.type = 'button';
+          b.addEventListener('click', function () {
+            SESSIONS.splice(SESSIONS.indexOf(s), 1); renderSessions();
+          });
+          acts.appendChild(b);
+        }
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#pv-sess-n').textContent = SESSIONS.length + ' open';
+    }
+
+    $('#pv-sess-end').addEventListener('click', function () {
+      for (var i = SESSIONS.length - 1; i >= 0; i--) { if (!SESSIONS[i].me) SESSIONS.splice(i, 1); }
+      renderSessions();
+    });
+
+    renderVis(); renderContact(); renderBlocked(); renderSec(); renderSessions();
+  })();
+
+  /* --- Help --------------------------------------------------------------- */
+  (function () {
+    if (!$('#view-help')) return;
+    var el = MATCH.el;
+
+    var FAQ = [
+      { g: 'Membership', q: 'Can I pause my membership?',
+        a: 'Yes, once in any year and for up to six months. The search stops, your file is closed to every advisor but your own, and the unused part of the year is held rather than refunded.' },
+      { g: 'Membership', q: 'What happens if I meet someone outside the house?',
+        a: 'Tell your advisor and the search stops the same day. Nothing further is charged, and your file is closed but not destroyed unless you ask.' },
+      { g: 'Introductions', q: 'Why has nothing been proposed for months?',
+        a: 'Because nothing was worth proposing. An advisor who has nothing writes to say so rather than sending something to look busy. If three months pass in silence, ask — the answer should be specific.' },
+      { g: 'Introductions', q: 'Can I decline without a reason?',
+        a: 'Always, and the other person is told only that it will not go further. A reason helps the search, but no reason is ever required and none is ever passed on.' },
+      { g: 'Introductions', q: 'Am I shown to people I have not been told about?',
+        a: 'Your case can be read by an advisor searching for another member, and only by an advisor. No member sees anything about you until you have both accepted.' },
+      { g: 'Privacy', q: 'Who at the house can read my file?',
+        a: 'Your advisor, a named second who holds it if she is unreachable, and nobody else. Every reading is logged, and you can see the log under What we hold.' },
+      { g: 'Privacy', q: 'Is my name ever written down?',
+        a: 'Yes, in your file, which does not leave the house. It is never written in a case, never given to another member, and never given to a venue.' },
+      { g: 'Safety', q: 'What happens if I report someone?',
+        a: 'It goes to a duty advisor within the hour, not to a queue. You are never put in a room with them again, and you are told what was done — even where the answer is that we could not act.' },
+      { g: 'Account', q: 'How do I get everything you hold about me?',
+        a: 'Ask under What we hold. It is assembled within thirty days, sent as a sealed document, and includes the parts that are unflattering.' }
+    ];
+    var TOPICS = ['Everything', 'Membership', 'Introductions', 'Privacy', 'Safety', 'Account'];
+    var topic = 'Everything';
+
+    var CHANNELS = [
+      { t: 'C. Vasseur, your advisor', n: 'Anything about your search, an introduction, or a case. Replies within a day.', a: '#messages', al: 'Write to her' },
+      { t: 'The office', n: 'Membership, billing, papers, and arrangements. Weekdays, nine to six, London.', a: '#assistant', al: 'Make a request' },
+      { t: 'The duty advisor', n: 'Anything urgent, and anything about your safety. A person answers at any hour.', tel: '+44 20 7946 0000' }
+    ];
+
+    var KINDS = [
+      { id: 'report', label: 'Report a member',
+        n: 'Conduct at a meeting or in correspondence. It reaches a duty advisor within the hour, and the person is never told you raised it.' },
+      { id: 'dispute', label: 'Dispute something',
+        n: 'A fee, an invoice, or a decision the house made. Answered in writing by someone who was not party to it, within ten working days.' },
+      { id: 'complaint', label: 'Make a complaint',
+        n: 'How you were treated by the house or by an advisor. It goes to the partner on duty, not to the advisor concerned.' },
+      { id: 'account', label: 'Account assistance',
+        n: 'Sign-in, verification, documents, or anything that is simply not working.' }
+    ];
+    var kind = KINDS[0];
+
+    var OPEN = [
+      { t: 'Invoice LP-2025-0044 — Formation charged in full', s: 'Dispute · opened 06 August', m: 'With the partner on duty. An answer is due by 20 August.' }
+    ];
+
+    function renderFaq() {
+      var box = $('#hp-faq'); box.textContent = '';
+      FAQ.filter(function (f) { return topic === 'Everything' || f.g === topic; }).forEach(function (f) {
+        var d = el('details', 'hp-q');
+        var s = el('summary', null, f.q);
+        d.appendChild(s);
+        d.appendChild(el('p', 'hp-a', f.a));
+        d.appendChild(el('p', 'hp-g', f.g));
+        box.appendChild(d);
+      });
+    }
+
+    function renderOpen() {
+      var box = $('#hp-open'); box.textContent = '';
+      OPEN.forEach(function (o) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', o.t));
+        left.appendChild(el('p', 'cn__s', o.s));
+        left.appendChild(el('p', 'cn__m', o.m));
+        row.appendChild(left); box.appendChild(row);
+      });
+      $('#hp-open-n').textContent = OPEN.length ? OPEN.length + ' open' : 'None';
+      $('#hp-open-empty').hidden = OPEN.length > 0;
+    }
+
+    TOPICS.forEach(function (t) {
+      var b = el('button', 'chip' + (t === topic ? ' is-on' : ''), t);
+      b.type = 'button'; b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', t === topic ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        topic = t;
+        $$('#hp-topics button').forEach(function (o) {
+          o.classList.toggle('is-on', o === b);
+          o.setAttribute('aria-checked', o === b ? 'true' : 'false');
+        });
+        renderFaq();
+      });
+      $('#hp-topics').appendChild(b);
+    });
+
+    var ch = $('#hp-channels');
+    CHANNELS.forEach(function (c) {
+      var row = el('div', 'cn');
+      var left = el('div');
+      left.appendChild(el('p', 'cn__n', c.t));
+      left.appendChild(el('p', 'cn__m', c.n));
+      if (c.tel) left.appendChild(el('p', 'cn__s', c.tel));
+      var acts = el('div', 'cn__acts');
+      if (c.a) {
+        var a = el('a', 'btn'); a.href = c.a; a.setAttribute('data-go', c.a.replace('#', ''));
+        a.appendChild(el('span', null, c.al));
+        a.appendChild(el('i', 'arrow'));
+        acts.appendChild(a);
+      }
+      row.appendChild(left); row.appendChild(acts); ch.appendChild(row);
+    });
+
+    KINDS.forEach(function (k) {
+      var b = el('button', 'chip' + (k === kind ? ' is-on' : ''), k.label);
+      b.type = 'button'; b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', k === kind ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        kind = k;
+        $$('#hp-kinds button').forEach(function (o) {
+          o.classList.toggle('is-on', o === b);
+          o.setAttribute('aria-checked', o === b ? 'true' : 'false');
+        });
+        $('#hp-kind-note').textContent = k.n;
+        $('#hp-kind-name').textContent = k.label;
+      });
+      $('#hp-kinds').appendChild(b);
+    });
+    $('#hp-kind-note').textContent = kind.n;
+    $('#hp-kind-name').textContent = kind.label;
+
+    $('#hp-send').addEventListener('click', function () {
+      var v = $('#hp-text').value.trim();
+      if (!v) { $('#hp-sent').textContent = 'Write what has happened first.'; return; }
+      OPEN.unshift({
+        t: v.length > 70 ? v.slice(0, 68).trim() + '…' : v,
+        s: kind.label + ' · opened today',
+        m: kind.id === 'report'
+          ? 'With the duty advisor. You will be telephoned within the hour.'
+          : 'Received. Someone who was not party to it will answer in writing.'
+      });
+      $('#hp-text').value = '';
+      $('#hp-sent').textContent = 'Sent. It is listed under Open matters, and you are told the outcome even where the answer is that we could not act.';
+      renderOpen();
+    });
+
+    renderFaq(); renderOpen();
+  })();
+
+  /* --- Legend Verified: status, code, badge, history, disclosure ----------- */
+  (function () {
+    if (!$('#vf-steps')) return;
+    var el = MATCH.el;
+
+    var STEPS = [
+      { k: 'Identity', v: 'Passport, seen in person by C. Vasseur', ok: true, d: '14 March 2024' },
+      { k: 'Address', v: 'Two documents, one dated within three months', ok: true, d: '14 March 2024' },
+      { k: 'Means', v: 'Confirmed by your solicitor, in writing', ok: true, d: '19 March 2024' },
+      { k: 'Marital status', v: 'Declared and checked against the register', ok: true, d: '14 March 2024' },
+      { k: 'Conduct', v: 'No matter recorded against you', ok: true, d: '14 March 2025' },
+      { k: 'The interview', v: 'Two hours, in person, London', ok: true, d: '02 April 2024' },
+      { k: 'Renewal', v: 'Due 14 March 2026 — a half-hour, in person', ok: false, d: 'Outstanding' }
+    ];
+
+    var HIST = [
+      { d: '14 March 2025', t: 'Annual renewal', by: 'C. Vasseur', n: 'Half an hour, London. Nothing had changed.' },
+      { d: '02 April 2024', t: 'Interview', by: 'C. Vasseur', n: 'Two hours. The note from it is in your file and you may read it.' },
+      { d: '19 March 2024', t: 'Means confirmed', by: 'H. Okonjo', n: 'By letter from your solicitor. The letter was returned to you, not kept.' },
+      { d: '14 March 2024', t: 'Identity, address, status', by: 'C. Vasseur', n: 'Documents seen in person and not copied.' }
+    ];
+
+    var BADGE = [
+      { k: 'On a case written about you', v: 'Shown', n: 'The mark and the date of the last check. Nothing about what was checked.' },
+      { k: 'At a gathering of the house', v: 'Shown', n: 'Against your Legend Code at the door, and to nobody else in the room.' },
+      { k: 'To a venue or a partner house', v: 'On request', n: 'Confirms you are verified. Discloses no name, no document, and no detail.' },
+      { k: 'Anywhere public', v: 'Never', n: 'There is no page anywhere that shows your mark.' }
+    ];
+
+    var DISC = [
+      { k: 'That you are verified', v: 'Shown on every case', opts: ['Shown on every case'] },
+      { k: 'The date of your last check', v: 'Shown', opts: ['Shown', 'Hidden'] },
+      { k: 'Which checks were made', v: 'Hidden', opts: ['Shown', 'Hidden'] },
+      { k: 'The advisor who made them', v: 'On request', opts: ['Shown', 'On request', 'Hidden'] },
+      { k: 'The documents themselves', v: 'Never', opts: ['Never'] }
+    ];
+
+    function renderSteps() {
+      var box = $('#vf-steps'); box.textContent = '';
+      STEPS.forEach(function (s) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', s.k));
+        left.appendChild(el('p', 'cn__s', s.ok ? 'Checked · ' + s.d : s.d));
+        left.appendChild(el('p', 'cn__m', s.v));
+        var acts = el('div', 'cn__acts');
+        if (!s.ok) {
+          var b = el('button', 'btn btn--solid', 'Arrange it'); b.type = 'button';
+          b.addEventListener('click', function () {
+            s.ok = true; s.d = 'Arranged — C. Vasseur will confirm the hour';
+            renderSteps(); renderState();
+          });
+          acts.appendChild(b);
+        } else {
+          acts.appendChild(el('span', 'pill pill--rest', 'Done'));
+        }
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+    }
+
+    function renderState() {
+      var done = STEPS.filter(function (s) { return s.ok; }).length;
+      var pct = Math.round(done / STEPS.length * 100);
+      $('#vf-pct').textContent = pct;
+      $('#vf-pct').appendChild(el('small', null, '%'));
+      $('#vf-pct').lastChild.style.fontSize = '.4em';
+      $('#vf-bar').style.width = pct + '%';
+      $('#vf-state').textContent = done === STEPS.length ? 'Verified' : 'Verified · renewal due';
+      var next = STEPS.filter(function (s) { return !s.ok; })[0];
+      $('#vf-next').textContent = next
+        ? 'Outstanding: ' + next.k + '. ' + v_next(next)
+        : 'Nothing outstanding. The next renewal falls twelve months from the last.';
+    }
+    function v_next(s) {
+      return s.k === 'Renewal'
+        ? 'Half an hour in person, once a year. Your mark does not lapse the day it is due — you have a month.'
+        : s.v;
+    }
+
+    function renderHist() {
+      var box = $('#vf-hist'); box.textContent = '';
+      HIST.forEach(function (h) {
+        var row = el('div', 'act-row');
+        row.appendChild(el('span', 'act-row__d', h.d));
+        var d = el('div');
+        d.appendChild(el('p', 'cn__n', h.t));
+        d.appendChild(el('p', 'cn__s', 'By ' + h.by));
+        d.appendChild(el('p', 'act-row__t', h.n));
+        row.appendChild(d); box.appendChild(row);
+      });
+      $('#vf-hist-n').textContent = HIST.length + ' entries';
+    }
+
+    function renderBadge() {
+      var box = $('#vf-badge'); box.textContent = '';
+      BADGE.forEach(function (b) {
+        var row = el('div', 'nt-pref');
+        row.appendChild(el('span', 'nt-pref__k', b.k));
+        row.appendChild(el('span', 'nt-pref__v', b.v));
+        box.appendChild(row);
+        box.appendChild(el('p', 'pr-vis__n', b.n));
+      });
+    }
+
+    function renderDisc() {
+      var box = $('#vf-privacy'); box.textContent = '';
+      DISC.forEach(function (d, i) {
+        var row = el('div', 'pr-row');
+        var left = el('div');
+        left.appendChild(el('p', 'pr-row__k', d.k));
+        var ctrl;
+        if (d.opts.length === 1) {
+          ctrl = el('span', 'nt-pref__v', d.v);
+        } else {
+          var lab = el('label', 'sr-only', d.k);
+          lab.setAttribute('for', 'vf-d-' + i);
+          ctrl = el('select'); ctrl.id = 'vf-d-' + i;
+          d.opts.forEach(function (o) {
+            var op = el('option', null, o); op.value = o;
+            if (o === d.v) op.selected = true;
+            ctrl.appendChild(op);
+          });
+          ctrl.addEventListener('change', function () { d.v = ctrl.value; });
+          row.appendChild(left); row.appendChild(lab); row.appendChild(ctrl);
+          box.appendChild(row); return;
+        }
+        row.appendChild(left); row.appendChild(ctrl); box.appendChild(row);
+      });
+    }
+
+    $('#vf-code').textContent = 'LGND–4471–MRC';
+    $('#vf-copy').addEventListener('click', function () {
+      $('#vf-copied').textContent = 'Copied. It identifies you to us and to nobody else; a stranger holding it learns only that the holder is verified.';
+    });
+
+    renderSteps(); renderState(); renderHist(); renderBadge(); renderDisc();
+  })();
+
+  /* --- Legend Academy: the rooms, what you are taking, certificates -------- */
+  (function () {
+    if (!$('#ac-list')) return;
+    var el = MATCH.el;
+
+    var ROOMS = [
+      { g: 'Dating', t: 'Reading a first meeting', n: 'What is worth noticing in the first hour, and what almost everyone mistakes for a signal.', f: 'Four evenings, six people', who: 'A former negotiator', s: 'taking' },
+      { g: 'Dating', t: 'The second and third meeting', n: 'Where most introductions fail, and why it is almost never about the first one.', f: 'Three evenings, six people', who: 'C. Vasseur' },
+      { g: 'Relationships', t: 'The first year', n: 'Merging two established lives — money, houses, children, and the conversations couples postpone.', f: 'Six sessions, in pairs', who: 'A psychotherapist', s: 'taking' },
+      { g: 'Relationships', t: 'When it stops resolving itself', n: 'A difficulty that has been going the same way for a year, and what actually changes it.', f: 'Four sessions, private', who: 'A psychotherapist' },
+      { g: 'Communication', t: 'Saying the difficult thing', n: 'How to open a conversation you have been avoiding, and how not to close it in the first sentence.', f: 'Two evenings, eight people', who: 'A former diplomat', s: 'done', cert: '11 June 2025' },
+      { g: 'Communication', t: 'Disagreeing well', n: 'Argument as a working method rather than a failure of one.', f: 'Three evenings, eight people', who: 'A former negotiator' },
+      { g: 'Social skills', t: 'A room of strangers', n: 'Arriving, leaving, and the ninety seconds in between. Taught by people who do it professionally.', f: 'One evening, ten people', who: 'A former diplomat', s: 'done', cert: '04 March 2025' },
+      { g: 'Social skills', t: 'Being seen without being known', n: 'Attending as a couple where you are recognised, and keeping the private part private.', f: 'Two evenings, six people', who: 'The house' },
+      { g: 'Personal development', t: 'What you are actually looking for', n: 'Separating what you want from what you have been told to want. Uncomfortable, and the most useful room we run.', f: 'Five sessions, private', who: 'A psychotherapist' },
+      { g: 'Personal development', t: 'After a long marriage', n: 'For members beginning again at fifty and sixty, taught by people who did.', f: 'Four sessions, six people', who: 'The house' },
+      { g: 'Lifestyle', t: 'The table', n: 'Wine, ordering, and hosting twelve without anyone noticing the work.', f: 'Two evenings, eight people', who: 'A restaurateur' },
+      { g: 'Lifestyle', t: 'Travelling together, the first time', n: 'What to agree before departure, taught as a practical matter rather than a romantic one.', f: 'One evening, eight people', who: 'The house' }
+    ];
+    var CATS = ['Everything', 'Dating', 'Relationships', 'Communication', 'Social skills', 'Personal development', 'Lifestyle'];
+    var cat = 'Everything';
+
+    function render() {
+      var box = $('#ac-list'); box.textContent = '';
+      var rows = ROOMS.filter(function (r) { return cat === 'Everything' || r.g === cat; });
+      rows.forEach(function (r) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', r.t));
+        left.appendChild(el('p', 'cn__s', r.g + ' · ' + r.f + ' · ' + r.who));
+        left.appendChild(el('p', 'cn__m', r.n));
+        var acts = el('div', 'cn__acts');
+        if (r.s === 'done') { acts.appendChild(el('span', 'pill pill--rest', 'Completed')); }
+        else if (r.s === 'taking') {
+          var lv = el('button', 'btn btn--quiet', 'Withdraw'); lv.type = 'button';
+          lv.addEventListener('click', function () { r.s = null; renderAll(); });
+          acts.appendChild(el('span', 'pill pill--action', 'Taking'));
+          acts.appendChild(lv);
+        } else {
+          var b = el('button', 'btn btn--quiet', 'Ask to join'); b.type = 'button';
+          b.addEventListener('click', function () { r.s = 'taking'; renderAll(); });
+          acts.appendChild(b);
+        }
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#ac-n').textContent = rows.length + ' of ' + ROOMS.length;
+      $('#ac-note').textContent = cat === 'Everything'
+        ? 'Every room the house runs. Small by design — a room is never opened for more than ten.'
+        : cat + ' — ' + rows.length + ' room' + (rows.length === 1 ? '' : 's') + '. Each is taught by a named person, told to you before you agree.';
+      $$('#ac-cats button').forEach(function (b) {
+        var on = b.textContent === cat;
+        b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+    }
+
+    function renderMine() {
+      var box = $('#ac-mine'); box.textContent = '';
+      var mine = ROOMS.filter(function (r) { return r.s === 'taking'; });
+      mine.forEach(function (r) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', r.t));
+        left.appendChild(el('p', 'cn__s', r.f));
+        left.appendChild(el('p', 'cn__m', 'Taught by ' + r.who + '. The office writes with the dates once the room is full.'));
+        row.appendChild(left); box.appendChild(row);
+      });
+      $('#ac-mine-n').textContent = mine.length ? mine.length + ' room' + (mine.length === 1 ? '' : 's') : 'None';
+      $('#ac-mine-empty').hidden = mine.length > 0;
+    }
+
+    function renderCerts() {
+      var box = $('#ac-certs'); box.textContent = '';
+      var done = ROOMS.filter(function (r) { return r.s === 'done'; });
+      done.forEach(function (r) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', r.t));
+        left.appendChild(el('p', 'cn__s', 'Completed ' + r.cert + ' · ' + r.who));
+        var acts = el('div', 'cn__acts');
+        var b = el('button', 'btn btn--quiet', 'Send it to me'); b.type = 'button';
+        b.addEventListener('click', function () {
+          left.appendChild(el('p', 'cn__m', 'Sent to your address of record, sealed and unaddressed on the outside.'));
+          b.disabled = true;
+        });
+        acts.appendChild(b);
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#ac-cert-n').textContent = done.length ? done.length + ' held' : 'None yet';
+    }
+
+    function renderAll() { render(); renderMine(); renderCerts(); }
+
+    CATS.forEach(function (c) {
+      var b = el('button', 'chip' + (c === cat ? ' is-on' : ''), c);
+      b.type = 'button'; b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', c === cat ? 'true' : 'false');
+      b.addEventListener('click', function () { cat = c; render(); });
+      $('#ac-cats').appendChild(b);
+    });
+    renderAll();
+  })();
+
+  /* --- Account: locale, how we write, and closing ------------------------- */
+  (function () {
+    if (!$('#st-locale')) return;
+    var el = MATCH.el;
+
+    var LOCALE = [
+      { k: 'Language', v: 'English', opts: ['English', 'Français', 'Italiano', 'Deutsch', 'العربية', 'فارسی'],
+        n: 'Everything written to you, including cases, in this language. Your advisor writes in it too, or tells you plainly if she cannot.' },
+      { k: 'Currency', v: 'GBP £', opts: ['GBP £', 'EUR €', 'USD $', 'CHF'],
+        n: 'Fees are quoted and settled in this currency. The rate on the day of the invoice is the one used, and it is printed on it.' },
+      { k: 'Where you are', v: 'London', opts: ['London', 'Paris', 'Geneva', 'Milan', 'New York', 'Dubai'],
+        n: 'Decides which advisor holds your file and which gatherings you are told about. Not shown to any member unless you open it.' },
+      { k: 'Time', v: 'London (GMT/BST)', opts: ['London (GMT/BST)', 'Paris (CET)', 'Geneva (CET)', 'New York (ET)', 'Dubai (GST)'],
+        n: 'Nothing is sent to you at night in this zone, whatever hour it is at the house.' }
+    ];
+
+    var COMMS = [
+      { k: 'By post', v: 'Sealed, unaddressed on the outside', opts: ['Sealed, unaddressed on the outside', 'Not by post'] },
+      { k: 'By email', v: 'No sender name, no subject line', opts: ['No sender name, no subject line', 'Full sender name', 'Not by email'] },
+      { k: 'By telephone', v: 'Withheld number, no message left', opts: ['Withheld number, no message left', 'Number shown', 'Not by telephone'] },
+      { k: 'What we may say if someone else answers', v: 'Nothing at all', opts: ['Nothing at all', 'A first name and a callback number'] },
+      { k: 'About gatherings and rooms', v: 'Written, once a season', opts: ['Written, once a season', 'Nothing is sent'] },
+      { k: 'Anything resembling marketing', v: 'Never sent', fixed: true }
+    ];
+
+    var CLOSE = [
+      { t: 'Suspend the engagement', n: 'The search stops the same day. Your file is closed to every advisor but your own, nothing further is charged, and you may resume within six months on a word.', b: 'Suspend it',
+        c: 'Noted. C. Vasseur telephones today to hear the reason, or not to, as you prefer. Nothing is charged from tomorrow.' },
+      { t: 'Close the account and have everything destroyed', n: 'The file, the cases, the notes, the reflections, the consent ledger — destroyed within thirty days, and confirmed to you in writing. The parts we are required by law to keep are listed to you first. It cannot be undone.', b: 'Begin it',
+        c: 'A partner telephones within the day. Nothing is destroyed until you have confirmed it to a person, and you are sent the list of what the law obliges us to keep before anything is touched.' }
+    ];
+
+    function rows(list, box) {
+      box.textContent = '';
+      list.forEach(function (it, i) {
+        var row = el('div', 'pr-row');
+        var left = el('div');
+        left.appendChild(el('p', 'pr-row__k', it.k));
+        if (it.n) left.appendChild(el('p', 'pr-row__v', it.n));
+        var ctrl;
+        if (it.fixed) {
+          ctrl = el('span', 'nt-pref__v', it.v);
+          row.appendChild(left); row.appendChild(ctrl);
+        } else {
+          var lab = el('label', 'sr-only', it.k);
+          var id = box.id + '-' + i; lab.setAttribute('for', id);
+          ctrl = el('select'); ctrl.id = id;
+          it.opts.forEach(function (o) {
+            var op = el('option', null, o); op.value = o;
+            if (o === it.v) op.selected = true;
+            ctrl.appendChild(op);
+          });
+          ctrl.addEventListener('change', function () {
+            it.v = ctrl.value;
+            if (box.id === 'st-locale') {
+              $('#st-locale-note').textContent =
+                it.k + ' set to ' + it.v + '. It takes effect on the next thing written to you; nothing already sent is re-sent.';
+            }
+          });
+          row.appendChild(left); row.appendChild(lab); row.appendChild(ctrl);
+        }
+        box.appendChild(row);
+      });
+    }
+
+    rows(LOCALE, $('#st-locale'));
+    rows(COMMS, $('#st-comms'));
+
+    var box = $('#st-close');
+    CLOSE.forEach(function (c) {
+      var row = el('div', 'cn');
+      var left = el('div');
+      left.appendChild(el('p', 'cn__n', c.t));
+      left.appendChild(el('p', 'cn__m', c.n));
+      var acts = el('div', 'cn__acts');
+      var b = el('button', 'btn btn--quiet', c.b); b.type = 'button';
+      b.addEventListener('click', function () { $('#st-close-note').textContent = c.c; });
+      acts.appendChild(b);
+      row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+    });
+  })();
+
+  /* --- Correspondence: folders and settings -------------------------------
+     The advisor thread stays where it is, at the top, because it is the one
+     that matters. Everything else is filed. */
+  (function () {
+    if (!$('#ms-list')) return;
+    var el = MATCH.el;
+
+    var MAIL = [
+      { g: 'inbox', n: 'C. Vasseur', s: 'Your advisor · 18 August', unread: true,
+        m: 'On No. 07 — the answer about Singapore was about a parent, not the business. I would rather they told you themselves.' },
+      { g: 'inbox', n: 'The office', s: 'Arrangements · 05 August',
+        m: 'Marylebone, 28 August, 20:00. Corner table, no music, held under our name.' },
+      { g: 'inbox', n: 'The house', s: 'Gatherings · 30 July',
+        m: 'The autumn weekend in Hampshire, 3–5 October. Twelve places, and you are one of the twelve if you want it.' },
+      { g: 'requests', n: 'No. 11', s: 'Asked of you · 15 August',
+        m: 'An advisor in Geneva has written a case naming you. Nothing is disclosed to them unless you accept.' },
+      { g: 'archived', n: 'C. Vasseur', s: 'Your advisor · 02 July',
+        m: 'On No. 04, and why the timing was wrong rather than the person.' },
+      { g: 'archived', n: 'The office', s: 'Billing · 30 April',
+        m: 'Formation, first year, invoiced in full. You have since disputed the manner of it.' },
+      { g: 'blocked', n: 'No. 09', s: 'Blocked 21 July',
+        m: 'Nothing from this member reaches you. It is held here so that you can see it exists, and it is deleted after a year.' }
+    ];
+
+    var TABS = [
+      { id: 'inbox',    label: 'Inbox',     note: 'Everything current, from the house and from your advisor' },
+      { id: 'requests', label: 'Requests',  note: 'Approaches waiting on an answer from you' },
+      { id: 'archived', label: 'Archived',  note: 'Filed by you, and still searchable' },
+      { id: 'blocked',  label: 'Blocked',   note: 'Held but never delivered, and deleted after a year' }
+    ];
+    var tab = 'inbox';
+
+    var PREFS = [
+      { k: 'Who may write to you here', v: 'Your advisor and the office only' },
+      { k: 'Approaches from members', v: 'Through your advisor, never directly' },
+      { k: 'Read receipts', v: 'Not sent, in either direction' },
+      { k: 'How long a thread is kept', v: 'Until you delete it' },
+      { k: 'Who else at the house reads this', v: 'Nobody' }
+    ];
+
+    function render() {
+      var box = $('#ms-list'); box.textContent = '';
+      var rows = MAIL.filter(function (m) { return m.g === tab; });
+      rows.forEach(function (m) {
+        var row = el('div', 'cn' + (m.unread ? ' is-new' : ''));
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', m.n));
+        left.appendChild(el('p', 'cn__s', m.s + (m.unread ? ' · unread' : '')));
+        left.appendChild(el('p', 'cn__m', m.m));
+        var acts = el('div', 'cn__acts');
+        if (m.g === 'requests') {
+          var a = el('a', 'btn btn--quiet'); a.href = '#requests'; a.setAttribute('data-go', 'requests');
+          a.appendChild(el('span', null, 'Open it')); a.appendChild(el('i', 'arrow'));
+          acts.appendChild(a);
+        } else if (m.g === 'inbox') {
+          var ar = el('button', 'btn btn--quiet', 'Archive'); ar.type = 'button';
+          ar.addEventListener('click', function () { m.g = 'archived'; m.unread = false; render(); });
+          acts.appendChild(ar);
+        } else if (m.g === 'archived') {
+          var un = el('button', 'btn btn--quiet', 'Back to inbox'); un.type = 'button';
+          un.addEventListener('click', function () { m.g = 'inbox'; render(); });
+          acts.appendChild(un);
+        } else if (m.g === 'blocked') {
+          var lift = el('button', 'btn btn--quiet', 'Lift the block'); lift.type = 'button';
+          lift.addEventListener('click', function () { m.g = 'inbox'; render(); });
+          acts.appendChild(lift);
+        }
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#ms-empty').hidden = rows.length > 0;
+      var t = TABS.filter(function (x) { return x.id === tab; })[0];
+      $('#ms-note').textContent = rows.length
+        ? t.label + ' — ' + rows.length + '. ' + t.note + '.'
+        : t.note + '.';
+      var unread = MAIL.filter(function (m) { return m.unread; }).length;
+      $('#ms-n').textContent = unread ? unread + ' unread' : 'Nothing unread';
+      $$('#ms-tabs button').forEach(function (b) {
+        b.setAttribute('aria-selected', b.getAttribute('data-ms') === tab ? 'true' : 'false');
+      });
+    }
+
+    TABS.forEach(function (t) {
+      var b = el('button', null, t.label); b.type = 'button';
+      b.setAttribute('data-ms', t.id); b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', t.id === tab ? 'true' : 'false');
+      b.addEventListener('click', function () { tab = t.id; render(); });
+      $('#ms-tabs').appendChild(b);
+    });
+
+    var pb = $('#ms-prefs');
+    PREFS.forEach(function (p) {
+      var row = el('div', 'nt-pref');
+      row.appendChild(el('span', 'nt-pref__k', p.k));
+      row.appendChild(el('span', 'nt-pref__v', p.v));
+      pb.appendChild(row);
     });
 
     render();
