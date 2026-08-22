@@ -1549,6 +1549,38 @@ a.tile:hover{ transform:translateY(-2px); }
    numeral column is what has to go. */
 .rail__nav a.cat .num{ display:none; }
 
+/* --- Find a partner: the one category with children in the rail ---------- */
+/* The list opens only while that branch is current, so six items do not become
+   ten. Indented under the parent's label, not its icon, so the hierarchy reads
+   at a glance. */
+.rail__sub{
+  display:flex; flex-direction:column;
+  margin:.1rem 0 .5rem;
+  padding-left:2.6rem;
+}
+.rail__sub .sub{
+  position:relative;
+  padding:.42rem 0 .42rem .9rem;
+  font-size:.78rem; line-height:1.35; color:var(--fg-soft);
+  border-left:1px solid var(--line-soft);
+  transition:color .25s var(--ease), border-color .25s var(--ease);
+}
+.rail__sub .sub:hover{ color:#EDEAE3; border-left-color:var(--champagne-dim, var(--champagne)); }
+.rail__sub .sub[aria-current="page"]{
+  color:#EDEAE3; border-left-color:var(--champagne);
+}
+/* The parent of the open branch stays legible without claiming to be the page. */
+.rail__nav a.cat.is-branch{ color:#EDEAE3; }
+
+/* Collapsed to a strip, and on the touch layout, the children have nowhere to
+   sit — the parent still reaches them. */
+.portal[data-rail="collapsed"] .rail__sub{ display:none; }
+@media (max-width:900px){
+  .rail__sub{ padding-left:1.2rem; flex-direction:row; flex-wrap:wrap; gap:.2rem 1.1rem; }
+  .rail__sub .sub{ border-left:0; padding-left:0; font-size:.72rem; }
+  .rail__sub .sub[aria-current="page"]{ border-bottom:1px solid var(--champagne); }
+}
+
 @media (prefers-reduced-motion:reduce){
   .rail__nav a.cat .nav-ic{ transform:none; }
   .rail__tip{ transition:none; }

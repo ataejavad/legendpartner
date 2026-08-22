@@ -12,6 +12,19 @@
 
   // Six categories in the rail; everything else is a section beneath one of them.
   var TITLES = {
+    verified:        'Legend Verified',
+    academy:         'Legend Academy',
+    find:            'Find a partner',
+    occasions:              'Events',
+    'occasions-parties':    'Parties',
+    'occasions-events':     'Events',
+    'occasions-business':   'Business events',
+    'occasions-travel':     'Travel companionship',
+    'occasions-social':     'Social occasions',
+    'find-long':     'Long-term relationship',
+    'find-short':    'Short-term relationship',
+    'find-casual':   'Casual dating',
+    'find-companion':'Event & party companion',
     long:       'Long partner',
     short:      'Short partner',
     events:     'Party & event',
@@ -94,6 +107,11 @@
   // Which category a section belongs to, so the rail still shows where you are
   // once you have gone one level down.
   var PARENT = {
+    'find-long': 'find', 'find-short': 'find',
+    'find-casual': 'find', 'find-companion': 'find',
+    'occasions-parties': 'occasions', 'occasions-events': 'occasions',
+    'occasions-business': 'occasions', 'occasions-travel': 'occasions',
+    'occasions-social': 'occasions',
     proposed: 'long', requests: 'long', introductions: 'long', appointments: 'long',
     preferences: 'me', reflections: 'me', intentions: 'me', persona: 'me', profile: 'me',
     insights: 'management', formation: 'management', counsel: 'management', continuity: 'management',
@@ -145,6 +163,26 @@
         title.textContent = TITLES[name];
       }
     }
+
+    // A category with children in the rail opens its list when it or one of them
+    // is current, and folds away otherwise, so the rail stays the length of its
+    // categories rather than the length of everything under them.
+    $$('.rail__sub').forEach(function (sub) {
+      var root = sub.getAttribute('data-branch');
+      var cat = $('#rail-nav a[data-view="' + root + '"]');
+      if (!cat) return;
+      var open = mark === root;
+      sub.hidden = !open;
+      cat.setAttribute('aria-expanded', open ? 'true' : 'false');
+      // One aria-current per page: on a child it belongs to the child, and the
+      // parent keeps only its open state and the rail's own marker.
+      if (open && name !== root) { cat.removeAttribute('aria-current'); cat.classList.add('is-branch'); }
+      else { cat.classList.remove('is-branch'); }
+      $$('a', sub).forEach(function (a) {
+        if (a.getAttribute('data-view') === name) { a.setAttribute('aria-current', 'page'); }
+        else { a.removeAttribute('aria-current'); }
+      });
+    });
 
     // The nav can scroll on short screens — keep the current item in sight.
     var current = $('#rail-nav a[aria-current="page"]');

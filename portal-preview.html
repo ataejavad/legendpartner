@@ -2546,6 +2546,38 @@ a.tile:hover{ transform:translateY(-2px); }
    numeral column is what has to go. */
 .rail__nav a.cat .num{ display:none; }
 
+/* --- Find a partner: the one category with children in the rail ---------- */
+/* The list opens only while that branch is current, so six items do not become
+   ten. Indented under the parent's label, not its icon, so the hierarchy reads
+   at a glance. */
+.rail__sub{
+  display:flex; flex-direction:column;
+  margin:.1rem 0 .5rem;
+  padding-left:2.6rem;
+}
+.rail__sub .sub{
+  position:relative;
+  padding:.42rem 0 .42rem .9rem;
+  font-size:.78rem; line-height:1.35; color:var(--fg-soft);
+  border-left:1px solid var(--line-soft);
+  transition:color .25s var(--ease), border-color .25s var(--ease);
+}
+.rail__sub .sub:hover{ color:#EDEAE3; border-left-color:var(--champagne-dim, var(--champagne)); }
+.rail__sub .sub[aria-current="page"]{
+  color:#EDEAE3; border-left-color:var(--champagne);
+}
+/* The parent of the open branch stays legible without claiming to be the page. */
+.rail__nav a.cat.is-branch{ color:#EDEAE3; }
+
+/* Collapsed to a strip, and on the touch layout, the children have nowhere to
+   sit — the parent still reaches them. */
+.portal[data-rail="collapsed"] .rail__sub{ display:none; }
+@media (max-width:900px){
+  .rail__sub{ padding-left:1.2rem; flex-direction:row; flex-wrap:wrap; gap:.2rem 1.1rem; }
+  .rail__sub .sub{ border-left:0; padding-left:0; font-size:.72rem; }
+  .rail__sub .sub[aria-current="page"]{ border-bottom:1px solid var(--champagne); }
+}
+
 @media (prefers-reduced-motion:reduce){
   .rail__nav a.cat .nav-ic{ transform:none; }
   .rail__tip{ transition:none; }
@@ -2927,6 +2959,17 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
           <span>Overview<span class="cat__n">What is waiting, at a glance</span></span>
         </a>
         <hr class="rail__rule">
+        <a class="cat" href="#find" data-view="find" data-label="Find a partner"
+           aria-expanded="false" aria-controls="rail-sub-find">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.6" cy="10.6" r="6.9"/><path d="m20 20-4.5-4.5"/></svg></span>
+          <span>Find a partner<span class="cat__n">What you are looking for</span></span>
+        </a>
+        <div class="rail__sub" id="rail-sub-find" data-branch="find" hidden>
+          <a class="sub" href="#find-long" data-view="find-long">Long-term relationship</a>
+          <a class="sub" href="#find-short" data-view="find-short">Short-term relationship</a>
+          <a class="sub" href="#find-casual" data-view="find-casual">Casual dating</a>
+          <a class="sub" href="#find-companion" data-view="find-companion">Event &amp; party companion</a>
+        </div>
         <a class="cat" href="#long" data-view="long" data-label="Long partner">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"/></svg></span>
           <span>Long partner<span class="cat__n">The search, and all of it</span></span>
@@ -2940,9 +2983,29 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/></svg></span>
           <span>Party &amp; event<span class="cat__n">Gatherings of the house</span></span>
         </a>
+        <a class="cat" href="#occasions" data-view="occasions" data-label="Events"
+           aria-expanded="false" aria-controls="rail-sub-occasions">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.2" y="5" width="17.6" height="15.6" rx="2"/><path d="M3.2 9.6h17.6"/><path d="M8 3.4v3.2"/><path d="M16 3.4v3.2"/></svg></span>
+          <span>Events<span class="cat__n">Where you are seen, and with whom</span></span>
+        </a>
+        <div class="rail__sub" id="rail-sub-occasions" data-branch="occasions" hidden>
+          <a class="sub" href="#occasions-parties" data-view="occasions-parties">Parties</a>
+          <a class="sub" href="#occasions-events" data-view="occasions-events">Events</a>
+          <a class="sub" href="#occasions-business" data-view="occasions-business">Business events</a>
+          <a class="sub" href="#occasions-travel" data-view="occasions-travel">Travel companionship</a>
+          <a class="sub" href="#occasions-social" data-view="occasions-social">Social occasions</a>
+        </div>
         <a class="cat" href="#management" data-view="management" data-label="Relationship management">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="M16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88Z"/></svg></span>
           <span>Relationship management<span class="cat__n">Formation, counsel, continuity</span></span>
+        </a>
+        <a class="cat" href="#verified" data-view="verified" data-label="Legend Verified">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.9 20 6v6.1c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6Z"/><polyline points="8.8 12 11.2 14.4 15.4 10.2"/></svg></span>
+          <span>Legend Verified<span class="cat__n">Who has been checked, and how</span></span>
+        </a>
+        <a class="cat" href="#academy" data-view="academy" data-label="Legend Academy">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 8.4 12 4.2l9.2 4.2L12 12.6Z"/><path d="M6.6 10.5v4.9c0 1.6 2.4 2.9 5.4 2.9s5.4-1.3 5.4-2.9v-4.9"/><path d="M21.2 8.4v5.2"/></svg></span>
+          <span>Legend Academy<span class="cat__n">What the house has learned, taught</span></span>
         </a>
         <a class="cat" href="#me" data-view="me" data-label="Profile">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4.6"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></span>
@@ -3158,6 +3221,694 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
         </div>
 
 
+      </section>
+
+
+      <!-- ============================================= EVENTS -->
+      <section class="view" id="view-occasions" tabindex="-1" aria-label="Events">
+        <p class="lede">Events</p>
+        <p class="sub">
+          Where you are seen, and with whom. Five kinds of occasion, each arranged on terms agreed
+          in advance by both people — so nobody improvises an answer in front of a room.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>The five</h2></div>
+            <div class="panel__body">
+              <div class="convo">
+                <div class="convo__item"><span class="no">01</span><div>
+                  <p class="nm">Parties</p>
+                  <p class="ds">The house's own gatherings, and private ones you are invited to. Small, unpublished, and never photographed.</p>
+                  <a class="btn" href="#occasions-parties" data-go="occasions-parties"><span>Open</span><i class="arrow"></i></a>
+                </div></div>
+                <div class="convo__item"><span class="no">02</span><div>
+                  <p class="nm">Events</p>
+                  <p class="ds">Openings, dinners, benefits, a box at something. An evening with a host, a guest list and an hour it ends.</p>
+                  <a class="btn" href="#occasions-events" data-go="occasions-events"><span>Open</span><i class="arrow"></i></a>
+                </div></div>
+                <div class="convo__item"><span class="no">03</span><div>
+                  <p class="nm">Business events</p>
+                  <p class="ds">Where the evening is work. Someone briefed on the room, who will be useful in it and will not become the subject of it.</p>
+                  <a class="btn" href="#occasions-business" data-go="occasions-business"><span>Open</span><i class="arrow"></i></a>
+                </div></div>
+                <div class="convo__item"><span class="no">04</span><div>
+                  <p class="nm">Travel companionship</p>
+                  <p class="ds">Days rather than hours, and a different set of questions. Arranged only where both people have met beforehand.</p>
+                  <a class="btn" href="#occasions-travel" data-go="occasions-travel"><span>Open</span><i class="arrow"></i></a>
+                </div></div>
+                <div class="convo__item"><span class="no">05</span><div>
+                  <p class="nm">Social occasions</p>
+                  <p class="ds">A wedding, a family lunch, a reunion. The rooms where the questions are personal and the answers should be settled in advance.</p>
+                  <a class="btn" href="#occasions-social" data-go="occasions-social"><span>Open</span><i class="arrow"></i></a>
+                </div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>True of all five</h2></div>
+              <div class="panel__body">
+                <ul class="includes">
+                  <li>The terms of the occasion are written and agreed by both people before it, not during it.</li>
+                  <li>What is said about how you know each other is decided by you, and both are told the same words.</li>
+                  <li>No photographs, by standing agreement, unless you ask for them.</li>
+                  <li>An occasion ends the moment either person says it does, and nothing is asked afterwards.</li>
+                </ul>
+                <div class="note-inline">
+                  Company for an occasion is company for an occasion. Both people are told so in the
+                  same sentence, and neither is led to expect anything else.
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Also here</h2></div>
+              <div class="panel__body">
+                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                  If you are looking for a companion rather than an occasion, that sits under Find a
+                  partner. The arrangements below are for an evening already in your diary.
+                </p>
+              </div>
+              <div class="panel__foot">
+                <a class="btn" href="#find-companion" data-go="find-companion"><span>Event &amp; party companion</span><i class="arrow"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= EVENTS — PARTIES -->
+      <section class="view" id="view-occasions-parties" tabindex="-1" aria-label="Parties">
+        <p class="lede">Parties</p>
+        <p class="sub">
+          The house's own gatherings, and private ones members are invited to. Small by design:
+          fourteen to thirty people, unpublished, and never photographed.
+        </p>
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>How an invitation works</h2></div>
+            <div class="panel__body">
+              <ul class="spine">
+                <li><span class="no">01</span><span>Your advisor proposes you to the host, not the other way round</span></li>
+                <li><span class="no">02</span><span>You are told who else is expected, in general terms, before you answer</span></li>
+                <li><span class="no">03</span><span>You accept, decline, or ask to bring someone — all three are ordinary</span></li>
+                <li><span class="no">04</span><span>Nothing about your attendance is recorded anywhere another member can see</span></li>
+              </ul>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2><span class="pill pill--rest">Next: September</span></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Size</dt><dd>Fourteen to thirty</dd>
+                  <dt>Notice</dt><dd>Three to six weeks</dd>
+                  <dt>Photographs</dt><dd>None, by standing agreement</dd>
+                  <dt>Declining</dt><dd>Without a reason, and without a mark on your file</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <a class="btn" href="#parties" data-go="parties"><span>Private gatherings</span><i class="arrow"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= EVENTS — EVENTS -->
+      <section class="view" id="view-occasions-events" tabindex="-1" aria-label="Events">
+        <p class="lede">Events</p>
+        <p class="sub">
+          An opening, a benefit, a dinner, a box at something. An evening with a host, a guest list,
+          and an hour at which it ends.
+        </p>
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>What we agree beforehand</h2></div>
+            <div class="panel__body">
+              <ul class="includes">
+                <li>The occasion, the host, and who else will be in the room.</li>
+                <li>Dress, and whether the evening has a form anyone is expected to know.</li>
+                <li>What is said about how you know each other, in the same words to both of you.</li>
+                <li>The hours, and who leaves first.</li>
+              </ul>
+              <div class="note-inline">
+                Written and agreed before the evening. Neither of you improvises an answer to a
+                question in front of other people.
+              </div>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Notice</dt><dd>Ten days is comfortable; three is possible</dd>
+                  <dt>Languages</dt><dd>Stated per companion, verified</dd>
+                  <dt>Afterwards</dt><dd>Nothing is asked of either of you</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will telephone for the details of the evening rather than ask you to write them out.">Describe the evening</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= EVENTS — BUSINESS -->
+      <section class="view" id="view-occasions-business" tabindex="-1" aria-label="Business events">
+        <p class="lede">Business events</p>
+        <p class="sub">
+          Where the evening is work. Someone briefed on the room, who will be useful in it and will
+          not become the subject of it.
+        </p>
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>The brief we take</h2></div>
+            <div class="panel__body">
+              <ul class="spine">
+                <li><span class="no">01</span><span>The industry, the company, and what the evening is for</span></li>
+                <li><span class="no">02</span><span>Who will be there that matters, and what they should come away thinking</span></li>
+                <li><span class="no">03</span><span>Subjects to carry, and subjects to leave alone</span></li>
+                <li><span class="no">04</span><span>Whether anyone in the room knows you personally</span></li>
+              </ul>
+              <div class="note-inline">
+                A companion at a business evening is briefed, not scripted. They will not claim an
+                expertise they do not have, and they will not pretend to be a colleague.
+              </div>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Notice</dt><dd>Two weeks, for a proper briefing</dd>
+                  <dt>Confidentiality</dt><dd>Signed per engagement, by the companion</dd>
+                  <dt>Languages</dt><dd>Stated and verified</dd>
+                  <dt>Afterwards</dt><dd>No account of the evening is written</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will ask for the brief before proposing anyone, and will say plainly if the evening is not one we can help with.">Give the brief</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= EVENTS — TRAVEL -->
+      <section class="view" id="view-occasions-travel" tabindex="-1" aria-label="Travel companionship">
+        <p class="lede">Travel companionship</p>
+        <p class="sub">
+          Days rather than hours, and a different set of questions. Arranged only where both people
+          have already met, at least once, somewhere neither of them had to travel to.
+        </p>
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Settled before departure</h2></div>
+            <div class="panel__body">
+              <ul class="includes">
+                <li>Separate rooms unless both people have said otherwise, in writing, in advance.</li>
+                <li>Who holds the tickets, and that either person can leave at any point without discussion.</li>
+                <li>How much of the day is together and how much is not.</li>
+                <li>A named person at the house reachable by both, for the whole of it.</li>
+              </ul>
+              <div class="note-inline">
+                We do not arrange a first meeting abroad. If you have not met, we will introduce you
+                at home first and take the trip as a second question.
+              </div>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Prerequisite</dt><dd>One prior meeting, at minimum</dd>
+                  <dt>Notice</dt><dd>Three weeks</dd>
+                  <dt>Documents</dt><dd>Verified by us, never held by us</dd>
+                  <dt>Ending it</dt><dd>Either person, at any point, return arranged by the house</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will check first whether you have met, and will propose a meeting at home if you have not.">Propose a trip</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= EVENTS — SOCIAL -->
+      <section class="view" id="view-occasions-social" tabindex="-1" aria-label="Social occasions">
+        <p class="lede">Social occasions</p>
+        <p class="sub">
+          A wedding, a family lunch, a reunion. The rooms where the questions are personal, asked by
+          people who have known you a long time, and the answers should be settled in advance.
+        </p>
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>The difficult part, handled first</h2></div>
+            <div class="panel__body">
+              <ul class="spine">
+                <li><span class="no">01</span><span>Who will ask, and what they will ask — usually two or three people you can name</span></li>
+                <li><span class="no">02</span><span>The account of how you met, agreed by both and true enough to repeat</span></li>
+                <li><span class="no">03</span><span>What is not said, and what to do if someone presses</span></li>
+                <li><span class="no">04</span><span>Whether anyone in the family already knows</span></li>
+              </ul>
+              <div class="note-inline">
+                We will not build an account that requires either of you to lie to someone's face.
+                Where the honest answer is awkward, we would rather help you say the awkward thing
+                well.
+              </div>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Notice</dt><dd>Three weeks, and a conversation before</dd>
+                  <dt>Photographs</dt><dd>Yours to decide, agreed by both</dd>
+                  <dt>Family</dt><dd>Never contacted by us, for any reason</dd>
+                  <dt>Afterwards</dt><dd>Nothing is asked of either of you</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will want the conversation before the arrangement, and will be honest if she thinks the occasion is one to attend alone.">Talk it through</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================= LEGEND VERIFIED -->
+      <section class="view" id="view-verified" tabindex="-1" aria-label="Legend Verified">
+        <p class="lede">Legend Verified</p>
+        <p class="sub">
+          Nobody reaches you unchecked. Verification is done by a person, in person, and an advisor
+          puts their name to it — which is the only reason it is worth anything.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>What is checked</h2></div>
+            <div class="panel__body">
+              <div class="convo">
+                <div class="convo__item"><span class="no">01</span><div>
+                  <p class="nm">Identity</p>
+                  <p class="ds">Government documents seen in person by an advisor — never remotely, and never from a scan. We verify them and do not keep them.</p>
+                </div></div>
+                <div class="convo__item"><span class="no">02</span><div>
+                  <p class="nm">Marital standing</p>
+                  <p class="ds">Asked directly, and checked where it can be. A member who is attached and has not said so is removed, not warned.</p>
+                </div></div>
+                <div class="convo__item"><span class="no">03</span><div>
+                  <p class="nm">Profession and means</p>
+                  <p class="ds">Confirmed to the level a member has agreed to disclose. We state what has been confirmed and what has only been claimed.</p>
+                </div></div>
+                <div class="convo__item"><span class="no">04</span><div>
+                  <p class="nm">Conduct</p>
+                  <p class="ds">Two references, and what previous introductions reported. Recorded as fact, not as a rating anyone can see.</p>
+                </div></div>
+                <div class="convo__item"><span class="no">05</span><div>
+                  <p class="nm">The meeting itself</p>
+                  <p class="ds">Twice, in person, before anyone is proposed to a member. The part no document replaces.</p>
+                </div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Your own mark</h2><span class="pill pill--rest">Not yet issued</span></div>
+              <div class="panel__body">
+                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                  A mark is issued only after an advisor has seen your documents in person. Ask for
+                  one at your consultation, or request it here and an appointment is arranged.
+                </p>
+                <dl class="kv" style="margin-top:1.2rem">
+                  <dt>Issued</dt><dd>In person, same day</dd>
+                  <dt>Renewed</dt><dd>Annually, in person</dd>
+                  <dt>Shown to</dt><dd>Only those you are introduced to</dd>
+                  <dt>Withdrawn</dt><dd>Immediately, if anything checked proves untrue</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <a class="btn" href="#credential" data-go="credential"><span>Your verification mark</span><i class="arrow"></i></a>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>What verification is not</h2></div>
+              <div class="panel__body">
+                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                  It is not a score, and it is not a promise about how someone will behave. It says
+                  that what they told us was checked, by whom, and on what date. Judgment about a
+                  person remains an advisor's, with their name on it.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= LEGEND ACADEMY -->
+      <section class="view" id="view-academy" tabindex="-1" aria-label="Legend Academy">
+        <p class="lede">Legend Academy</p>
+        <p class="sub">
+          What the house has learned across eleven hundred introductions, taught properly. Private
+          sessions and small rooms — never a course you watch alone.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>What is taught</h2></div>
+            <div class="panel__body">
+              <div class="convo">
+                <div class="convo__item"><span class="no">01</span><div>
+                  <p class="nm">Reading a first meeting</p>
+                  <p class="ds">What is worth noticing in the first hour, and what almost everyone mistakes for a signal and should not.</p>
+                </div></div>
+                <div class="convo__item"><span class="no">02</span><div>
+                  <p class="nm">The postponed conversations</p>
+                  <p class="ds">Money, children, geography, family. How to raise each of them early, which is the only time it is easy.</p>
+                </div></div>
+                <div class="convo__item"><span class="no">03</span><div>
+                  <p class="nm">Presence</p>
+                  <p class="ds">How to be in a room. Delivered privately, and honestly, by someone who will tell you the thing your friends will not.</p>
+                </div></div>
+                <div class="convo__item"><span class="no">04</span><div>
+                  <p class="nm">Ending things well</p>
+                  <p class="ds">How to say no, and how to be told no. The skill that decides what people say about you afterwards.</p>
+                </div></div>
+              </div>
+              <div class="note-inline">
+                Nothing taught here is used to assess you. Sessions do not enter your file, your
+                brief or your persona, and no advisor working on an introduction reads them.
+              </div>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>How it is held</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Form</dt><dd>Private sessions, or rooms of six</dd>
+                  <dt>Length</dt><dd>Ninety minutes</dd>
+                  <dt>Where</dt><dd>London, New York, Geneva; or your own house</dd>
+                  <dt>Included</dt><dd>Two sessions a year under a Signature mandate</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will suggest which session is worth your time first, and will say if she thinks none of them are.">Ask about a session</button>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Who teaches</h2></div>
+              <div class="panel__body">
+                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                  Advisors of the house, and a small number of people from outside it — a
+                  negotiator, a former diplomat, a psychotherapist. Named to you before you agree
+                  to a session, never after.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= FIND A PARTNER -->
+      <section class="view" id="view-find" tabindex="-1" aria-label="Find a partner">
+        <p class="lede">Find a partner</p>
+        <p class="sub">
+          What you are looking for decides how we look. Four tracks, retained singly, and you may
+          be on more than one — or move between them without explaining yourself.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>The four tracks</h2></div>
+            <div class="panel__body">
+              <div class="convo">
+                <div class="convo__item">
+                  <span class="no">01</span>
+                  <div>
+                    <p class="nm">Long-term relationship</p>
+                    <p class="ds">The full search: what a partnership must be for this life, then the person, verified in
+                      person, then the first year. Months rather than weeks.</p>
+                    <a class="btn" href="#find-long" data-go="find-long"><span>Open</span><i class="arrow"></i></a>
+                  </div>
+                </div>
+                <div class="convo__item">
+                  <span class="no">02</span>
+                  <div>
+                    <p class="nm">Short-term relationship</p>
+                    <p class="ds">Companionship on stated terms, for a period both people name at the outset. Nothing
+                      about it is provisional except its length.</p>
+                    <a class="btn" href="#find-short" data-go="find-short"><span>Open</span><i class="arrow"></i></a>
+                  </div>
+                </div>
+                <div class="convo__item">
+                  <span class="no">03</span>
+                  <div>
+                    <p class="nm">Casual dating</p>
+                    <p class="ds">Lighter, and without an intention attached. The same verification and the same
+                      discretion — we simply do not ask where it is going.</p>
+                    <a class="btn" href="#find-casual" data-go="find-casual"><span>Open</span><i class="arrow"></i></a>
+                  </div>
+                </div>
+                <div class="convo__item">
+                  <span class="no">04</span>
+                  <div>
+                    <p class="nm">Event &amp; party companion</p>
+                    <p class="ds">Someone for a particular evening, who will be at ease in the room and will not be
+                      the thing anyone remembers about it.</p>
+                    <a class="btn" href="#find-companion" data-go="find-companion"><span>Open</span><i class="arrow"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>True of all four</h2></div>
+              <div class="panel__body">
+                <ul class="includes">
+                  <li>Every candidate is met in person by an advisor before they are considered for you.</li>
+                  <li>Nothing about you is disclosed to anyone until you have agreed to it, in writing, case by case.</li>
+                  <li>An advisor's name is on every recommendation. Nothing is decided by a system.</li>
+                </ul>
+                <div class="note-inline">
+                  Which track you are on is held on your file and seen by your advisor. It is never
+                  shown to another member, and moving between tracks is not recorded as a change of
+                  mind.
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Not sure which</h2></div>
+              <div class="panel__body">
+                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                  Most members are not, at first. Say so and your advisor will begin with the
+                  assessment rather than a track — the answer usually arrives on its own.
+                </p>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will begin with the assessment and will not ask you to choose a track before it.">Begin with the assessment</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= FIND — LONG TERM -->
+      <section class="view" id="view-find-long" tabindex="-1" aria-label="Long-term relationship">
+        <p class="lede">Long-term relationship</p>
+        <p class="sub">
+          The whole of it: establishing what a partnership must be for this particular life, finding
+          the person, and staying through the year that decides whether it holds.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>How it runs</h2></div>
+            <div class="panel__body">
+              <ul class="spine">
+                <li><span class="no">01</span><span>Assessment — what this life actually needs, before a name is considered</span></li>
+                <li><span class="no">02</span><span>The brief, written and agreed with you</span></li>
+                <li><span class="no">03</span><span>Search, inside the network and beyond it</span></li>
+                <li><span class="no">04</span><span>Verification — met in person, twice, before a case is written</span></li>
+                <li><span class="no">05</span><span>Introduction, with the reasoning on the table</span></li>
+                <li><span class="no">06</span><span>Formation — the first year, and the conversations most couples postpone</span></li>
+              </ul>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Pace</dt><dd>Months, not weeks</dd>
+                  <dt>Introductions</dt><dd>Single figures in a year</dd>
+                  <dt>Withheld</dt><dd>Name and photograph, until you accept</dd>
+                  <dt>Ending it</dt><dd>Whenever you say, without a reason</dd>
+                </dl>
+                <div class="note-inline">
+                  The figure that matters is the one you do not see: the candidates assessed
+                  properly and not brought to you. That is what the mandate is buying.
+                </div>
+              </div>
+              <div class="panel__foot">
+                <a class="btn" href="#introductions" data-go="introductions"><span>Your introductions</span><i class="arrow"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= FIND — SHORT TERM -->
+      <section class="view" id="view-find-short" tabindex="-1" aria-label="Short-term relationship">
+        <p class="lede">Short-term relationship</p>
+        <p class="sub">
+          Companionship on terms both people state at the outset, for a period both people name.
+          Nothing about it is provisional except its length.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Stated at the outset</h2></div>
+            <div class="panel__body">
+              <ul class="includes">
+                <li>How long, in months, and what happens at the end of it.</li>
+                <li>What each person is looking for, said plainly rather than discovered later.</li>
+                <li>Whether it is exclusive, and whether that is expected to change.</li>
+                <li>How it ends — by whom, with how much notice, and what is said afterwards.</li>
+              </ul>
+              <div class="note-inline">
+                We put these in writing before an introduction, not because they are binding, but
+                because a term nobody said aloud is the one that causes the injury.
+              </div>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Pace</dt><dd>Weeks to a first introduction</dd>
+                  <dt>Term</dt><dd>Named by both, reviewed at the end</dd>
+                  <dt>Verification</dt><dd>The same as every other track</dd>
+                  <dt>Renewal</dt><dd>Asked of each of you separately</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will ask you for the terms first and will not begin looking until they are written down.">Set my terms</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= FIND — CASUAL -->
+      <section class="view" id="view-find-casual" tabindex="-1" aria-label="Casual dating">
+        <p class="lede">Casual dating</p>
+        <p class="sub">
+          Lighter, and without an intention attached. The same verification and the same discretion
+          as every other track — we simply do not ask where it is going.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>What is different</h2></div>
+            <div class="panel__body">
+              <ul class="includes">
+                <li>No brief, and no assessment unless you want one.</li>
+                <li>No case written, no reasoning to read — an introduction and a name.</li>
+                <li>Nothing is asked of you afterwards. No reflection, and no standing.</li>
+              </ul>
+              <p class="ask__lbl">What is not different</p>
+              <ul class="includes">
+                <li>Every person is met and verified before you meet them.</li>
+                <li>Consent is asked case by case, exactly as elsewhere.</li>
+                <li>Nothing about it appears anywhere another member can see.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Pace</dt><dd>Days to a first introduction</dd>
+                  <dt>Obligation</dt><dd>None, on either side</dd>
+                  <dt>Held on file</dt><dd>The introduction only</dd>
+                  <dt>Ending it</dt><dd>Silence is an acceptable answer</dd>
+                </dl>
+                <div class="note-inline">
+                  Members on this track are not shown to members on the long-term track, and the
+                  reverse. Nobody is met under a description they did not agree to.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= FIND — COMPANION -->
+      <section class="view" id="view-find-companion" tabindex="-1" aria-label="Event and party companion">
+        <p class="lede">Event &amp; party companion</p>
+        <p class="sub">
+          Someone for a particular evening — who will be at ease in the room, and who will not be
+          the thing anyone remembers about it.
+        </p>
+
+        <div class="cols cols--7-5" style="margin-top:2.6rem">
+          <div class="panel">
+            <div class="panel__head"><h2>What we need from you</h2></div>
+            <div class="panel__body">
+              <ul class="spine">
+                <li><span class="no">01</span><span>The occasion, the room, and who else will be in it</span></li>
+                <li><span class="no">02</span><span>What is expected of a guest there — dress, language, whether anyone will ask questions</span></li>
+                <li><span class="no">03</span><span>What you would like said about how you know each other</span></li>
+                <li><span class="no">04</span><span>The hours, and who leaves first</span></li>
+              </ul>
+              <div class="note-inline">
+                Agreed with both of you before the evening, in writing. Neither of you improvises an
+                answer to a question in front of other people.
+              </div>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.6rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What to expect</h2></div>
+              <div class="panel__body">
+                <dl class="kv">
+                  <dt>Notice</dt><dd>Ten days is comfortable; three is possible</dd>
+                  <dt>Languages</dt><dd>Stated per companion, verified</dd>
+                  <dt>Discretion</dt><dd>No photographs, by standing agreement</dd>
+                  <dt>Afterwards</dt><dd>Nothing is asked of either of you</dd>
+                </dl>
+              </div>
+              <div class="panel__foot">
+                <button class="btn btn--solid" type="button" data-note="Noted for C. Vasseur. She will telephone for the details of the evening rather than ask you to write them out.">Describe the evening</button>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Where our limit is</h2></div>
+              <div class="panel__body">
+                <p style="font-size:.92rem;color:var(--fg-soft);margin:0">
+                  This is company for an occasion and nothing else. Both people are told so in the
+                  same words, and an evening ends the moment either of them says it does.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- ======================================== INTRODUCTIONS -->
@@ -5714,6 +6465,19 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
 
   // Six categories in the rail; everything else is a section beneath one of them.
   var TITLES = {
+    verified:        'Legend Verified',
+    academy:         'Legend Academy',
+    find:            'Find a partner',
+    occasions:              'Events',
+    'occasions-parties':    'Parties',
+    'occasions-events':     'Events',
+    'occasions-business':   'Business events',
+    'occasions-travel':     'Travel companionship',
+    'occasions-social':     'Social occasions',
+    'find-long':     'Long-term relationship',
+    'find-short':    'Short-term relationship',
+    'find-casual':   'Casual dating',
+    'find-companion':'Event & party companion',
     long:       'Long partner',
     short:      'Short partner',
     events:     'Party & event',
@@ -5796,6 +6560,11 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
   // Which category a section belongs to, so the rail still shows where you are
   // once you have gone one level down.
   var PARENT = {
+    'find-long': 'find', 'find-short': 'find',
+    'find-casual': 'find', 'find-companion': 'find',
+    'occasions-parties': 'occasions', 'occasions-events': 'occasions',
+    'occasions-business': 'occasions', 'occasions-travel': 'occasions',
+    'occasions-social': 'occasions',
     proposed: 'long', requests: 'long', introductions: 'long', appointments: 'long',
     preferences: 'me', reflections: 'me', intentions: 'me', persona: 'me', profile: 'me',
     insights: 'management', formation: 'management', counsel: 'management', continuity: 'management',
@@ -5847,6 +6616,26 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
         title.textContent = TITLES[name];
       }
     }
+
+    // A category with children in the rail opens its list when it or one of them
+    // is current, and folds away otherwise, so the rail stays the length of its
+    // categories rather than the length of everything under them.
+    $$('.rail__sub').forEach(function (sub) {
+      var root = sub.getAttribute('data-branch');
+      var cat = $('#rail-nav a[data-view="' + root + '"]');
+      if (!cat) return;
+      var open = mark === root;
+      sub.hidden = !open;
+      cat.setAttribute('aria-expanded', open ? 'true' : 'false');
+      // One aria-current per page: on a child it belongs to the child, and the
+      // parent keeps only its open state and the rail's own marker.
+      if (open && name !== root) { cat.removeAttribute('aria-current'); cat.classList.add('is-branch'); }
+      else { cat.classList.remove('is-branch'); }
+      $$('a', sub).forEach(function (a) {
+        if (a.getAttribute('data-view') === name) { a.setAttribute('aria-current', 'page'); }
+        else { a.removeAttribute('aria-current'); }
+      });
+    });
 
     // The nav can scroll on short screens — keep the current item in sight.
     var current = $('#rail-nav a[aria-current="page"]');
