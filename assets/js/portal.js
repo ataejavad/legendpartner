@@ -140,11 +140,7 @@
         var sal = document.createElement('span');
         sal.className = 'title__salutation';
         sal.textContent = SALUTATION;
-        var who = document.createElement('span');
-        who.className = 'title__member';
-        who.textContent = ', ' + MEMBER;      // the comma belongs to the name,
-        title.appendChild(sal);               // so dropping the name reads cleanly
-        title.appendChild(who);
+        title.appendChild(sal);               // the name lives once, top right
       } else {
         title.textContent = TITLES[name];
       }

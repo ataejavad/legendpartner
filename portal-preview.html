@@ -1126,11 +1126,48 @@ body.portal-body{
    the rail keeps the name; the comma travels with the name so what is left
    reads as a sentence. */
 @media (max-width:1150px){
-  .title__member{ display:none; }
   /* The date is the least load-bearing thing in the bar, and at 901px — where
      the rail becomes a sidebar and the column narrows — it was leaving the
-     title 69px to render a greeting in. It goes before the greeting does. */
+     title 69px to render a greeting in. It goes first. */
   .topbar .meta .date{ display:none; }
+}
+
+/* The member's identity, at the far right of the bar. Small by necessity: the
+   bar is 56px and already carries the greeting, the section links and the
+   confidentiality mark. The name is the half that matters, so the reference
+   folds away first. */
+.topbar__member{
+  display:flex; align-items:baseline; gap:.55rem;
+  flex:none; min-width:0;
+  padding-left:1.6rem; border-left:1px solid var(--line-soft);
+}
+.topbar__member .name{
+  font-family:var(--serif); font-weight:300; font-size:.95rem;
+  letter-spacing:normal; text-transform:none; color:#EDEAE3; white-space:nowrap;
+}
+.topbar__member .ref{
+  font-size:.52rem; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--fg-faint); white-space:nowrap;
+}
+@media (max-width:1150px){
+  .topbar__member .ref{ display:none; }
+}
+@media (max-width:900px){
+  .topbar__member{ padding-left:1rem; }
+  .topbar__member .name{ font-size:.86rem; }
+}
+
+/* Below 640px the 2rem gaps between the bar's three groups are most of what is
+   left; at 390px the bar wanted 425px of content in 342px and the greeting was
+   being ellipsed down to "G.". The gaps go first, then the confidentiality
+   mark, which is the only thing here the lock screen and the footer already
+   say. The greeting and the name both survive to 320px. */
+@media (max-width:640px){
+  .topbar{ gap:1rem; }
+  .topbar .meta{ gap:1rem; }
+}
+@media (max-width:520px){
+  .topbar .confidential{ display:none; }
 }
 .topbar .meta{
   display:flex; align-items:center; gap:1.6rem;
@@ -2884,12 +2921,7 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
       </button>
       </div>
 
-      <div class="rail__member">
-        <p class="name">A. Marchand</p>
-        <span class="ref">Signature · SG-2411</span>
-      </div>
-
-      <nav class="rail__nav" id="rail-nav" aria-label="Portal">
+            <nav class="rail__nav" id="rail-nav" aria-label="Portal">
         <a class="cat cat--home" href="#overview" data-view="overview" data-label="Overview">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>
           <span>Overview<span class="cat__n">What is waiting, at a glance</span></span>
@@ -2943,6 +2975,10 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
       <div class="meta">
         <span class="date" id="today"></span>
         <span class="confidential">Confidential</span>
+        <span class="topbar__member">
+          <span class="name">A. Marchand</span>
+          <span class="ref">Signature &middot; SG-2411</span>
+        </span>
       </div>
     </header>
 
@@ -5806,11 +5842,7 @@ body{background:#0B0B0C;color:#EDEAE3;font-family:var(--sans);font-size:var(--t-
         var sal = document.createElement('span');
         sal.className = 'title__salutation';
         sal.textContent = SALUTATION;
-        var who = document.createElement('span');
-        who.className = 'title__member';
-        who.textContent = ', ' + MEMBER;      // the comma belongs to the name,
-        title.appendChild(sal);               // so dropping the name reads cleanly
-        title.appendChild(who);
+        title.appendChild(sal);               // the name lives once, top right
       } else {
         title.textContent = TITLES[name];
       }
