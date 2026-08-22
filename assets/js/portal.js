@@ -1060,5 +1060,204 @@
     });
   });
 
+  /* --- Live tiles ---------------------------------------------------------
+     Three behaviours on one row:
+       · the figures count up once, when the row first arrives;
+       · each tile turns to a second face carrying the sentence behind the
+         figure, staggered so the row is never all in motion at once;
+       · the member can reorder the row by drag or keyboard, and the order is
+         remembered on the device.
+     Nothing here decides anything — it is presentation of what is already on
+     the file, and all of it is off under prefers-reduced-motion.            */
+  var tilesRow = $('#tiles');
+  if (tilesRow) (function () {
+    var TILE_KEY = 'legend.tiles';
+    var tiles = function () { return $$('.tile', tilesRow); };
+
+    function stamp() {
+      tiles().forEach(function (t, i) { t.style.setProperty('--i', i); });
+    }
+
+    /* -- remembered order ------------------------------------------------- */
+    function save() {
+      var order = tiles().map(function (t) { return t.getAttribute('data-tile'); });
+      try { localStorage.setItem(TILE_KEY, order.join(',')); } catch (e) {}
+      if (resetBtn) resetBtn.hidden = false;
+    }
+
+    var DEFAULT_ORDER = tiles().map(function (t) { return t.getAttribute('data-tile'); });
+    var resetBtn = $('#tiles-reset');
+
+    function restore() {
+      var raw = null;
+      try { raw = localStorage.getItem(TILE_KEY); } catch (e) {}
+      if (!raw) return;
+      var order = raw.split(',');
+      // Only honour a remembered order that still names exactly these tiles;
+      // a stale list from an older build is discarded rather than half-applied.
+      var same = order.length === DEFAULT_ORDER.length &&
+        order.every(function (n) { return DEFAULT_ORDER.indexOf(n) > -1; });
+      if (!same) { try { localStorage.removeItem(TILE_KEY); } catch (e) {} return; }
+      order.forEach(function (name) {
+        var t = $('.tile[data-tile="' + name + '"]', tilesRow);
+        if (t) tilesRow.appendChild(t);
+      });
+      if (resetBtn) resetBtn.hidden = false;
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        DEFAULT_ORDER.forEach(function (name) {
+          var t = $('.tile[data-tile="' + name + '"]', tilesRow);
+          if (t) tilesRow.appendChild(t);
+        });
+        try { localStorage.removeItem(TILE_KEY); } catch (e) {}
+        resetBtn.hidden = true;
+        stamp();
+        announce('The tiles are back in their original order.');
+      });
+    }
+
+    /* -- a live region, so reordering is audible as well as visible -------- */
+    var say = document.createElement('p');
+    say.className = 'sr-only';
+    say.setAttribute('role', 'status');
+    say.setAttribute('aria-live', 'polite');
+    tilesRow.parentNode.insertBefore(say, tilesRow.nextSibling);
+    function announce(text) { say.textContent = text; }
+
+    function label(t) {
+      // The front label is broken over two lines, and a <br> yields no space in
+      // textContent; the back face carries the same words unbroken.
+      var l = $('.tile__face--b .tile__l', t) || $('.tile__l', t);
+      return l ? l.textContent.replace(/\s+/g, ' ').trim() : 'Tile';
+    }
+
+    /* -- drag to reorder --------------------------------------------------- */
+    var dragged = null, dragging = false;
+
+    tiles().forEach(function (t) {
+      t.addEventListener('dragstart', function (e) {
+        dragged = t; dragging = true;
+        t.classList.add('is-dragging');
+        try {
+          e.dataTransfer.effectAllowed = 'move';
+          // Firefox will not start a drag without payload.
+          e.dataTransfer.setData('text/plain', t.getAttribute('data-tile'));
+        } catch (err) {}
+      });
+      t.addEventListener('dragend', function () {
+        t.classList.remove('is-dragging');
+        tiles().forEach(function (o) { o.classList.remove('is-over'); });
+        dragged = null;
+        stamp();
+        // The click that ends a drag must not also navigate.
+        setTimeout(function () { dragging = false; }, 60);
+      });
+      t.addEventListener('dragenter', function () {
+        if (dragged && dragged !== t) t.classList.add('is-over');
+      });
+      t.addEventListener('dragleave', function () { t.classList.remove('is-over'); });
+      t.addEventListener('dragover', function (e) { e.preventDefault(); });
+      t.addEventListener('drop', function (e) {
+        e.preventDefault();
+        t.classList.remove('is-over');
+        if (!dragged || dragged === t) return;
+        var list = tiles();
+        var from = list.indexOf(dragged), to = list.indexOf(t);
+        tilesRow.insertBefore(dragged, from < to ? t.nextSibling : t);
+        settle(dragged);
+        save(); stamp();
+        announce(label(dragged) + ' moved to position ' + (tiles().indexOf(dragged) + 1) + ' of ' + list.length + '.');
+      });
+
+      // A drag ends in a click on the anchor; swallow that one.
+      t.addEventListener('click', function (e) {
+        if (dragging) { e.preventDefault(); e.stopImmediatePropagation(); }
+      }, true);
+
+      /* -- keyboard reordering: Alt + arrow -------------------------------- */
+      t.addEventListener('keydown', function (e) {
+        if (!e.altKey || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+        e.preventDefault();
+        var list = tiles(), i = list.indexOf(t);
+        var j = e.key === 'ArrowLeft' ? i - 1 : i + 1;
+        if (j < 0 || j >= list.length) return;
+        tilesRow.insertBefore(t, e.key === 'ArrowLeft' ? list[j] : list[j].nextSibling);
+        settle(t); save(); stamp(); t.focus();
+        announce(label(t) + ' moved to position ' + (j + 1) + ' of ' + list.length + '.');
+      });
+    });
+
+    function settle(t) {
+      if (reduced) return;
+      t.classList.remove('is-settling');
+      void t.offsetWidth;                    // restart the animation
+      t.classList.add('is-settling');
+      setTimeout(function () { t.classList.remove('is-settling'); }, 460);
+    }
+
+    restore();
+    stamp();
+
+    /* -- entrance, counters, and the turning ------------------------------- */
+    function countUp(el) {
+      var target = parseFloat(el.getAttribute('data-count'));
+      var dec = parseInt(el.getAttribute('data-dec') || '0', 10);
+      if (isNaN(target)) return;
+      var t0 = null, ms = 900;
+      function frame(now) {
+        if (t0 === null) t0 = now;
+        var k = Math.min((now - t0) / ms, 1);
+        k = 1 - Math.pow(1 - k, 3);          // ease out
+        el.textContent = (target * k).toFixed(dec);
+        if (k < 1) requestAnimationFrame(frame);
+        else el.textContent = target.toFixed(dec);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    var paused = false, turnTimer = null, turnIdx = 0;
+
+    // One tile is turned at a time: shown for a beat, returned, then a pause
+    // before the next. A recursive timeout rather than an interval, so the
+    // hold and the gap can differ and can never overlap.
+    function turnNext() {
+      var list = tiles();
+      if (!list.length) return;
+      if (paused || document.hidden) { turnTimer = setTimeout(turnNext, 1400); return; }
+      var t = list[turnIdx % list.length];
+      turnIdx++;
+      t.classList.add('is-flipped');
+      turnTimer = setTimeout(function () {
+        t.classList.remove('is-flipped');
+        turnTimer = setTimeout(turnNext, 1500);
+      }, 3600);
+    }
+
+    function startTurning() {
+      if (reduced || turnTimer) return;
+      turnTimer = setTimeout(turnNext, 600);
+    }
+
+    // The entrance itself is a CSS animation, so the row is never dependent on
+    // this running. What waits for the row to be seen is the counting and the
+    // turning, neither of which is worth doing off-screen.
+    function reveal() {
+      if (!reduced) $$('.tile__num', tilesRow).forEach(countUp);
+      startTurning();
+    }
+
+    if (reduced || !('IntersectionObserver' in window)) { reveal(); }
+    else {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { io.disconnect(); reveal(); }
+        });
+      }, { threshold: .25 });
+      io.observe(tilesRow);
+    }
+  })();
+
   route();
 })();

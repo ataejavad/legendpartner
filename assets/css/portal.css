@@ -1481,3 +1481,134 @@ a.tile:hover{ transform:translateY(-2px); }
   .rail__nav a.cat .nav-ic{ transform:none; }
   .rail__tip{ transition:none; }
 }
+
+/* --- Live tiles ---------------------------------------------------------- */
+/* Each tile carries two faces. The front is the figure; the back is the
+   sentence that explains it, which is the only reason the tile moves at all.
+   The row is also the member's to arrange — drag, or Alt+arrow from the
+   keyboard — and the order is remembered on the device. */
+.tiles--live{ perspective:900px; }
+
+.tiles--live .tile{ cursor:grab; }
+.tiles--live .tile:active{ cursor:grabbing; }
+
+.tile__flip{
+  display:grid; flex:1; min-height:0;
+  transform-style:preserve-3d;
+  transition:transform .9s cubic-bezier(.6,.02,.2,1);
+}
+.tile__face{
+  grid-area:1/1;
+  display:flex; flex-direction:column; justify-content:space-between; gap:.5rem;
+  -webkit-backface-visibility:hidden; backface-visibility:hidden;
+}
+.tile__face--b{ transform:rotateX(180deg); }
+.tile.is-flipped .tile__flip{ transform:rotateX(180deg); }
+
+.tile__d{
+  font-family:var(--serif); font-size:1.02rem; line-height:1.4; font-weight:300;
+  text-wrap:balance;
+}
+.tile__num{ font-variant-numeric:tabular-nums; }
+.tile__suf{ font-size:.42em; letter-spacing:.06em; }
+
+/* Entrance: the row settles in rather than appearing all at once. This is a
+   CSS animation, not a JS class, so the tiles are never left invisible if the
+   script does not run. `backwards` holds the opening frame through the stagger
+   delay and then lets go entirely — which is what keeps the hover lift below
+   from being overridden by a lingering fill. */
+@keyframes tile-in{ from{ opacity:0; transform:translateY(10px); } }
+.tiles--live .tile{
+  animation:tile-in .7s var(--ease) backwards;
+  animation-delay:calc(var(--i,0) * 70ms);
+}
+
+/* Dragging */
+.tile.is-dragging{ opacity:.4; cursor:grabbing; }
+.tile.is-over{ outline:1px solid var(--champagne); outline-offset:3px; }
+.tile.is-settling{ animation:tile-settle .42s var(--ease); }
+@keyframes tile-settle{
+  0%{ transform:scale(.97) } 60%{ transform:scale(1.015) } 100%{ transform:none }
+}
+
+.tiles__hint{
+  margin:.9rem 0 0;
+  font-size:.72rem; line-height:1.7; color:var(--fg-faint);
+  display:flex; align-items:baseline; gap:.6rem; flex-wrap:wrap;
+}
+.tiles__hint kbd{
+  font-family:var(--sans); font-size:.66rem; padding:.1rem .34rem;
+  border:1px solid var(--line-soft); border-radius:var(--r-xs);
+  color:var(--fg-soft);
+}
+.tiles__reset{
+  background:none; border:0; padding:0; cursor:pointer;
+  font:inherit; color:var(--champagne);
+  border-bottom:1px solid currentColor;
+}
+.tiles__reset:hover{ opacity:.75; }
+
+/* --- The assistant, centred --------------------------------------------- */
+/* The chat is the middle of the dashboard: tiles above, the rest of the cards
+   below. It runs the full width of the column so it reads as the room's table
+   rather than one more card in a grid. */
+.ask-centre{ margin-top:clamp(1rem,1.6vw,1.6rem); }
+.ask-centre .ask--centre{
+  background:var(--card); border-color:var(--card-line);
+  --fg-faint:rgba(237,234,227,.64);
+}
+.dash .ask-centre .ask--centre{
+  border-radius:var(--r);
+  box-shadow:var(--shadow), 0 0 0 1px rgba(207,196,176,.10), 0 24px 70px -40px rgba(207,196,176,.30);
+}
+.ask--centre .ask__thread{ min-height:clamp(220px,26vh,340px); max-height:46vh; }
+/* An opening line stranded at the top of a tall panel reads as a dead page.
+   Pushing the first message down sits the conversation on the composer, the
+   way a thread actually behaves — done with margin rather than
+   justify-content, which clips the top of an overflowing flex column. */
+.ask--centre .ask__thread > .msg:first-child{ margin-top:auto; }
+/* Wider than the sidebar version was, but still a measure you can read; the
+   member's own messages keep sitting right because .msg--me has room to push. */
+.ask--centre .msg{ max-width:min(68ch, 100%); }
+.ask--centre .msg .bubble{ font-size:.96rem; line-height:1.7; }
+.ask--centre .composer textarea{ min-height:2.8rem; }
+
+@media (max-width:720px){
+  .ask--centre .ask__thread{ min-height:200px; }
+}
+
+/* Announcements for the reordering, for screen readers only. */
+.sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap;
+  border:0;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .tile__flip{ transition:none; }
+  .tiles--live .tile{ animation:none; }
+  .tile.is-settling{ animation:none; }
+}
+
+/* The assistant's terms belong with the assistant, not adrift in the card grid
+   where a tall list of prohibitions left a short neighbour stranded. Under the
+   chat, and side by side, it is wide and short instead of narrow and tall. */
+.ask-centre .ask-terms{
+  margin-top:clamp(.8rem,1.2vw,1.2rem);
+  background:var(--card); border-color:var(--card-line);
+  --fg-faint:rgba(237,234,227,.64);
+}
+.dash .ask-centre .ask-terms{ border-radius:var(--r); box-shadow:var(--shadow); }
+.ask-terms__body{
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:1.6rem clamp(1.4rem,3vw,3rem);
+}
+/* .panel__body spaces its children with a top margin on every sibling, which
+   in a grid pushes the second column a row-gap out of line with the first.
+   The gap above does that job here. */
+.ask-terms__body > * + *{ margin-top:0; }
+.ask-terms__body > .note-inline{ grid-column:1 / -1; }
+.ask-terms__body .ask__lbl{ margin-top:0; }
+@media (max-width:760px){
+  .ask-terms__body{ grid-template-columns:minmax(0,1fr); }
+}

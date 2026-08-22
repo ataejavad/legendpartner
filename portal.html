@@ -175,40 +175,93 @@
           </div>
         </div>
 
-        <!-- the tile row -->
-        <div class="tiles" style="margin-top:2.2rem">
-          <a class="tile" href="#proposed" data-go="proposed">
+        <!-- the tile row — live tiles: each turns to a second face carrying the
+             detail behind the figure, and the row can be reordered by the member -->
+        <div class="tiles tiles--live" id="tiles" style="margin-top:2.2rem">
+          <a class="tile" href="#proposed" data-go="proposed" data-tile="proposed" draggable="true" style="--i:0">
             <span class="tile__act" aria-hidden="true"></span>
-            <span class="tile__n">2</span>
-            <span class="tile__l">Proposed<br>for you</span>
+            <span class="tile__flip">
+              <span class="tile__face">
+                <span class="tile__n"><span class="tile__num" data-count="2">2</span></span>
+                <span class="tile__l">Proposed<br>for you</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">Two cases are open. The older has been waiting nine days.</span>
+                <span class="tile__l">Proposed for you</span>
+              </span>
+            </span>
           </a>
-          <a class="tile" href="#requests" data-go="requests">
+          <a class="tile" href="#requests" data-go="requests" data-tile="requests" draggable="true" style="--i:1">
             <span class="tile__act" aria-hidden="true"></span>
-            <span class="tile__n">2</span>
-            <span class="tile__l">Asked<br>of you</span>
+            <span class="tile__flip">
+              <span class="tile__face">
+                <span class="tile__n"><span class="tile__num" data-count="2">2</span></span>
+                <span class="tile__l">Asked<br>of you</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">One consent request, and one reflection your advisor is waiting on.</span>
+                <span class="tile__l">Asked of you</span>
+              </span>
+            </span>
           </a>
-          <a class="tile" href="#introductions" data-go="introductions">
-            <span class="tile__n">1</span>
-            <span class="tile__l">Introduction<br>awaiting</span>
+          <a class="tile" href="#introductions" data-go="introductions" data-tile="introductions" draggable="true" style="--i:2">
+            <span class="tile__flip">
+              <span class="tile__face">
+                <span class="tile__n"><span class="tile__num" data-count="1">1</span></span>
+                <span class="tile__l">Introduction<br>awaiting</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">No. 07 — a founder in Zurich, met twice before the case was written.</span>
+                <span class="tile__l">Introduction awaiting</span>
+              </span>
+            </span>
           </a>
-          <a class="tile" href="#appointments" data-go="appointments">
-            <span class="tile__n">28<span style="font-size:.42em;letter-spacing:.06em"> Aug</span></span>
-            <span class="tile__l">Next<br>appointment</span>
+          <a class="tile" href="#appointments" data-go="appointments" data-tile="appointments" draggable="true" style="--i:3">
+            <span class="tile__flip">
+              <span class="tile__face">
+                <span class="tile__n"><span class="tile__num" data-count="28">28</span><span class="tile__suf"> Aug</span></span>
+                <span class="tile__l">Next<br>appointment</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">Friday, 20:00 · Marylebone. The table is held in our name.</span>
+                <span class="tile__l">Next appointment</span>
+              </span>
+            </span>
           </a>
-          <a class="tile" href="#persona" data-go="persona">
-            <span class="tile__n">72<span style="font-size:.42em">%</span></span>
-            <span class="tile__l">Persona<br>complete</span>
+          <a class="tile" href="#persona" data-go="persona" data-tile="persona" draggable="true" style="--i:4">
+            <span class="tile__flip">
+              <span class="tile__face">
+                <span class="tile__n"><span class="tile__num" data-count="72">72</span><span class="tile__suf">%</span></span>
+                <span class="tile__l">Persona<br>complete</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">Six sessions in. Around six is where it stops changing much.</span>
+                <span class="tile__l">Persona complete</span>
+              </span>
+            </span>
           </a>
-          <a class="tile" href="#reflections" data-go="reflections">
-            <span class="tile__n">4.6</span>
-            <span class="tile__l">Your standing<br>out of five</span>
+          <a class="tile" href="#reflections" data-go="reflections" data-tile="reflections" draggable="true" style="--i:5">
+            <span class="tile__flip">
+              <span class="tile__face">
+                <span class="tile__n"><span class="tile__num" data-count="4.6" data-dec="1">4.6</span></span>
+                <span class="tile__l">Your standing<br>out of five</span>
+              </span>
+              <span class="tile__face tile__face--b" aria-hidden="true">
+                <span class="tile__d">Across eleven meetings. Never shown to anyone you meet.</span>
+                <span class="tile__l">Your standing</span>
+              </span>
+            </span>
           </a>
         </div>
+        <p class="tiles__hint" id="tiles-hint">
+          The tiles turn to show what sits behind each figure. Drag one to reorder the row, or focus
+          it and hold <kbd>Alt</kbd> with <kbd>←</kbd> / <kbd>→</kbd>. Your order is remembered on this device.
+          <button type="button" class="tiles__reset" id="tiles-reset" hidden>Reset the order</button>
+        </p>
 
-        <!-- the card grid -->
-        <div class="dash-grid">
-
-          <div class="panel span-2 ask">
+        <!-- the assistant, given the middle of the page -->
+        <div class="ask-centre">
+          <div class="panel ask ask--centre">
             <div class="panel__head">
               <h2>Ask the house</h2>
               <span class="pill pill--rest">Assistant &middot; reads your file only</span>
@@ -248,22 +301,25 @@
               </p>
             </div>
           </div>
-
-          <div class="panel">
+          <div class="panel ask-terms">
             <div class="panel__head"><h2>What it will and will not do</h2></div>
-            <div class="panel__body">
-              <p class="ask__lbl">It will</p>
-              <ul class="includes">
-                <li>Answer about your own file &mdash; appointments, cases, the brief, fees, whatever is outstanding.</li>
-                <li>Draft a note to your advisor and leave it for you to send.</li>
-                <li>Say it does not know, and hand the question to a person by name.</li>
-              </ul>
-              <p class="ask__lbl">It will not</p>
-              <ul class="includes includes--not">
-                <li>Disclose a name, profession or photograph that is still withheld from you.</li>
-                <li>Accept, decline, arrange or cancel anything on your behalf.</li>
-                <li>Decide who is brought to you. That is an advisor's judgment, with their name on it.</li>
-              </ul>
+            <div class="panel__body ask-terms__body">
+              <div>
+                <p class="ask__lbl">It will</p>
+                <ul class="includes">
+                  <li>Answer about your own file &mdash; appointments, cases, the brief, fees, whatever is outstanding.</li>
+                  <li>Draft a note to your advisor and leave it for you to send.</li>
+                  <li>Say it does not know, and hand the question to a person by name.</li>
+                </ul>
+              </div>
+              <div>
+                <p class="ask__lbl">It will not</p>
+                <ul class="includes includes--not">
+                  <li>Disclose a name, profession or photograph that is still withheld from you.</li>
+                  <li>Accept, decline, arrange or cancel anything on your behalf.</li>
+                  <li>Decide who is brought to you. That is an advisor's judgment, with their name on it.</li>
+                </ul>
+              </div>
               <div class="note-inline">
                 It is not your persona. The persona is the model of you and speaks to other members
                 with your permission; this answers to you and speaks to nobody.
@@ -273,7 +329,10 @@
               <a class="btn" href="#persona" data-go="persona"><span>Your persona</span><i class="arrow"></i></a>
             </div>
           </div>
+        </div>
 
+        <!-- the card grid -->
+        <div class="dash-grid">
 
           <div class="panel span-2">
             <div class="panel__head">
