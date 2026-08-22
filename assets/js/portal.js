@@ -12,6 +12,9 @@
 
   // Six categories in the rail; everything else is a section beneath one of them.
   var TITLES = {
+    activity:        'My activity',
+    notifications:   'Notifications',
+    connections:     'My connections',
     verified:        'Legend Verified',
     academy:         'Legend Academy',
     find:            'Find a partner',
@@ -108,6 +111,7 @@
   // once you have gone one level down.
   var PARENT = {
     'find-long': 'find', 'find-short': 'find',
+    notifications: 'activity', connections: 'activity',
     'find-casual': 'find',
     // Companionship moved under Events & Companionship; the page stays where it
     // is and this is what gives it the right way back up.
@@ -4238,6 +4242,223 @@
     });
 
     renderUpcoming(); renderEvents(); renderCompanions();
+  })();
+
+  /* --- Activity, notifications, connections --------------------------------
+     The three cross-cutting surfaces: what you did, what you were told, and
+     who you are in touch with. Deliberately plain — counts rather than scores,
+     reasons rather than badges, and every state endable from the row it is on. */
+  if ($('#view-activity') && typeof MATCH !== 'undefined') (function () {
+    var el = MATCH.el;
+
+    /* -- quick actions: the six things worth one click ---------------------- */
+    var QUICK = [
+      { t:'Ask the house',        n:'A question about your engagement', go:'overview' },
+      { t:'Read the open case',   n:'Introduction No. 07',              go:'introductions' },
+      { t:'Answer what is asked', n:'One consent request',              go:'requests' },
+      { t:'Record a reflection',  n:'Your advisor is waiting on the 28th', go:'reflections' },
+      { t:'Find a companion',     n:'For an evening in your diary',     go:'occasions' },
+      { t:'Contact your advisor', n:'C. Vasseur, London',              go:'messages' }
+    ];
+    var q = $('#act-quick');
+    QUICK.forEach(function (a) {
+      var b = el('button', 'qa__i'); b.type = 'button';
+      b.appendChild(el('span', 'qa__t', a.t));
+      b.appendChild(el('span', 'qa__n', a.n));
+      b.addEventListener('click', function () { location.hash = '#' + a.go; });
+      q.appendChild(b);
+    });
+
+    /* -- what you did ------------------------------------------------------- */
+    var FEED = [
+      { d:'Today',      t:'Asked the assistant what was waiting on you' },
+      { d:'Today',      t:'Opened Introduction No. 07' },
+      { d:'2 days ago', t:'Saved a profile to your shortlist' },
+      { d:'3 days ago', t:'Requested a companion for the private view on the 9th' },
+      { d:'6 days ago', t:'Confirmed four persona lines' },
+      { d:'11 days ago',t:'Declined an introduction, without giving a reason' },
+      { d:'14 days ago',t:'Attended the autumn dinner' },
+      { d:'21 days ago',t:'Updated the brief — age and place' }
+    ];
+    var feed = $('#act-feed');
+    FEED.forEach(function (f) {
+      var r = el('div', 'act-row');
+      r.appendChild(el('span', 'act-row__d', f.d));
+      r.appendChild(el('span', 'act-row__t', f.t));
+      feed.appendChild(r);
+    });
+    $('#act-n').textContent = FEED.length + ' this month';
+
+    var dl = $('#act-figures');
+    [['Introductions read', '4'], ['Brought to you this year', '4'],
+     ['Assessed and not brought', '17'], ['Evenings attended', '3'],
+     ['Requests you sent', '2'], ['Requests you answered', '5']]
+      .forEach(function (r) { dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1])); });
+
+    var TODO = [
+      { t:'One consent request', go:'requests' },
+      { t:'A reflection on the 28th', go:'reflections' },
+      { t:'Two persona lines to confirm or remove', go:'me' },
+      { t:'Two photographs on your profile', go:'profile' }
+    ];
+    var todo = $('#act-todo');
+    TODO.forEach(function (t) {
+      var a = el('button', 'act-todo'); a.type = 'button';
+      a.appendChild(el('span', null, t.t));
+      a.appendChild(el('i', 'arrow'));
+      a.addEventListener('click', function () { location.hash = '#' + t.go; });
+      todo.appendChild(a);
+    });
+    $('#act-todo-n').textContent = TODO.length + ' waiting';
+  })();
+
+  if ($('#view-notifications') && typeof MATCH !== 'undefined') (function () {
+    var el = MATCH.el;
+    var KINDS = ['All','Introductions','Requests','Events','Your advisor','The house'];
+    var NOTES = [
+      { k:'Introductions', d:'Today', t:'Introduction No. 07 is open',
+        w:'Because you asked to be told the day a case is written, rather than weekly.', unread:true, go:'introductions' },
+      { k:'Requests', d:'Today', t:'A consent request is waiting on you',
+        w:'Because nothing about you moves until you answer it.', unread:true, go:'requests' },
+      { k:'Events', d:'2 days ago', t:'Your companion confirmed the private view on the 9th',
+        w:'Because an arrangement changed state.', unread:true, go:'occasions' },
+      { k:'Your advisor', d:'2 days ago', t:'C. Vasseur wrote to you',
+        w:'Because she writes rather than telephones when it is not urgent.', unread:false, go:'messages' },
+      { k:'Events', d:'5 days ago', t:'A table is held for the 28th, Marylebone',
+        w:'Because you are expected somewhere, and the house books it in your name.', unread:false, go:'appointments' },
+      { k:'The house', d:'9 days ago', t:'Your verification was renewed',
+        w:'Because it renews annually, in person, and it has been done.', unread:false, go:'credential' },
+      { k:'Introductions', d:'12 days ago', t:'An introduction was declined on your behalf',
+        w:'Because you asked to be told when your advisor declines one for you.', unread:false, go:'introductions' }
+    ];
+    var filter = 'All';
+    var list = $('#nt-list');
+    function render() {
+      list.textContent = '';
+      NOTES.filter(function (n) { return filter === 'All' || n.k === filter; })
+        .forEach(function (n) {
+          var r = el('div', 'nt' + (n.unread ? ' is-new' : ''));
+          var l = el('div');
+          l.appendChild(el('p', 'nt__t', n.t));
+          l.appendChild(el('p', 'nt__w', n.w));
+          l.appendChild(el('p', 'nt__m', n.k + ' · ' + n.d));
+          r.appendChild(l);
+          var go = el('button', 'btn'); go.type = 'button';
+          go.appendChild(el('span', null, 'Open')); go.appendChild(el('i', 'arrow'));
+          go.addEventListener('click', function () { n.unread = false; location.hash = '#' + n.go; });
+          r.appendChild(go);
+          list.appendChild(r);
+        });
+    }
+    KINDS.forEach(function (k) {
+      var b = el('button', 'chip' + (k === filter ? ' is-on' : ''), k);
+      b.type = 'button'; b.setAttribute('role','radio');
+      b.setAttribute('aria-checked', k === filter ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        filter = k;
+        $$('#nt-filters button').forEach(function (o) {
+          o.classList.toggle('is-on', o === b); o.setAttribute('aria-checked', o === b ? 'true':'false');
+        });
+        render();
+      });
+      $('#nt-filters').appendChild(b);
+    });
+    $('#nt-read').addEventListener('click', function () {
+      NOTES.forEach(function (n) { n.unread = false; }); render();
+    });
+    var prefs = $('#nt-prefs');
+    [ ['An introduction is written for you', 'Telephone, the same day'],
+      ['Something is asked of you', 'Telephone, the same day'],
+      ['An arrangement changes state', 'Written, within the hour'],
+      ['Your advisor writes', 'Written'],
+      ['Your verification is due', 'Written, a month ahead'],
+      ['Anything else', 'Nothing is sent'] ]
+      .forEach(function (r) {
+        var row = el('div', 'nt-pref');
+        row.appendChild(el('span', 'nt-pref__k', r[0]));
+        row.appendChild(el('span', 'nt-pref__v', r[1]));
+        prefs.appendChild(row);
+      });
+    render();
+  })();
+
+  if ($('#view-connections') && typeof MATCH !== 'undefined') (function () {
+    var el = MATCH.el;
+    var TABS = [
+      { id:'current',  label:'Current relationships', note:'Formed, and running' },
+      { id:'connected',label:'Connected',             note:'In touch, nothing more implied' },
+      { id:'received', label:'Requests received',     note:'Waiting on your answer' },
+      { id:'sent',     label:'Requests sent',         note:'Waiting on theirs' },
+      { id:'saved',    label:'Favourites',            note:'Your private shortlist' },
+      { id:'past',     label:'History',               note:'Ended, and how' }
+    ];
+    var PEOPLE = [
+      { g:'current',  n:'Introduction No. 06', s:'Formation · month four',
+        m:'Two people, four months in, and the first year is the part the house stays for.', go:'formation' },
+      { g:'connected',n:'Sophia', s:'Connected · 2 days ago',
+        m:'Zurich. You accepted the case on the 9th and have written twice.', go:'messages' },
+      { g:'connected',n:'Marguerite', s:'Connected · 6 days ago',
+        m:'London. Introduced through your advisor rather than a search.', go:'messages' },
+      { g:'received', n:'A consent request', s:'Waiting on you',
+        m:'Another advisor believes you may suit their member. Nothing about you moves until you answer.', go:'requests' },
+      { g:'sent',     n:'Katharina', s:'Requested · 3 days ago',
+        m:'For the private view on the 9th. She has not answered, and is under no obligation to.', go:'occasions' },
+      { g:'sent',     n:'Isabelle', s:'Requested · 11 days ago',
+        m:'Long-term track. Expired requests are withdrawn quietly at thirty days.', go:'find-long' },
+      { g:'saved',    n:'Marguerite', s:'Saved · long-term', m:'Kept for later. She is not told.', go:'find-long' },
+      { g:'saved',    n:'Nour', s:'Shortlisted · casual', m:'Kept for later. She is not told.', go:'find-casual' },
+      { g:'past',     n:'Introduction No. 04', s:'Ended · March',
+        m:'Ended by you, without a reason given. Nothing was written to her about why.', go:'introductions' },
+      { g:'past',     n:'Introduction No. 02', s:'Ended · January',
+        m:'Ended by her. You were told that, and nothing more.', go:'introductions' }
+    ];
+    var tab = 'current';
+    var list = $('#cn-list');
+    function render() {
+      var rows = PEOPLE.filter(function (p) { return p.g === tab; });
+      list.textContent = '';
+      rows.forEach(function (p) {
+        var r = el('div', 'cn');
+        var l = el('div');
+        l.appendChild(el('p', 'cn__n', p.n));
+        l.appendChild(el('p', 'cn__s', p.s));
+        l.appendChild(el('p', 'cn__m', p.m));
+        r.appendChild(l);
+        var acts = el('div', 'cn__acts');
+        var go = el('button', 'btn'); go.type = 'button';
+        go.appendChild(el('span', null, 'Open')); go.appendChild(el('i', 'arrow'));
+        go.addEventListener('click', function () { location.hash = '#' + p.go; });
+        acts.appendChild(go);
+        if (tab === 'sent' || tab === 'connected' || tab === 'saved') {
+          var end = el('button', 'btn btn--quiet', tab === 'sent' ? 'Withdraw' : tab === 'saved' ? 'Remove' : 'End it');
+          end.type = 'button';
+          end.addEventListener('click', function () {
+            PEOPLE.splice(PEOPLE.indexOf(p), 1); render();
+            note(end, tab === 'sent'
+              ? 'Withdrawn. She is not told that you withdrew, only that the request is no longer open.'
+              : tab === 'saved' ? 'Removed from your shortlist. She was never told it existed.'
+              : 'Ended. No reason is given to her, and none is asked of you.');
+          });
+          acts.appendChild(end);
+        }
+        r.appendChild(acts);
+        list.appendChild(r);
+      });
+      $('#cn-empty').hidden = rows.length > 0;
+      var t = TABS.filter(function (x) { return x.id === tab; })[0];
+      $('#cn-note').textContent = rows.length ? t.label + ' — ' + rows.length + '. ' + t.note + '.' : '';
+      $$('#cn-tabs button').forEach(function (b) {
+        b.setAttribute('aria-selected', b.getAttribute('data-cn') === tab ? 'true' : 'false');
+      });
+    }
+    TABS.forEach(function (t) {
+      var b = el('button', null, t.label); b.type = 'button';
+      b.setAttribute('data-cn', t.id); b.setAttribute('role','tab');
+      b.setAttribute('aria-selected', t.id === tab ? 'true':'false');
+      b.addEventListener('click', function () { tab = t.id; render(); });
+      $('#cn-tabs').appendChild(b);
+    });
+    render();
   })();
 
   route();

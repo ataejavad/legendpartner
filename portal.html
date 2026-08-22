@@ -126,6 +126,15 @@
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="M16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88Z"/></svg></span>
           <span>Relationship management<span class="cat__n">Formation, counsel, continuity</span></span>
         </a>
+        <a class="cat" href="#activity" data-view="activity" data-label="Activity"
+           aria-expanded="false" aria-controls="rail-sub-activity">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.4 12h4l2.2-5.4 3.4 11 2.4-5.6h5.2"/></svg></span>
+          <span>Activity<span class="cat__n">What is waiting, and what you asked</span></span>
+        </a>
+        <div class="rail__sub" id="rail-sub-activity" data-branch="activity" hidden>
+          <a class="sub" href="#notifications" data-view="notifications">Notifications</a>
+          <a class="sub" href="#connections" data-view="connections">My connections</a>
+        </div>
         <a class="cat" href="#verified" data-view="verified" data-label="Legend Verified">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.9 20 6v6.1c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6Z"/><polyline points="8.8 12 11.2 14.4 15.4 10.2"/></svg></span>
           <span>Legend Verified<span class="cat__n">Who has been checked, and how</span></span>
@@ -697,6 +706,89 @@
         </div>
       </section>
 
+
+
+      <!-- ============================================= MY ACTIVITY -->
+      <section class="view" id="view-activity" tabindex="-1" aria-label="My activity">
+        <p class="lede">My activity</p>
+        <p class="sub">
+          What you have done, what is waiting on you, and the few things worth doing next. Yours
+          alone — none of it is shown to another member, and none of it is a score.
+        </p>
+
+        <div class="panel" style="margin-top:2rem">
+          <div class="panel__head"><h2>Quick actions</h2><span class="pill pill--rest">One click each</span></div>
+          <div class="panel__body"><div class="qa" id="act-quick"></div></div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Recent activity</h2><span class="pill pill--rest" id="act-n">—</span></div>
+            <div class="panel__body"><div id="act-feed"></div></div>
+          </div>
+          <div class="stack" style="gap:1.2rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Where you stand</h2></div>
+              <div class="panel__body">
+                <dl class="kv" id="act-figures"></dl>
+                <div class="note-inline">
+                  Counts, not judgements. The house does not rank members by activity and an empty
+                  month is not held against you.
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>Waiting on you</h2><span class="pill pill--action" id="act-todo-n">—</span></div>
+              <div class="panel__body"><div id="act-todo"></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= NOTIFICATIONS -->
+      <section class="view" id="view-notifications" tabindex="-1" aria-label="Notifications">
+        <p class="lede">Notifications</p>
+        <p class="sub">
+          Everything the house has told you, in one place, with the reason it told you. Nothing here
+          is marketing, and nothing arrives to make you open the portal more often.
+        </p>
+
+        <div class="panel" style="margin-top:2rem">
+          <div class="panel__head">
+            <h2>What you are told about</h2>
+            <button type="button" class="btn btn--quiet" id="nt-read">Mark all as read</button>
+          </div>
+          <div class="panel__body">
+            <div class="chips" id="nt-filters" role="group" aria-label="Filter notifications"></div>
+            <div id="nt-list" style="margin-top:1.4rem"></div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head"><h2>What reaches you, and how</h2></div>
+          <div class="panel__body">
+            <div id="nt-prefs"></div>
+            <div class="note-inline">
+              The house telephones for anything that matters and writes for everything else. Nothing
+              is sent at night in your own time zone, and nothing is sent twice.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= CONNECTIONS -->
+      <section class="view" id="view-connections" tabindex="-1" aria-label="My connections">
+        <p class="lede">My connections</p>
+        <p class="sub">
+          Everyone you are in touch with, everyone who is waiting on an answer, and everyone you
+          asked. Each with its state, and each endable from here without a reason being given.
+        </p>
+
+        <div class="ev-tabs" id="cn-tabs" role="tablist" aria-label="Which connections"></div>
+        <p class="cas-curated" id="cn-note"></p>
+        <p class="ltr-empty" id="cn-empty" hidden>Nothing in this group.</p>
+        <div id="cn-list" aria-live="polite"></div>
+      </section>
 
       <!-- ============================================= LEGEND VERIFIED -->
       <section class="view" id="view-verified" tabindex="-1" aria-label="Legend Verified">
