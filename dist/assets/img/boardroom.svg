@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A long table under a low light">
+  <defs>
+    <linearGradient id="b-ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#141418"/><stop offset="1" stop-color="#08080A"/>
+    </linearGradient>
+    <radialGradient id="b-lamp" cx=".5" cy=".3" r=".5">
+      <stop offset="0" stop-color="#E4D6B6" stop-opacity=".34"/>
+      <stop offset="1" stop-color="#E4D6B6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="b-table" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E4D6B6" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#E4D6B6" stop-opacity=".03"/>
+    </linearGradient>
+    <filter id="b-blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="26"/></filter>
+  </defs>
+  <rect width="600" height="900" fill="url(#b-ground)"/>
+  <ellipse cx="300" cy="250" rx="240" ry="200" fill="url(#b-lamp)" filter="url(#b-blur)"/>
+  <path d="M120 560 L480 560 L540 760 L60 760 Z" fill="url(#b-table)"/>
+  <path d="M120 560 L480 560" stroke="#E4D6B6" stroke-opacity=".22" stroke-width="1.5"/>
+  <g fill="#E4D6B6" fill-opacity=".14">
+    <rect x="168" y="596" width="52" height="7" rx="3.5"/>
+    <rect x="274" y="596" width="52" height="7" rx="3.5"/>
+    <rect x="380" y="596" width="52" height="7" rx="3.5"/>
+    <rect x="146" y="676" width="60" height="8" rx="4"/>
+    <rect x="270" y="676" width="60" height="8" rx="4"/>
+    <rect x="394" y="676" width="60" height="8" rx="4"/>
+  </g>
+  <rect x="292" y="120" width="16" height="150" fill="#E4D6B6" fill-opacity=".10"/>
+  <ellipse cx="300" cy="286" rx="72" ry="20" fill="#E4D6B6" fill-opacity=".16"/>
+</svg>

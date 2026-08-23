@@ -981,11 +981,18 @@
   /* --- Palette switch (preview only) -------------------------------------- */
   // The dashboard architecture is palette-agnostic: the same markup renders in
   // Legend's own colours or in the reference palette, by swapping tokens.
+  // Legend is the pressed button, so it must also be the attribute. With no
+  // attribute at all the cascade lands on the reference ramp — the switch then
+  // reads Legend while the page shows the other one, and anything else keyed to
+  // these tokens inherits the wrong palette.
+  if (!document.documentElement.getAttribute('data-palette')) {
+    document.documentElement.setAttribute('data-palette', 'legend');
+  }
   $$('[data-palette-set]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var set = btn.getAttribute('data-palette-set');
-      if (set === 'reference') { document.documentElement.setAttribute('data-palette', 'reference'); }
-      else { document.documentElement.removeAttribute('data-palette'); }
+      document.documentElement.setAttribute('data-palette',
+        set === 'reference' ? 'reference' : 'legend');
       $$('[data-palette-set]').forEach(function (b) {
         b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
       });
@@ -3777,6 +3784,11 @@
         about:'No press, no notes, no attribution. That is the whole proposition.' }
     ];
 
+    // Shared with the six tiles above, so a category's evenings are read from
+    // this array rather than copied into a second one that would drift.
+    MATCH.events = EVENTS;
+    MATCH.evCats = CATS;
+
     var KINDS = ['Social companion','Dinner companion','Event companion',
                  'Business event companion','Travel companion'];
     var COMPANIONS = [
@@ -5867,6 +5879,456 @@
     });
 
     render();
+  })();
+
+  /* --- Events & Companionship: the six tiles -------------------------------
+     Picking a tile is a change of layout, and CSS cannot transition a change
+     of grid. So the geometry is switched in one frame and the chosen tile is
+     put back where it was with a transform, then released — the tile appears
+     to travel to the right-hand column. The five that are leaving are told
+     which way to go from where they actually sat, so each departs outward
+     rather than all of them to the same corner. */
+  (function () {
+    var stage = $('#occ-stage');
+    if (!stage) return;
+    var el = MATCH.el;
+    var occ = $('#occ');
+    var detail = $('#occ-detail');
+    var body = $('#occ-d-body');
+    var tiles = $$('.occ-t', stage);
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var open = null;
+    var lastFocus = null;
+    var gone = null;
+
+    /* -- what each tile is, and what it asks for -------------------------- */
+    var PAGES = {
+      parties: {
+        k: '01', t: 'Parties', cat: 'private',
+        sub: 'The house\'s own gatherings, and private ones members are invited to. Fourteen to thirty people, unpublished, and never photographed.',
+        facts: [['Size', 'Fourteen to thirty'], ['Notice', 'Three to six weeks'],
+                ['Photographs', 'None, by standing agreement'],
+                ['Declining', 'Without a reason, and without a mark on your file']],
+        how: ['Your advisor proposes you to the host, not the other way round',
+              'You are told who else is expected, in general terms, before you answer',
+              'You accept, decline, or ask to bring someone — all three are ordinary',
+              'Nothing about your attendance is recorded where another member can see it'],
+        form: {
+          t: 'Ask to be considered',
+          fields: [
+            { k: 'when', label: 'Which season', type: 'select', opts: ['The next one', 'Autumn', 'Winter', 'Whenever there is room'] },
+            { k: 'city', label: 'Where', type: 'select', opts: ['Munich', 'London', 'Vienna', 'Zurich', 'Anywhere the house is'] },
+            { k: 'with', label: 'Alone or with someone', type: 'select', opts: ['Alone', 'With a companion the house finds', 'With someone I will name'] },
+            { k: 'note', label: 'Anything the host should know', type: 'text', wide: true,
+              ph: 'A dietary matter, someone you would rather not be seated near, a name you would rather not hear.' }
+          ],
+          go: 'Send to your advisor',
+          done: 'Sent to C. Vasseur. She proposes you to the host rather than adding you to a list, so the answer comes back as a yes or a no with a reason, usually within the week.'
+        }
+      },
+      events: {
+        k: '02', t: 'Events', cat: 'culture',
+        sub: 'An opening, a benefit, a dinner, a box at something. An evening with a host, a guest list, and an hour at which it ends.',
+        facts: [['Notice', 'Ten days is comfortable; three is possible'],
+                ['Languages', 'Stated per companion, and verified'],
+                ['Afterwards', 'Nothing is asked of either of you'],
+                ['The account', 'Settled by the house, never at the table']],
+        how: ['The occasion, the host, and who else will be in the room',
+              'Dress, and whether the evening has a form anyone is expected to know',
+              'What is said about how you know each other — in the same words to both of you',
+              'The hours, and who leaves first'],
+        form: {
+          t: 'Ask for an evening',
+          fields: [
+            { k: 'kind', label: 'What sort of evening', type: 'select', opts: ['A private view', 'Opera or concert', 'A benefit or gala', 'A dinner', 'Something else'] },
+            { k: 'date', label: 'The date', type: 'date' },
+            { k: 'city', label: 'Where', type: 'select', opts: ['Munich', 'Vienna', 'Zurich', 'London', 'Elsewhere'] },
+            { k: 'comp', label: 'A companion', type: 'select', opts: ['Yes, find one', 'No, I am attending alone', 'Undecided'] },
+            { k: 'note', label: 'The brief', type: 'text', wide: true,
+              ph: 'What the evening is for, and what would make it a poor one.' }
+          ],
+          go: 'Send to the concierge',
+          done: 'With the concierge. If a companion is wanted you are shown two or three, never a gallery, and you may say no to all of them without explaining.'
+        }
+      },
+      business: {
+        k: '03', t: 'Business events', cat: 'business',
+        sub: 'A dinner, a conference, a room where being alone is conspicuous. A companion briefed on the room rather than scripted for it.',
+        facts: [['Brief', 'Written, and agreed by both of you beforehand'],
+                ['Discretion', 'No photographs, no attribution, no notes'],
+                ['Languages', 'Named and verified per companion'],
+                ['Afterwards', 'Nothing is recorded on either file']],
+        how: ['What the evening is for, and what a good one looks like to you',
+              'What is said about how you know each other, agreed word for word',
+              'Whether your work is discussed at all, and by whom',
+              'The hour it ends, decided before it starts'],
+        form: {
+          t: 'Take the brief',
+          fields: [
+            { k: 'occasion', label: 'The occasion', type: 'select', opts: ['A dinner', 'A conference', 'A client evening', 'An award or ceremony', 'Something else'] },
+            { k: 'date', label: 'The date', type: 'date' },
+            { k: 'city', label: 'Where', type: 'text', ph: 'City, or the venue if you can say it' },
+            { k: 'lang', label: 'Language in the room', type: 'select', opts: ['German', 'English', 'French', 'Italian', 'More than one'] },
+            { k: 'story', label: 'What is said about how you know each other', type: 'text', wide: true,
+              ph: 'We will use these words and no others. If you would rather we agreed them together, say so.' }
+          ],
+          go: 'Send the brief',
+          done: 'Taken. A companion is proposed with the brief attached, and neither of you improvises an answer in front of anyone.'
+        }
+      },
+      travel: {
+        k: '04', t: 'Travel companionship', cat: 'travel',
+        sub: 'A weekend, a city, a passage of days. Everything that is awkward to raise at the airport is settled before departure.',
+        facts: [['Rooms', 'Separate, unless both of you have said otherwise in writing'],
+                ['Costs', 'Settled by the house in advance, itemised to you'],
+                ['Documents', 'Checked by us; passports are never held'],
+                ['Ending it early', 'Either of you, at any point, with the return arranged']],
+        how: ['Where, for how long, and who books what',
+              'The rooms, in writing, before anything is reserved',
+              'What is said if you are recognised, and by which of you',
+              'How it ends early if either of you wants it to']
+        ,
+        form: {
+          t: 'Settle it beforehand',
+          fields: [
+            { k: 'where', label: 'Where', type: 'text', ph: 'A city, a coast, or simply "somewhere quiet"' },
+            { k: 'from', label: 'Departing', type: 'date' },
+            { k: 'nights', label: 'Nights', type: 'select', opts: ['One', 'Two', 'Three', 'Four to seven', 'Longer'] },
+            { k: 'rooms', label: 'Rooms', type: 'select', opts: ['Separate rooms', 'Separate suites', 'To be agreed with the companion'] },
+            { k: 'note', label: 'What would make it a good few days', type: 'text', wide: true,
+              ph: 'And what would make it a bad few days. The second is the more useful answer.' }
+          ],
+          go: 'Send to the concierge',
+          done: 'With the concierge. Nothing is booked until the rooms and the ending are agreed in writing by both of you.'
+        }
+      },
+      social: {
+        k: '05', t: 'Social occasions', cat: 'social',
+        sub: 'A wedding, a christening, a reunion, a funeral. The occasions where arriving alone is the difficult part — handled first.',
+        facts: [['Notice', 'A fortnight is comfortable; a day is possible'],
+                ['The story', 'Agreed in the same words, said by whichever of you is asked'],
+                ['Family', 'Told nothing they have not been told by you'],
+                ['Photographs', 'Declined on your behalf, politely, by the companion']],
+        how: ['Whose occasion it is, and who will be difficult about it',
+              'What is said about how you know each other, and by which of you',
+              'What is not said, however directly it is asked',
+              'When you leave, and who says so first'],
+        form: {
+          t: 'The difficult part, first',
+          fields: [
+            { k: 'occasion', label: 'The occasion', type: 'select', opts: ['A wedding', 'A christening', 'A reunion', 'A funeral', 'A family gathering', 'Something else'] },
+            { k: 'date', label: 'The date', type: 'date' },
+            { k: 'city', label: 'Where', type: 'text', ph: 'City or venue' },
+            { k: 'story', label: 'What is said about how you know each other', type: 'text', wide: true,
+              ph: 'Write it as you would want to hear it said. We will not improve on it.' },
+            { k: 'hard', label: 'Who will ask the hardest question', type: 'text', wide: true,
+              ph: 'A name, and what they will ask. This is the most useful line on the form.' }
+          ],
+          go: 'Send to your advisor',
+          done: 'Sent. Your advisor telephones before anything is arranged — this is the one category we will not settle in writing alone.'
+        }
+      },
+      design: {
+        k: '06', t: 'Design your event', cat: null,
+        sub: 'Your own evening, from the room to the guest list. You name whom you want in it; the house arranges the rest and appears nowhere on the invitation.',
+        facts: [['Size', 'Four to sixty'], ['Notice', 'Six weeks for a room worth having'],
+                ['Our name', 'Nowhere on it, unless you ask'],
+                ['The account', 'Quoted before anything is reserved']],
+        how: ['You say what the evening is for, and who should be in the room',
+              'We propose the room, the table and the hour, with a figure attached',
+              'You name your guests; the house invites those you would rather not invite yourself',
+              'On the night the house is present and invisible'],
+        form: {
+          t: 'The brief',
+          fields: [
+            { k: 'what', label: 'What is it', type: 'select', opts: ['A dinner', 'A celebration', 'A private view', 'A weekend', 'A launch', 'I do not know yet'] },
+            { k: 'date', label: 'When', type: 'date' },
+            { k: 'guests', label: 'How many at table', type: 'select', opts: ['Four to eight', 'Eight to sixteen', 'Sixteen to thirty', 'Thirty to sixty'] },
+            { k: 'city', label: 'Where', type: 'text', ph: 'A city, or a room you already have in mind' },
+            { k: 'budget', label: 'What it should not exceed', type: 'select', opts: ['Under €5,000', '€5,000 – €15,000', '€15,000 – €40,000', 'Over €40,000', 'Tell me what it costs first'] },
+            { k: 'why', label: 'What the evening is for', type: 'text', wide: true,
+              ph: 'The real reason, not the one on the invitation. It changes every other decision.' },
+            { k: 'who', label: 'Who is invited', type: 'text', wide: true,
+              ph: 'Names, or a description. Anyone you would rather not invite yourself, we invite for you.' }
+          ],
+          go: 'Send the brief',
+          done: 'Taken. You are sent a room, a table, an hour and a figure within three days, and nothing is reserved until you have seen all four.'
+        }
+      }
+    };
+
+    /* -- the page beside the tile ----------------------------------------- */
+    function evenings(cat) {
+      var list = (MATCH.events || []).filter(function (e) { return e.cat === cat; });
+      if (!list.length) return null;
+      var sec = el('div', 'occ-sec');
+      sec.appendChild(el('h3', 'occ-sec__t', 'What the house is holding'));
+      list.forEach(function (e) {
+        var row = el('div', 'occ-ev');
+        var left = el('div');
+        left.appendChild(el('p', 'occ-ev__n', e.name));
+        left.appendChild(el('p', 'occ-ev__m',
+          [e.city, e.date, e.time !== '—' ? e.time : null, e.guests + ' at table', e.dress]
+            .filter(Boolean).join(' · ')));
+        left.appendChild(el('p', 'occ-ev__a', e.about));
+        row.appendChild(left);
+        sec.appendChild(row);
+      });
+      return sec;
+    }
+
+    function form(p) {
+      var sec = el('div', 'occ-sec');
+      sec.appendChild(el('h3', 'occ-sec__t', p.form.t));
+      var f = el('form', 'occ-form');
+      var vals = {};
+      var wraps = {};
+
+      p.form.fields.forEach(function (def) {
+        var w = el('div', 'occ-f' + (def.wide ? ' occ-f--wide' : ''));
+        var id = 'occ-f-' + p.k + '-' + def.k;
+        var lab = el('label', null, def.label); lab.setAttribute('for', id);
+        var input;
+        if (def.type === 'select') {
+          input = el('select');
+          var blank = el('option', null, 'Choose'); blank.value = '';
+          input.appendChild(blank);
+          def.opts.forEach(function (o) { var op = el('option', null, o); op.value = o; input.appendChild(op); });
+        } else if (def.type === 'date') {
+          input = el('input'); input.type = 'date';
+        } else {
+          input = el('textarea'); input.rows = def.wide ? 3 : 2;
+          if (def.ph) input.placeholder = def.ph;
+        }
+        input.id = id;
+        input.addEventListener('input', function () { vals[def.k] = input.value; w.classList.remove('is-bad'); });
+        input.addEventListener('change', function () { vals[def.k] = input.value; w.classList.remove('is-bad'); });
+        w.appendChild(lab); w.appendChild(input);
+        wraps[def.k] = w;
+        f.appendChild(w);
+      });
+
+      var foot = el('div', 'occ-form__foot');
+      var go = el('button', 'btn btn--solid', p.form.go); go.type = 'submit';
+      var said = el('p', 'occ-said');
+      foot.appendChild(go); foot.appendChild(said);
+      f.appendChild(foot);
+
+      f.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        // Only the first two are required. A form that demands everything gets
+        // invented answers, which are worse than blank ones.
+        var need = p.form.fields.slice(0, 2).filter(function (d) { return !vals[d.k]; });
+        if (need.length) {
+          need.forEach(function (d) { wraps[d.k].classList.add('is-bad'); });
+          said.textContent = 'The first two are needed. Everything else can be left blank, and a blank answer is an answer.';
+          return;
+        }
+        var done = el('div', 'occ-done');
+        done.appendChild(el('h3', 'occ-done__t', 'Sent'));
+        done.appendChild(el('p', 'occ-done__m', p.form.done));
+        var acts = el('div', 'occ-form__foot');
+        var back = el('button', 'btn btn--solid', 'Back to the six'); back.type = 'button';
+        back.addEventListener('click', function () { shut(); });
+        var again = el('button', 'btn btn--quiet', 'Send another'); again.type = 'button';
+        again.addEventListener('click', function () { render(p); });
+        acts.appendChild(back); acts.appendChild(again);
+        done.appendChild(acts);
+        body.textContent = '';
+        body.appendChild(done);
+        body.scrollTop = 0;
+      });
+
+      sec.appendChild(f);
+      return sec;
+    }
+
+    function render(p) {
+      $('#occ-d-k').textContent = p.k;
+      $('#occ-d-title').textContent = p.t;
+      $('#occ-d-sub').textContent = p.sub;
+      body.textContent = '';
+
+      var facts = el('div', 'occ-sec');
+      facts.appendChild(el('h3', 'occ-sec__t', 'What to expect'));
+      var dl = el('dl', 'kv');
+      p.facts.forEach(function (r) { dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1])); });
+      facts.appendChild(dl);
+      body.appendChild(facts);
+
+      var how = el('div', 'occ-sec');
+      how.appendChild(el('h3', 'occ-sec__t', 'Agreed beforehand'));
+      var ul = el('ul', 'spine');
+      p.how.forEach(function (line, i) {
+        var li = el('li');
+        li.appendChild(el('span', 'no', ('0' + (i + 1)).slice(-2)));
+        li.appendChild(el('span', null, line));
+        ul.appendChild(li);
+      });
+      how.appendChild(ul);
+      body.appendChild(how);
+
+      var ev = p.cat && evenings(p.cat);
+      if (ev) body.appendChild(ev);
+
+      body.appendChild(form(p));
+    }
+
+    /* -- the movement ------------------------------------------------------ */
+    // Each departing tile is told which way out, from where it actually sits.
+    function aim() {
+      var box = stage.getBoundingClientRect();
+      var cx = box.left + box.width / 2, cy = box.top + box.height / 2;
+      tiles.forEach(function (t, i) {
+        var r = t.getBoundingClientRect();
+        var dx = (r.left + r.width / 2) - cx;
+        var dy = (r.top + r.height / 2) - cy;
+        var m = Math.max(Math.abs(dx), Math.abs(dy)) || 1;
+        t.style.setProperty('--ox', Math.round(dx / m * 120) + 'px');
+        t.style.setProperty('--oy', Math.round(dy / m * 120) + 'px');
+        t.style.setProperty('--k', i);
+      });
+    }
+
+    // FLIP: the grid changes in one frame, so the tile is put back where it
+    // was and then let go.
+    function fly(tile, before) {
+      if (reduced) return;
+      var after = tile.getBoundingClientRect();
+      if (!before.width || !after.width) return;
+      var dx = before.left - after.left, dy = before.top - after.top;
+      var sx = before.width / after.width, sy = before.height / after.height;
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(sx - 1) < .01 && Math.abs(sy - 1) < .01) return;
+      tile.style.transformOrigin = 'top left';
+      tile.style.transition = 'none';
+      tile.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
+      // Two frames: one for the browser to take the start, one to leave it.
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          tile.classList.add('is-flying');
+          tile.style.transition = '';
+          tile.style.transform = '';
+        });
+      });
+      var end = function () {
+        tile.classList.remove('is-flying');
+        tile.style.transformOrigin = '';
+        tile.removeEventListener('transitionend', end);
+      };
+      tile.addEventListener('transitionend', end);
+    }
+
+    function pick(tile) {
+      var id = tile.getAttribute('data-occ');
+      if (open === id) return;
+      lastFocus = document.activeElement;
+      aim();
+      var before = tile.getBoundingClientRect();
+      tiles.forEach(function (t) {
+        var on = t === tile;
+        t.classList.toggle('is-picked', on);
+        t.classList.remove('is-flipped');
+        t.setAttribute('aria-expanded', on ? 'true' : 'false');
+        if (!on) { t.setAttribute('tabindex', '-1'); t.setAttribute('aria-hidden', 'true'); }
+        else { t.removeAttribute('tabindex'); t.removeAttribute('aria-hidden'); }
+      });
+      detail.hidden = false;
+      occ.classList.add('is-open');
+      open = id;
+      render(PAGES[id]);
+      fly(tile, before);
+      // Out of the layout once they have gone, or their boxes keep widening
+      // the page from outside the column.
+      if (gone) clearTimeout(gone);
+      gone = setTimeout(function () {
+        gone = null;
+        tiles.forEach(function (t) { if (t !== tile) t.classList.add('is-gone'); });
+      }, reduced ? 0 : 780);
+      $('#occ-d-title').focus();
+    }
+
+    function shut() {
+      if (!open) return;
+      if (gone) { clearTimeout(gone); gone = null; }
+      // Back into the layout before anything is measured, so the five are in
+      // place to travel home rather than appearing where they landed.
+      tiles.forEach(function (t) { t.classList.remove('is-gone'); });
+      var tile = $('.occ-t.is-picked', stage);
+      var before = tile && tile.getBoundingClientRect();
+      occ.classList.remove('is-open');
+      detail.hidden = true;
+      open = null;
+      tiles.forEach(function (t) {
+        t.classList.remove('is-picked');
+        t.setAttribute('aria-expanded', 'false');
+        t.removeAttribute('tabindex'); t.removeAttribute('aria-hidden');
+      });
+      if (tile && before) fly(tile, before);
+      (lastFocus && lastFocus.focus ? lastFocus : tile).focus();
+    }
+
+    /* -- two faces --------------------------------------------------------- */
+    // Hover and focus turn a tile over. An idle turn keeps the field alive
+    // while nobody is pointing at it, and stops the moment one is opened.
+    // One timer and one tile turned by it, both cancellable — otherwise the
+    // idle turn's pending un-turn lands on whichever tile the pointer has
+    // since arrived at, and un-turns that one under the member's cursor.
+    var turn = null, at = 0, auto = null, hovered = null;
+
+    function stopAuto() {
+      if (turn) { clearTimeout(turn); turn = null; }
+      if (auto) { auto.classList.remove('is-flipped'); auto = null; }
+    }
+    function turnNext() {
+      turn = null;
+      if (open || hovered || reduced) { turn = setTimeout(turnNext, 2600); return; }
+      auto = tiles[at % tiles.length]; at++;
+      auto.classList.add('is-flipped');
+      turn = setTimeout(function () {
+        turn = null;
+        if (auto) { auto.classList.remove('is-flipped'); auto = null; }
+        turn = setTimeout(turnNext, 1400);
+      }, 3200);
+    }
+
+    tiles.forEach(function (t) {
+      t.setAttribute('aria-expanded', 'false');
+      t.addEventListener('click', function () { pick(t); });
+      ['mouseenter', 'focus'].forEach(function (e) {
+        t.addEventListener(e, function () {
+          hovered = t;
+          stopAuto();
+          if (!open) {
+            tiles.forEach(function (o) { o.classList.remove('is-flipped'); });
+            t.classList.add('is-flipped');
+          }
+        });
+      });
+      ['mouseleave', 'blur'].forEach(function (e) {
+        t.addEventListener(e, function () {
+          if (hovered === t) hovered = null;
+          t.classList.remove('is-flipped');
+          if (!turn && !reduced) turn = setTimeout(turnNext, 2600);
+        });
+      });
+    });
+
+    $('#occ-close').addEventListener('click', shut);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && open && $('#view-occasions').classList.contains('is-active')) shut();
+    });
+    // Leaving the section puts the six back, so returning to it is never a
+    // half-open page.
+    window.addEventListener('hashchange', function () {
+      if (open && location.hash !== '#occasions') shut();
+    });
+
+    if (!reduced && 'IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (en) {
+        en.forEach(function (x) { if (x.isIntersecting) { io.disconnect(); turn = setTimeout(turnNext, 1200); } });
+      }, { threshold: .2 });
+      io.observe(stage);
+    }
   })();
 
   route();

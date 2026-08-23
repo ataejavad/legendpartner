@@ -377,8 +377,124 @@
       <section class="view" id="view-occasions" tabindex="-1" aria-label="Events and companionship">
         <p class="lede">Events &amp; Companionship</p>
         <p class="sub">
-          Curated events and private companionship for meaningful social experiences. The house
-          finds the evening, and the person for it — you are not searching a marketplace.
+          Six ways an evening happens, and the house arranges any of them. It finds the occasion
+          and the person for it — you are not searching a marketplace — and where none of the six
+          is what you want, the sixth is a blank you fill in yourself.
+        </p>
+
+        <!-- The six tiles. Sizes differ and the six together fill the field —
+             a category is a place, not a row in a list. A tile carries a
+             photograph, a film or nothing but type: the face is a container.
+             Picking one sends the other five away and keeps the chosen tile at
+             the right, with its own page beside it. -->
+        <div class="occ" id="occ">
+          <div class="occ__stage tiles--live" id="occ-stage">
+
+            <button class="tile occ-t tile--media" type="button" data-occ="parties" style="--i:0">
+              <img class="tile__img" src="assets/img/salon.svg" alt="" aria-hidden="true" loading="lazy">
+              <span class="tile__flip">
+                <span class="tile__face tile__face--over">
+                  <span class="occ-t__k">01</span>
+                  <span class="tile__l">Parties</span>
+                </span>
+                <span class="tile__face tile__face--b" aria-hidden="true">
+                  <span class="tile__d">Fourteen to thirty people, unpublished, never photographed. Your advisor proposes you to the host.</span>
+                  <span class="tile__l">Parties</span>
+                </span>
+              </span>
+            </button>
+
+            <button class="tile occ-t tile--media" type="button" data-occ="events" style="--i:1">
+              <video class="tile__video" src="assets/video/house.webm" poster="assets/img/house-poster.svg"
+                     autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>
+              <span class="tile__flip">
+                <span class="tile__face tile__face--over">
+                  <span class="occ-t__k">02</span>
+                  <span class="tile__l">Events</span>
+                </span>
+                <span class="tile__face tile__face--b" aria-hidden="true">
+                  <span class="tile__d">An opening, a benefit, a box at something. A host, a guest list, and an hour at which it ends.</span>
+                  <span class="tile__l">Events</span>
+                </span>
+              </span>
+            </button>
+
+            <button class="tile occ-t tile--media" type="button" data-occ="business" style="--i:2">
+              <img class="tile__img" src="assets/img/boardroom.svg" alt="" aria-hidden="true" loading="lazy">
+              <span class="tile__flip">
+                <span class="tile__face tile__face--over">
+                  <span class="occ-t__k">03</span>
+                  <span class="tile__l">Business<br>events</span>
+                </span>
+                <span class="tile__face tile__face--b" aria-hidden="true">
+                  <span class="tile__d">A companion briefed on the room rather than scripted for it. Nothing is said about how you know each other that you have not agreed.</span>
+                  <span class="tile__l">Business events</span>
+                </span>
+              </span>
+            </button>
+
+            <button class="tile occ-t tile--media" type="button" data-occ="travel" style="--i:3">
+              <img class="tile__img" src="assets/img/harbour.svg" alt="" aria-hidden="true" loading="lazy">
+              <span class="tile__flip">
+                <span class="tile__face tile__face--over">
+                  <span class="occ-t__k">04</span>
+                  <span class="tile__l">Travel<br>companionship</span>
+                </span>
+                <span class="tile__face tile__face--b" aria-hidden="true">
+                  <span class="tile__d">Separate rooms unless both of you have said otherwise, in writing, beforehand. Settled before departure, never at the airport.</span>
+                  <span class="tile__l">Travel companionship</span>
+                </span>
+              </span>
+            </button>
+
+            <button class="tile occ-t" type="button" data-occ="social" style="--i:4">
+              <span class="tile__flip">
+                <span class="tile__face">
+                  <span class="occ-t__k">05</span>
+                  <span class="tile__n"><span class="tile__num">Social</span></span>
+                  <span class="tile__l">Social<br>occasions</span>
+                </span>
+                <span class="tile__face tile__face--b" aria-hidden="true">
+                  <span class="tile__d">A wedding, a christening, a funeral, a reunion. The occasions where arriving alone is the difficult part — handled first.</span>
+                  <span class="tile__l">Social occasions</span>
+                </span>
+              </span>
+            </button>
+
+            <button class="tile occ-t occ-t--make" type="button" data-occ="design" style="--i:5">
+              <span class="tile__flip">
+                <span class="tile__face">
+                  <span class="occ-t__k">06</span>
+                  <span class="tile__n"><span class="tile__num">Design</span></span>
+                  <span class="tile__l">Design<br>your event</span>
+                </span>
+                <span class="tile__face tile__face--b" aria-hidden="true">
+                  <span class="tile__d">Your own evening, from the room to the guest list. You name whom you want in it; the house arranges the rest and appears nowhere on the invitation.</span>
+                  <span class="tile__l">Design your event</span>
+                </span>
+              </span>
+            </button>
+          </div>
+
+          <!-- The chosen tile's own page. Built in the script from the same
+               record the tile is built from, so the two cannot drift. -->
+          <div class="occ__detail" id="occ-detail" hidden aria-labelledby="occ-d-title">
+            <div class="occ-d">
+              <div class="occ-d__bar">
+                <span class="occ-d__k" id="occ-d-k">—</span>
+                <button class="occ-d__x" type="button" id="occ-close">
+                  All six<span class="occ-d__esc">Esc</span>
+                </button>
+              </div>
+              <h2 class="occ-d__t" id="occ-d-title" tabindex="-1">—</h2>
+              <p class="occ-d__s" id="occ-d-sub"></p>
+              <div class="occ-d__body" id="occ-d-body"></div>
+            </div>
+          </div>
+        </div>
+
+        <p class="occ__hint" id="occ-hint">
+          Pick one and the others stand aside. Everything below applies whichever you choose.
         </p>
 
         <div class="ev-flow" aria-label="How this works">

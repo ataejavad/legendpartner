@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A coastline at first light">
+  <defs>
+    <linearGradient id="h-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1B1A1E"/><stop offset=".58" stop-color="#0E0E11"/>
+      <stop offset="1" stop-color="#08080A"/>
+    </linearGradient>
+    <radialGradient id="h-sun" cx=".28" cy=".42" r=".46">
+      <stop offset="0" stop-color="#E4D6B6" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#E4D6B6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="h-sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E4D6B6" stop-opacity=".14"/>
+      <stop offset="1" stop-color="#E4D6B6" stop-opacity=".02"/>
+    </linearGradient>
+    <filter id="h-blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="34"/></filter>
+  </defs>
+  <rect width="600" height="900" fill="url(#h-sky)"/>
+  <ellipse cx="170" cy="380" rx="220" ry="180" fill="url(#h-sun)" filter="url(#h-blur)"/>
+  <path d="M0 470 L600 470 L600 900 L0 900 Z" fill="url(#h-sea)"/>
+  <g stroke="#E4D6B6" stroke-opacity=".13" stroke-width="1.4">
+    <path d="M0 528h600"/><path d="M0 586h600"/><path d="M0 650h600"/>
+    <path d="M0 722h600"/><path d="M0 804h600"/>
+  </g>
+  <path d="M0 470 L112 404 L206 452 L318 388 L432 448 L600 396 L600 470 Z" fill="#08080A" fill-opacity=".82"/>
+  <g fill="#E4D6B6" fill-opacity=".16">
+    <path d="M356 470 L356 356 L420 470 Z"/>
+    <rect x="352" y="466" width="76" height="9" rx="4.5"/>
+  </g>
+</svg>
