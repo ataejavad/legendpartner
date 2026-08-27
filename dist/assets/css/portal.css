@@ -2713,3 +2713,26 @@ a.tile:hover{ transform:translateY(-2px); }
 @media (max-width:720px){
   .md-grid{ grid-template-columns:minmax(0,1fr); }
 }
+
+/* --- Dating & Relationship Public Profile --------------------------------- */
+.pub-state{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:1.4rem; flex-wrap:wrap;
+  border:1px solid var(--line-soft); border-left:2px solid var(--line);
+  border-radius:var(--r-sm); padding:1.2rem 1.4rem;
+}
+.pub-state.is-live{ border-left-color:var(--champagne); }
+.pub-state__k{ margin:0; font-family:var(--serif); font-size:1.3rem; color:#EDEAE3; }
+.pub-state__n{ margin:.4rem 0 0; font-size:.86rem; color:var(--fg-soft); max-width:62ch; }
+.pub-state__acts{ display:flex; gap:.6rem; flex-wrap:wrap; flex:0 1 auto; min-width:0; }
+/* Two buttons side by side do not fit a phone, and flex:none on the row keeps
+   them on one line rather than letting them wrap. Give them the width. */
+@media (max-width:640px){
+  .pub-state{ flex-direction:column; }
+  .pub-state__acts{ width:100%; }
+  .pub-state__acts .btn{ flex:1 1 auto; justify-content:center; }
+}
+.pub-v{ margin:.3rem 0 0; font-size:.94rem; color:#EDEAE3; max-width:56ch; }
+.pub-card__n{ margin:0 0 1rem; font-family:var(--serif); font-size:1.6rem; color:#EDEAE3; }
+#pub-fields .pr-row__v{ font-size:.78rem; }
+#pub-photos .ltr-toggle{ margin-top:.5rem; }
+#pp-pane-public .pr-row .ltr-toggle{ flex:none; }

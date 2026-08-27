@@ -3693,8 +3693,8 @@
         $$('.pp-tabs button').forEach(function (o) {
           o.setAttribute('aria-selected', o === b ? 'true' : 'false');
         });
-        ['profile','persona','settings'].forEach(function (p) {
-          $('#pp-pane-' + p).hidden = p !== which;
+        $$('.pp-pane').forEach(function (pane) {
+          pane.hidden = pane.id !== 'pp-pane-' + which;
         });
       });
     });
@@ -3711,7 +3711,7 @@
     });
     $('#pp-ask').addEventListener('click', function () {
       $$('.pp-tabs button').forEach(function (o) { o.setAttribute('aria-selected', o.getAttribute('data-pp') === 'persona' ? 'true' : 'false'); });
-      ['profile','persona','settings'].forEach(function (p) { $('#pp-pane-' + p).hidden = p !== 'persona'; });
+      $$('.pp-pane').forEach(function (pane) { pane.hidden = pane.id !== 'pp-pane-persona'; });
       var c = $('#pp-ask-chips'); if (c.firstChild) c.firstChild.focus();
     });
 
@@ -7002,6 +7002,265 @@
     });
 
     render(); renderSaved(); renderRules(null);
+  })();
+
+  /* --- Dating & Relationship Public Profile --------------------------------
+     The one page of a member's that exists outside an introduction. Everything
+     here is off until it is turned on, each line states what it costs to open,
+     and the card at the side is rendered from the same records as the controls
+     so the preview cannot drift from the page a stranger would actually get. */
+  (function () {
+    if (!$('#pp-pane-public')) return;
+    var el = MATCH.el;
+
+    var live = false;
+    var LINK = 'legendpartner.com/p/mrc-7412';
+
+    // Each line: what it is, what it says, and what closing it costs. A control
+    // whose consequence is hidden is not a choice.
+    var FIELDS = [
+      { k: 'First name', v: 'A.', on: true, fixed: true,
+        n: 'An initial. Your surname is not offered at any setting, and no page of ours has ever carried one.' },
+      { k: 'Age', v: '41', on: true,
+        n: 'Closed, the page reads as evasive rather than private. Most who close it turn it back on.' },
+      { k: 'City', v: 'London', on: true,
+        n: 'Closed, you are shown only to people already searching your country.' },
+      { k: 'What you are looking for', v: 'A long-term partnership', on: true,
+        n: 'The line that does the most work here. Closed, the page cannot be matched to anyone.' },
+      { k: 'A sentence about you', v: 'Reads more than he writes. Keeps two evenings a week for nothing in particular.', on: true,
+        n: 'Written by you, never by us, and never improved by us.' },
+      { k: 'Interests', v: 'Travel · Art · Sailing · Wine', on: true,
+        n: 'Four is enough. A list of twelve reads as a list.' },
+      { k: 'Lifestyle', v: 'Investor · travels monthly', on: false,
+        n: 'Occupation on a public page attracts the wrong kind of attention. Off by default, deliberately.' },
+      { k: 'Languages', v: 'English, French', on: true,
+        n: 'Useful, and gives nothing away.' },
+      { k: 'Children', v: 'One, at home', on: false,
+        n: 'Never public unless you open it. Most members disclose this in person, at the second meeting.' },
+      { k: 'Legend Verified', v: 'Verified in person, 14 March 2026', on: true, fixed: true,
+        n: 'Always shown. It is the reason a page of ours is worth reading at all, and it cannot be turned off.' }
+    ];
+
+    var PHOTOS = [
+      { t: 'Portrait, 2024', on: true },
+      { t: 'Standing, Hampshire', on: true },
+      { t: 'At the piano', on: false },
+      { t: 'With the dogs', on: false }
+    ];
+
+    var REACH = [
+      { k: 'Members of the house', v: 'Yes', opts: ['Yes', 'Only if verified', 'No'] },
+      { k: 'People holding the link', v: 'Yes', opts: ['Yes', 'No'] },
+      { k: 'Search engines', v: 'Never', fixed: true },
+      { k: 'People you have blocked', v: 'Never', fixed: true },
+      { k: 'Anyone not signed in', v: 'No', opts: ['Yes', 'No'] }
+    ];
+
+    var APPROACH = [
+      { k: 'Who may approach you', v: 'Verified members only', opts: ['Verified members only', 'Any member', 'Nobody — the page is to be read, not answered'] },
+      { k: 'What they must send', v: 'A reason, in their own words', opts: ['A reason, in their own words', 'Nothing beyond their interest'] },
+      { k: 'Who reads it first', v: 'C. Vasseur', fixed: true },
+      { k: 'What you see', v: 'Only what she puts in front of you', fixed: true },
+      { k: 'A second approach after you decline', v: 'Never', opts: ['Never', 'Once, after six months'] }
+    ];
+
+    var EYES = [
+      { id: 'member', label: 'A verified member' },
+      { id: 'link',   label: 'Someone with the link' },
+      { id: 'out',    label: 'Anyone else' }
+    ];
+    var eye = 'member';
+
+    /* -- what each pair of eyes is actually allowed ------------------------ */
+    function reachOf(k) {
+      var r = REACH.filter(function (x) { return x.k === k; })[0];
+      return r ? r.v : 'No';
+    }
+    function allowed() {
+      if (!live) return false;
+      if (eye === 'member') return reachOf('Members of the house') !== 'No';
+      if (eye === 'link')   return reachOf('People holding the link') === 'Yes';
+      return reachOf('Anyone not signed in') === 'Yes';
+    }
+
+    function renderFields() {
+      var box = $('#pub-fields'); box.textContent = '';
+      FIELDS.forEach(function (f, i) {
+        var row = el('div', 'pr-row');
+        var left = el('div');
+        left.appendChild(el('p', 'pr-row__k', f.k));
+        left.appendChild(el('p', 'pub-v', f.v));
+        left.appendChild(el('p', 'pr-row__v', f.n));
+        row.appendChild(left);
+        if (f.fixed) {
+          row.appendChild(el('span', 'nt-pref__v', 'Always shown'));
+        } else {
+          var lab = el('label', 'ltr-toggle');
+          var cb = el('input'); cb.type = 'checkbox'; cb.checked = f.on;
+          cb.id = 'pub-f-' + i;
+          cb.addEventListener('change', function () { f.on = cb.checked; renderAll(); });
+          lab.appendChild(cb);
+          lab.appendChild(el('span', null, f.on ? 'On the page' : 'Held back'));
+          row.appendChild(lab);
+        }
+        box.appendChild(row);
+      });
+      var on = FIELDS.filter(function (f) { return f.fixed || f.on; }).length;
+      $('#pub-n').textContent = on + ' of ' + FIELDS.length + ' shown';
+    }
+
+    function renderPhotos() {
+      var box = $('#pub-photos'); box.textContent = '';
+      PHOTOS.forEach(function (p, i) {
+        var c = el('div', 'pr-photo');
+        var img = el('img'); img.src = MATCH.plate('pub-' + i + '-' + p.t);
+        img.alt = ''; img.setAttribute('aria-hidden', 'true');
+        if (!p.on) img.style.opacity = '.34';
+        c.appendChild(img);
+        c.appendChild(el('p', 'pr-photo__t', p.t));
+        var lab = el('label', 'ltr-toggle');
+        var cb = el('input'); cb.type = 'checkbox'; cb.checked = p.on;
+        cb.id = 'pub-ph-' + i;
+        cb.addEventListener('change', function () { p.on = cb.checked; renderAll(); });
+        lab.appendChild(cb);
+        lab.appendChild(el('span', null, p.on ? 'Public' : 'Held'));
+        c.appendChild(lab);
+        box.appendChild(c);
+      });
+      var n = PHOTOS.filter(function (p) { return p.on; }).length;
+      $('#pub-ph-n').textContent = n + ' of ' + PHOTOS.length + ' public';
+    }
+
+    function rows(list, box, after) {
+      box.textContent = '';
+      list.forEach(function (it, i) {
+        var row = el('div', 'pr-row');
+        var left = el('div');
+        left.appendChild(el('p', 'pr-row__k', it.k));
+        row.appendChild(left);
+        if (it.fixed) {
+          row.appendChild(el('span', 'nt-pref__v', it.v));
+        } else {
+          var lab = el('label', 'sr-only', it.k);
+          var id = box.id + '-' + i; lab.setAttribute('for', id);
+          var sel = el('select'); sel.id = id;
+          it.opts.forEach(function (o) {
+            var op = el('option', null, o); op.value = o;
+            if (o === it.v) op.selected = true;
+            sel.appendChild(op);
+          });
+          sel.addEventListener('change', function () { it.v = sel.value; after(); });
+          row.appendChild(lab); row.appendChild(sel);
+        }
+        box.appendChild(row);
+      });
+    }
+
+    function renderCard() {
+      var box = $('#pub-card'); box.textContent = '';
+      var who = EYES.filter(function (e) { return e.id === eye; })[0];
+      $('#pub-as').textContent = who.label;
+
+      if (!allowed()) {
+        box.appendChild(el('p', 'pr-card__s', !live
+          ? 'The page is not published. Nobody sees anything, and the link answers as though no such page exists — it does not say that one is hidden.'
+          : who.label + ' cannot reach this page on your present settings. They are shown nothing, and are not told that a page exists.'));
+        return;
+      }
+
+      var shown = FIELDS.filter(function (f) { return f.fixed || f.on; });
+      var ph = PHOTOS.filter(function (p) { return p.on; });
+
+      var strip = el('div', 'pr-strip');
+      if (ph.length) {
+        ph.forEach(function (p) {
+          var img = el('img'); img.src = MATCH.plate('pub-' + PHOTOS.indexOf(p) + '-' + p.t);
+          img.alt = ''; img.setAttribute('aria-hidden', 'true');
+          strip.appendChild(img);
+        });
+      } else {
+        strip.appendChild(el('p', 'ltr-empty', 'No photograph on the page.'));
+      }
+      box.appendChild(strip);
+
+      var name = shown.filter(function (f) { return f.k === 'First name'; })[0];
+      var age = shown.filter(function (f) { return f.k === 'Age'; })[0];
+      var city = shown.filter(function (f) { return f.k === 'City'; })[0];
+      box.appendChild(el('h3', 'pub-card__n',
+        [name && name.v, age && age.v].filter(Boolean).join(', ') + (city ? ' · ' + city.v : '')));
+
+      var dl = el('dl', 'kv');
+      shown.forEach(function (f) {
+        if (['First name', 'Age', 'City'].indexOf(f.k) > -1) return;
+        dl.appendChild(el('dt', null, f.k));
+        dl.appendChild(el('dd', null, f.v));
+      });
+      box.appendChild(dl);
+
+      var who2 = APPROACH[0].v;
+      box.appendChild(el('p', 'pr-card__f',
+        who2 === 'Nobody — the page is to be read, not answered'
+          ? 'There is no way to approach from this page. It can be read and nothing more.'
+          : 'They may write one approach, to your advisor. They cannot write to you, and they are not told whether you read it.'));
+    }
+
+    function renderState() {
+      $('#pub-status').textContent = live ? 'Published · ' + LINK : 'Not published';
+      $('#pub-note').textContent = live
+        ? 'Anyone the settings below allow can read it. Take it down and the link stops answering within the minute.'
+        : 'Nothing exists at the link. This is the state a member is in unless they deliberately leave it.';
+      $('#pub-toggle').textContent = live ? 'Take it down' : 'Publish it';
+      $('#pub-state').classList.toggle('is-live', live);
+    }
+
+    function renderFigures() {
+      var dl = $('#pub-figures'); dl.textContent = '';
+      var rowsOf = live
+        ? [['Read', '212 times'], ['By members', '188'], ['By link', '24'],
+           ['Approaches', '3 — two put to you, one not'], ['Told who read it', 'Nobody, ever']]
+        : [['Read', 'Not published'], ['Approaches', 'None possible'],
+           ['Held while unpublished', 'Nothing. There is no page to count']];
+      rowsOf.forEach(function (r) {
+        dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1]));
+      });
+    }
+
+    function renderAll() {
+      renderFields(); renderPhotos(); renderCard(); renderState(); renderFigures();
+    }
+
+    EYES.forEach(function (e) {
+      var b = el('button', 'chip' + (e.id === eye ? ' is-on' : ''), e.label);
+      b.type = 'button'; b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', e.id === eye ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        eye = e.id;
+        $$('#pub-eyes button').forEach(function (o) {
+          o.classList.toggle('is-on', o === b);
+          o.setAttribute('aria-checked', o === b ? 'true' : 'false');
+        });
+        renderCard();
+      });
+      $('#pub-eyes').appendChild(b);
+    });
+
+    $('#pub-toggle').addEventListener('click', function () {
+      live = !live;
+      $('#pub-said').textContent = live
+        ? 'Published. C. Vasseur is told that you have, because she will be the one reading what comes back — and she may tell you she thinks it is a mistake.'
+        : 'Taken down. The link stops answering, the count is discarded rather than kept for later, and nobody who read it is told anything.';
+      renderAll();
+    });
+
+    $('#pub-copy').addEventListener('click', function () {
+      $('#pub-said').textContent = live
+        ? 'Copied: ' + LINK + '. It is yours to give to one person or to nobody — the link is not the publication, the settings above are.'
+        : 'There is nothing to copy while the page is not published.';
+    });
+
+    rows(REACH, $('#pub-reach'), renderCard);
+    rows(APPROACH, $('#pub-approach'), renderCard);
+    renderAll();
   })();
 
   route();

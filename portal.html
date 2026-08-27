@@ -4163,6 +4163,7 @@
           <button type="button" role="tab" data-pp="profile" aria-selected="true">My profile</button>
           <button type="button" role="tab" data-pp="persona" aria-selected="false">My persona</button>
           <button type="button" role="tab" data-pp="settings" aria-selected="false">Settings &amp; permissions</button>
+          <button type="button" role="tab" data-pp="public" aria-selected="false">Dating &amp; Relationship Public Profile</button>
         </div>
 
         <!-- ============================ PROFILE ======================== -->
@@ -4259,6 +4260,93 @@
                     Resetting the persona does not touch your profile. Deleting the conversation
                     history removes what the persona was built from, and the persona with it.
                   </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ===================== DATING & RELATIONSHIP PUBLIC PROFILE ===== -->
+        <div class="pp-pane" id="pp-pane-public" hidden>
+          <div class="pub-state" id="pub-state">
+            <div>
+              <p class="pub-state__k" id="pub-status">—</p>
+              <p class="pub-state__n" id="pub-note"></p>
+            </div>
+            <div class="pub-state__acts">
+              <button class="btn btn--solid" type="button" id="pub-toggle">—</button>
+              <button class="btn btn--quiet" type="button" id="pub-copy">Copy the link</button>
+            </div>
+          </div>
+          <p class="cas-curated" id="pub-said" aria-live="polite"></p>
+
+          <div class="cols cols--7-5" style="margin-top:1.4rem">
+            <div class="panel">
+              <div class="panel__head">
+                <h2>What is on it</h2>
+                <span class="pill pill--rest" id="pub-n">—</span>
+              </div>
+              <div class="panel__body">
+                <div id="pub-fields"></div>
+                <div class="note-inline">
+                  Your surname is not on the list, at any setting. It is released by you, to one
+                  person, and never by a page.
+                </div>
+              </div>
+            </div>
+
+            <div class="stack" style="gap:1.2rem">
+              <div class="panel">
+                <div class="panel__head"><h2>Photographs</h2><span class="pill pill--rest" id="pub-ph-n">—</span></div>
+                <div class="panel__body">
+                  <div class="pr-photos" id="pub-photos"></div>
+                  <div class="note-inline">
+                    A photograph on a public page can be saved by anyone who sees it. That is true of
+                    every such page and we would rather say it than let you discover it.
+                  </div>
+                </div>
+              </div>
+              <div class="panel">
+                <div class="panel__head"><h2>Who can find it</h2></div>
+                <div class="panel__body">
+                  <div id="pub-reach"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cols cols--7-5" style="margin-top:1.2rem">
+            <div class="panel">
+              <div class="panel__head">
+                <h2>Exactly what a stranger sees</h2>
+                <span class="pill pill--rest" id="pub-as">—</span>
+              </div>
+              <div class="panel__body">
+                <div class="chips" id="pub-eyes" role="group" aria-label="Seen by"></div>
+                <div class="pr-card" id="pub-card" style="margin-top:1.4rem"></div>
+              </div>
+            </div>
+
+            <div class="stack" style="gap:1.2rem">
+              <div class="panel">
+                <div class="panel__head"><h2>If someone wants to meet you</h2></div>
+                <div class="panel__body">
+                  <div id="pub-approach"></div>
+                  <div class="note-inline">
+                    Nobody writes to you from this page. An approach reaches C. Vasseur, who reads it
+                    and decides whether it is worth putting in front of you at all.
+                  </div>
+                </div>
+              </div>
+              <div class="panel">
+                <div class="panel__head"><h2>What the page has done</h2><span class="pill pill--rest">Thirty days</span></div>
+                <div class="panel__body">
+                  <dl class="kv" id="pub-figures"></dl>
+                  <div class="note-inline">
+                    You are never told who looked, and nobody is told that you looked at theirs. A
+                    count is the most a page of ours will ever report.
+                  </div>
                 </div>
               </div>
             </div>
