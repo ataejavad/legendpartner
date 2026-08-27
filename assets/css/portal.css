@@ -2676,3 +2676,40 @@ a.tile:hover{ transform:translateY(-2px); }
   .occ.is-open .occ__detail{ animation:none; }
   .occ.is-open .occ-t:not(.is-picked){ transform:none; }
 }
+
+/* --- Media: the library --------------------------------------------------- */
+.md-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(15rem,1fr)); gap:1.2rem; }
+.md{
+  display:flex; flex-direction:column; gap:.35rem;
+  background:none; border:1px solid var(--line-soft); border-radius:var(--r-sm);
+  padding:0 0 1rem; overflow:hidden;
+  font:inherit; text-align:left; cursor:pointer; color:inherit;
+  transition:border-color .25s var(--ease), transform .3s var(--ease);
+}
+.md:hover{ border-color:var(--champagne); transform:translateY(-2px); }
+.md:focus-visible{ outline:2px solid var(--champagne); outline-offset:3px; }
+.md__fig{ position:relative; display:block; aspect-ratio:16/10; overflow:hidden; background:#0E0E10; }
+.md__v{ width:100%; height:100%; object-fit:cover; display:block; }
+.md__kind{
+  position:absolute; left:.7rem; bottom:.7rem;
+  font-size:.54rem; letter-spacing:.2em; text-transform:uppercase;
+  color:#EDEAE3; background:rgba(8,8,10,.72); padding:.24rem .5rem; border-radius:2px;
+}
+.md__t{ margin:.9rem 1rem 0; font-family:var(--serif); font-size:1.12rem; color:#EDEAE3; }
+.md__d{ margin:0 1rem; font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:var(--fg-faint); }
+.md__n{ margin:.4rem 1rem 0; font-size:.84rem; color:var(--fg-soft); }
+.md__player{ width:100%; max-height:26rem; object-fit:contain; background:#0B0B0C; border-radius:2px; display:block; }
+.md__meta{ margin:1rem 0 0; font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:var(--champagne); }
+.md__body{
+  margin:1.2rem 0 0; font-family:var(--serif); font-size:1.06rem; line-height:1.62;
+  color:#EDEAE3; max-width:66ch;
+}
+#md-open .panel__head h2{ font-family:var(--serif); }
+#md-open .panel__head h2:focus{ outline:none; }
+
+/* Chips and tab strips that arrived with these four sections. */
+#bz-tabs button{ font-size:.8rem; padding:.5rem .9rem; }
+
+@media (max-width:720px){
+  .md-grid{ grid-template-columns:minmax(0,1fr); }
+}

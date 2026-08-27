@@ -63,7 +63,11 @@
     presentation: 'How you appear',
     billing: 'Membership & billing',
     privacy: 'Privacy & security',
-    help: 'Help'
+    help: 'Help',
+    business: 'Business Connections',
+    network: 'Private Social Network',
+    market: 'Marketplace',
+    media: 'Media'
   };
 
   /* --- Dates & greeting --------------------------------------------------- */
@@ -6329,6 +6333,675 @@
       }, { threshold: .2 });
       io.observe(stage);
     }
+  })();
+
+  /* --- A form built from a description ------------------------------------
+     Three of the four sections below want a short form with the same manners:
+     the first two fields are needed, the rest may be left blank, and a blank
+     answer is an answer. Written once here rather than three times. */
+  function occForm(host, spec) {
+    var el = MATCH.el;
+    var vals = {}, wraps = {};
+    host.textContent = '';
+    var f = el('form', 'occ-form');
+
+    spec.fields.forEach(function (def) {
+      var w = el('div', 'occ-f' + (def.wide ? ' occ-f--wide' : ''));
+      var id = spec.id + '-' + def.k;
+      var lab = el('label', null, def.label); lab.setAttribute('for', id);
+      var input;
+      if (def.type === 'select') {
+        input = el('select');
+        var blank = el('option', null, 'Choose'); blank.value = '';
+        input.appendChild(blank);
+        def.opts.forEach(function (o) { var op = el('option', null, o); op.value = o; input.appendChild(op); });
+      } else if (def.type === 'date') {
+        input = el('input'); input.type = 'date';
+      } else if (def.type === 'line') {
+        input = el('input'); input.type = 'text';
+        if (def.ph) input.placeholder = def.ph;
+      } else {
+        input = el('textarea'); input.rows = def.wide ? 3 : 2;
+        if (def.ph) input.placeholder = def.ph;
+      }
+      input.id = id;
+      function take() { vals[def.k] = input.value; w.classList.remove('is-bad'); }
+      input.addEventListener('input', take);
+      input.addEventListener('change', take);
+      w.appendChild(lab); w.appendChild(input);
+      wraps[def.k] = w;
+      f.appendChild(w);
+    });
+
+    var foot = el('div', 'occ-form__foot');
+    var go = el('button', 'btn btn--solid', spec.go); go.type = 'submit';
+    var said = el('p', 'occ-said');
+    foot.appendChild(go); foot.appendChild(said);
+    f.appendChild(foot);
+
+    f.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var need = spec.fields.slice(0, 2).filter(function (d) { return !vals[d.k]; });
+      if (need.length) {
+        need.forEach(function (d) { wraps[d.k].classList.add('is-bad'); });
+        said.textContent = 'The first two are needed. Everything else can be left blank, and a blank answer is an answer.';
+        return;
+      }
+      var done = MATCH.el('div', 'occ-done');
+      done.appendChild(el('h3', 'occ-done__t', spec.doneT || 'Sent'));
+      done.appendChild(el('p', 'occ-done__m', spec.done));
+      var acts = el('div', 'occ-form__foot');
+      var again = el('button', 'btn btn--quiet', 'Send another'); again.type = 'button';
+      again.addEventListener('click', function () { occForm(host, spec); });
+      acts.appendChild(again);
+      done.appendChild(acts);
+      host.textContent = '';
+      host.appendChild(done);
+      if (spec.after) spec.after(vals);
+    });
+
+    host.appendChild(f);
+  }
+
+  /* --- Business Connections ----------------------------------------------- */
+  (function () {
+    if (!$('#view-business')) return;
+    var el = MATCH.el;
+
+    var INTROS = [
+      { g: 'open', n: 'A member in Zurich', s: 'Proposed 19 August · by C. Vasseur',
+        why: 'They have built and sold two businesses in the field yours is entering, and said they would rather talk to someone doing it now than sit on another board.',
+        what: 'Neither of you is named until you both accept.' },
+      { g: 'open', n: 'A member in Milan', s: 'Proposed 12 August · by H. Okonjo',
+        why: 'You asked in June for someone who has taken a family company through a succession. This is the second time it has been asked of them and the first time they have said yes.',
+        what: 'They have already accepted. Nothing about you has been disclosed.' },
+      { g: 'live', n: 'A. Bergmann', s: 'Both accepted 02 August',
+        why: 'Manufacturing in Bavaria, and the same problem with a distributor you described in May.',
+        what: 'You have met once. The house is not party to anything that follows.' },
+      { g: 'live', n: 'R. Achebe', s: 'Both accepted 14 July',
+        why: 'Introduced for the legal question, not the investment one — and that was stated to both of you in writing.',
+        what: 'Two calls so far.' },
+      { g: 'past', n: 'A member in London', s: 'Declined by you, 30 June',
+        why: 'You gave no reason and none was passed on. They will not be proposed to you again.',
+        what: 'Closed.' },
+      { g: 'past', n: 'A member in Dubai', s: 'Declined by them, 11 May',
+        why: 'They were not told who you were. You are not told why they declined, because they were not asked.',
+        what: 'Closed.' }
+    ];
+
+    var TABS = [
+      { id: 'open', label: 'Waiting on you', note: 'Proposed, with the reason written down' },
+      { id: 'live', label: 'Introduced',     note: 'Both accepted; the house has stepped back' },
+      { id: 'past', label: 'Closed',         note: 'Declined by one side or the other, and never revisited' }
+    ];
+    var tab = 'open';
+
+    function render() {
+      var box = $('#bz-list'); box.textContent = '';
+      var rows = INTROS.filter(function (i) { return i.g === tab; });
+      rows.forEach(function (it) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', it.n));
+        left.appendChild(el('p', 'cn__s', it.s));
+        left.appendChild(el('p', 'cn__m', it.why));
+        left.appendChild(el('p', 'cn__m', it.what));
+        var acts = el('div', 'cn__acts');
+        if (it.g === 'open') {
+          var yes = el('button', 'btn btn--solid', 'Accept'); yes.type = 'button';
+          yes.addEventListener('click', function () {
+            it.g = 'live'; it.s = 'Both accepted today';
+            it.what = 'Names exchanged. The house is not party to anything that follows.';
+            render();
+          });
+          var no = el('button', 'btn btn--quiet', 'Decline'); no.type = 'button';
+          no.addEventListener('click', function () {
+            it.g = 'past'; it.s = 'Declined by you, today';
+            it.why = 'You gave no reason and none was passed on. They will not be proposed to you again.';
+            it.what = 'Closed.';
+            render();
+          });
+          acts.appendChild(yes); acts.appendChild(no);
+        } else if (it.g === 'live') {
+          var end = el('button', 'btn btn--quiet', 'End it'); end.type = 'button';
+          end.addEventListener('click', function () {
+            it.g = 'past'; it.s = 'Ended by you, today';
+            it.what = 'Closed. They are told it has ended and not why.';
+            render();
+          });
+          acts.appendChild(end);
+        }
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#bz-empty').hidden = rows.length > 0;
+      var t = TABS.filter(function (x) { return x.id === tab; })[0];
+      $('#bz-note').textContent = rows.length ? t.label + ' — ' + rows.length + '. ' + t.note + '.' : t.note + '.';
+      var open = INTROS.filter(function (i) { return i.g === 'open'; }).length;
+      $('#bz-n').textContent = open ? open + ' waiting' : 'Nothing waiting';
+      $$('#bz-tabs button').forEach(function (b) {
+        b.setAttribute('aria-selected', b.getAttribute('data-bz') === tab ? 'true' : 'false');
+      });
+    }
+
+    TABS.forEach(function (t) {
+      var b = el('button', null, t.label); b.type = 'button';
+      b.setAttribute('data-bz', t.id); b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', t.id === tab ? 'true' : 'false');
+      b.addEventListener('click', function () { tab = t.id; render(); });
+      $('#bz-tabs').appendChild(b);
+    });
+
+    var PROFILE = [
+      { k: 'What you do', v: 'Stated by you, in one line, and not embellished' },
+      { k: 'What you are looking for', v: 'An operator, a successor, a buyer, or nothing at present' },
+      { k: 'What you will not be asked about', v: 'Money, unless you have said otherwise in writing' },
+      { k: 'Who reads it', v: 'Your advisor, and a second advisor searching for another member' },
+      { k: 'Your name', v: 'Released by you, at the point you accept' }
+    ];
+    var pb = $('#bz-profile');
+    PROFILE.forEach(function (r) {
+      var row = el('div', 'nt-pref');
+      row.appendChild(el('span', 'nt-pref__k', r.k));
+      row.appendChild(el('span', 'nt-pref__v', r.v));
+      pb.appendChild(row);
+    });
+
+    occForm($('#bz-form'), {
+      id: 'bz-f',
+      fields: [
+        { k: 'want', label: 'What you are looking for', type: 'select',
+          opts: ['An operator', 'A successor', 'A buyer', 'A co-investor', 'Someone who has done this before', 'Something else'] },
+        { k: 'field', label: 'In what field', type: 'line', ph: 'One line. Sector, or the problem itself.' },
+        { k: 'where', label: 'Where', type: 'select', opts: ['Anywhere', 'Europe', 'The United Kingdom', 'North America', 'The Gulf', 'Asia'] },
+        { k: 'money', label: 'May money be raised in this conversation?', type: 'select',
+          opts: ['No', 'Yes, and I have said so in writing'] },
+        { k: 'note', label: 'The brief', type: 'text', wide: true,
+          ph: 'What a good introduction would look like, and what a bad one would look like. The second is the more useful answer.' }
+      ],
+      go: 'Send to your advisor',
+      doneT: 'With your advisor',
+      done: 'She reads it against every file she holds and against what the other advisors are searching for. If nothing is worth proposing she writes to say so rather than sending something to look busy.'
+    });
+
+    render();
+  })();
+
+  /* --- Private Social Network ---------------------------------------------
+     Rooms, not a feed. The whole design of this section is a set of things it
+     deliberately does not have, so those are stated first rather than being
+     left for the member to notice. */
+  (function () {
+    if (!$('#view-network')) return;
+    var el = MATCH.el;
+
+    var NOTS = [
+      { ic: '⊘', t: 'No feed', n: 'Nothing arrives in an order somebody chose for you. You open a room, or you do not.' },
+      { ic: '⊘', t: 'No numbers', n: 'No followers, no likes, no count of anything beside a name.' },
+      { ic: '⊘', t: 'No strangers', n: 'A room is entered by invitation from someone already in it.' },
+      { ic: '⊘', t: 'No record', n: 'What is said in a room is not on your file and is not read by your advisor.' }
+    ];
+    var qa = $('#nw-nots');
+    NOTS.forEach(function (x) {
+      var c = el('div', 'qa__i');
+      c.appendChild(el('span', 'qa__ic', x.ic));
+      c.appendChild(el('span', 'qa__t', x.t));
+      c.appendChild(el('span', 'qa__n', x.n));
+      qa.appendChild(c);
+    });
+
+    var ROOMS = [
+      { id: 'r-cellar', t: 'The cellar', n: 'Wine, and the arguments about it. Twelve members, one of whom makes it.',
+        size: 12, in: true, as: 'A. M.', posts: [
+          { who: 'H. (Bordeaux)', d: '18 August', m: 'The 2019s are drinking earlier than anyone said they would. I would not lay down more of them.' },
+          { who: 'You', d: '18 August', m: 'That matches what I opened last month. What would you buy instead?' }
+        ] },
+      { id: 'r-sail', t: 'Under sail', n: 'Members who sail, and members who would like to be asked. Fourteen.',
+        size: 14, in: true, as: 'Marchand', posts: [
+          { who: 'T.', d: '11 August', m: 'Two berths free out of Palma, first week of September. Nobody need be good at it.' }
+        ] },
+      { id: 'r-second', t: 'Second acts', n: 'Members who sold, retired, or stopped, and found the quiet difficult. Nine.',
+        size: 9, in: false, as: null, posts: [] },
+      { id: 'r-board', t: 'The long table', n: 'Family businesses and the succession question. Eleven, and closed to advisers by design.',
+        size: 11, in: false, as: null, posts: [] },
+      { id: 'r-quiet', t: 'The quiet room', n: 'No subject. Members who want company without conversation about anything in particular. Sixteen.',
+        size: 16, in: true, as: 'A.', posts: [
+          { who: 'A member', d: '20 August', m: 'Nothing to report. Which is the point of this room.' }
+        ] },
+      { id: 'r-city', t: 'London, Thursdays', n: 'Whoever is in the city that week, and where they will be. Eighteen.',
+        size: 18, in: false, as: null, posts: [] }
+    ];
+
+    var FILTERS = [
+      { id: 'all',  label: 'Every room' },
+      { id: 'in',   label: 'Rooms you are in' },
+      { id: 'open', label: 'Rooms you could be asked into' }
+    ];
+    var filter = 'all';
+    var current = ROOMS[0];
+
+    function shown() {
+      return ROOMS.filter(function (r) {
+        return filter === 'all' || (filter === 'in' ? r.in : !r.in);
+      });
+    }
+
+    function renderRooms() {
+      var box = $('#nw-rooms'); box.textContent = '';
+      var rows = shown();
+      rows.forEach(function (r) {
+        var row = el('div', 'cn' + (r === current ? ' is-new' : ''));
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', r.t));
+        left.appendChild(el('p', 'cn__s', r.size + ' members' + (r.in ? ' · you are in it, as ' + r.as : ' · you are not in it')));
+        left.appendChild(el('p', 'cn__m', r.n));
+        var acts = el('div', 'cn__acts');
+        if (r.in) {
+          var open = el('button', 'btn btn--quiet', r === current ? 'Open' : 'Read it'); open.type = 'button';
+          open.addEventListener('click', function () { current = r; renderRooms(); renderThread(); });
+          var out = el('button', 'btn btn--quiet', 'Leave'); out.type = 'button';
+          out.addEventListener('click', function () {
+            r.in = false; r.as = null;
+            if (current === r) current = ROOMS.filter(function (x) { return x.in; })[0] || null;
+            renderRooms(); renderThread();
+          });
+          acts.appendChild(open); acts.appendChild(out);
+        } else {
+          var ask = el('button', 'btn btn--quiet', 'Ask to be invited'); ask.type = 'button';
+          ask.addEventListener('click', function () {
+            left.appendChild(el('p', 'cn__m',
+              'Asked. Someone already in the room decides, and you are told either way. A no is not explained and is not asked again.'));
+            ask.disabled = true;
+          });
+          acts.appendChild(ask);
+        }
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      var mine = ROOMS.filter(function (r) { return r.in; }).length;
+      $('#nw-n').textContent = mine + ' of ' + ROOMS.length + ' open to you';
+      $('#nw-note').textContent = filter === 'in'
+        ? 'The rooms you are in. Leaving one is silent — nobody is told, and you may be asked back.'
+        : filter === 'open'
+          ? 'Rooms you are not in. Asking is ordinary; so is being told no, once, without a reason.'
+          : 'Every room the house runs. A room is capped at twenty and is closed when it reaches it.';
+      $$('#nw-filters button').forEach(function (b) {
+        var on = b.getAttribute('data-nw') === filter;
+        b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+    }
+
+    function renderThread() {
+      var box = $('#nw-thread'); box.textContent = '';
+      $('#nw-to').textContent = current ? current.t : 'No room open';
+      $('#nw-send').disabled = !current;
+      $('#nw-say').disabled = !current;
+      if (!current) { box.appendChild(el('p', 'ltr-empty', 'Open a room and what is said in it appears here.')); return; }
+      if (!current.posts.length) { box.appendChild(el('p', 'ltr-empty', 'Nothing said in here yet.')); return; }
+      current.posts.forEach(function (p) {
+        var w = el('div', 'msg msg--' + (p.who === 'You' ? 'me' : 'them'));
+        w.appendChild(el('p', 'who', p.who + ' · ' + p.d));
+        w.appendChild(el('div', 'bubble', p.m));
+        box.appendChild(w);
+      });
+    }
+
+    FILTERS.forEach(function (f) {
+      var b = el('button', 'chip' + (f.id === filter ? ' is-on' : ''), f.label);
+      b.type = 'button'; b.setAttribute('data-nw', f.id); b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', f.id === filter ? 'true' : 'false');
+      b.addEventListener('click', function () { filter = f.id; renderRooms(); });
+      $('#nw-filters').appendChild(b);
+    });
+
+    $('#nw-send').addEventListener('click', function () {
+      var v = $('#nw-say').value.trim();
+      if (!current) return;
+      if (!v) { $('#nw-said').textContent = 'Write something first.'; return; }
+      current.posts.push({ who: 'You', d: 'Today', m: v });
+      $('#nw-say').value = '';
+      $('#nw-said').textContent = 'Posted to ' + current.t + '. Read by its ' + current.size +
+        ' members and by nobody else — not your advisor, and not the house.';
+      renderThread();
+    });
+
+    var VIS = [
+      { k: 'The name each room sees', v: 'Set per room, by you' },
+      { k: 'Whether two rooms can tell it is the same person', v: 'They cannot' },
+      { k: 'Whether your advisor reads any of it', v: 'No' },
+      { k: 'Whether anything here reaches your file', v: 'No' },
+      { k: 'How long a room keeps what is said', v: 'Ninety days, then it is gone' }
+    ];
+    var vb = $('#nw-vis');
+    VIS.forEach(function (r) {
+      var row = el('div', 'nt-pref');
+      row.appendChild(el('span', 'nt-pref__k', r.k));
+      row.appendChild(el('span', 'nt-pref__v', r.v));
+      vb.appendChild(row);
+    });
+
+    renderRooms(); renderThread();
+  })();
+
+  /* --- Marketplace --------------------------------------------------------- */
+  (function () {
+    if (!$('#view-market')) return;
+    var el = MATCH.el;
+
+    var LOTS = [
+      { id: 'm1', cat: 'art', t: 'A Vuillard interior, 1899', p: 'In the region of £400,000',
+        where: 'London', checked: true, held: 'In the family since 1946',
+        n: 'Sold because the house it hangs in is being sold. The seller would rather it went to someone who will live with it than to a room it is stored in.' },
+      { id: 'm2', cat: 'art', t: 'Three Hockney prints, signed', p: '£62,000 the set',
+        where: 'Munich', checked: true, held: 'Bought from the printer, 1979',
+        n: 'The set has never been split and the seller asks that it is not split now.' },
+      { id: 'm3', cat: 'property', t: 'A house above Lake Geneva', p: 'On application',
+        where: 'Vaud', checked: true, held: 'Built 1931, one family since',
+        n: 'Eleven rooms, four hectares, and a covenant on the land the seller will explain in person.' },
+      { id: 'm4', cat: 'property', t: 'A flat off the Marylebone Road', p: '£2.4m',
+        where: 'London', checked: false, held: 'Twelve years',
+        n: 'Listed by the member directly. The house has seen the title and nothing else.' },
+      { id: 'm5', cat: 'motor', t: 'Aston Martin DB5, 1964', p: '€1.1m',
+        where: 'Milan', checked: true, held: 'Two owners, both known to the house',
+        n: 'Matching numbers, and a folder of receipts going back to 1971 that is worth more than the paint.' },
+      { id: 'm6', cat: 'motor', t: 'A 1962 saloon, unfinished', p: '£18,000',
+        where: 'Hampshire', checked: false, held: 'Four years',
+        n: 'Restoration begun and not finished. Sold as it stands, with everything that came with it.' },
+      { id: 'm7', cat: 'cellar', t: 'A cellar, 1,400 bottles', p: 'In the region of £180,000',
+        where: 'Bordeaux', checked: true, held: 'Bought en primeur, thirty years',
+        n: 'Provenance unbroken and temperature logged since 1996. The seller will not split it.' },
+      { id: 'm8', cat: 'company', t: 'A manufacturer, Bavaria', p: 'On application',
+        where: 'Munich', checked: true, held: 'Third generation',
+        n: 'Sixty people, profitable, and no successor in the family. The owner wants an operator rather than a fund, and has said so.' },
+      { id: 'm9', cat: 'company', t: 'A minority stake, hospitality group', p: '€3.5m for 18%',
+        where: 'Vienna', checked: false, held: 'Since 2018',
+        n: 'Listed by the member. Figures are shown only after both sides agree to be named.' }
+    ];
+
+    var CATS = [
+      { id: 'all',      label: 'Everything' },
+      { id: 'art',      label: 'Pictures' },
+      { id: 'property', label: 'Property' },
+      { id: 'motor',    label: 'Motor cars' },
+      { id: 'cellar',   label: 'Cellars' },
+      { id: 'company',  label: 'Companies' }
+    ];
+    var cat = 'all';
+    var mine = [];
+
+    function shown() {
+      return LOTS.filter(function (l) {
+        return (cat === 'all' || l.cat === cat) && (!$('#mk-prov').checked || l.checked);
+      });
+    }
+
+    function render() {
+      var box = $('#mk-list'); box.textContent = '';
+      var rows = shown();
+      rows.forEach(function (l) {
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', l.t));
+        left.appendChild(el('p', 'cn__s', l.p + ' · ' + l.where + ' · ' +
+          (l.checked ? 'Checked by the house' : 'Listed by the member, unchecked')));
+        left.appendChild(el('p', 'cn__m', l.n));
+        left.appendChild(el('p', 'cn__m', 'Held: ' + l.held));
+        var acts = el('div', 'cn__acts');
+        var on = mine.indexOf(l.id) > -1;
+        var b = el('button', 'btn ' + (on ? 'btn--quiet' : 'btn--solid'), on ? 'Withdraw interest' : 'Register interest');
+        b.type = 'button';
+        b.addEventListener('click', function () {
+          if (on) { mine.splice(mine.indexOf(l.id), 1); }
+          else { mine.push(l.id); }
+          render(); renderMine();
+        });
+        acts.appendChild(b);
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#mk-empty').hidden = rows.length > 0;
+      $('#mk-n').textContent = rows.length + ' of ' + LOTS.length;
+      var c = CATS.filter(function (x) { return x.id === cat; })[0];
+      $('#mk-note').textContent = $('#mk-prov').checked
+        ? c.label + ' the house has checked itself — provenance, title, and the right to sell.'
+        : c.label + ', including what members have listed directly. Those are shown as unchecked, which is what they are.';
+      $$('#mk-cats button').forEach(function (b) {
+        var isOn = b.getAttribute('data-mk') === cat;
+        b.classList.toggle('is-on', isOn); b.setAttribute('aria-checked', isOn ? 'true' : 'false');
+      });
+    }
+
+    function renderMine() {
+      var box = $('#mk-mine'); box.textContent = '';
+      mine.forEach(function (id) {
+        var l = LOTS.filter(function (x) { return x.id === id; })[0];
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', l.t));
+        left.appendChild(el('p', 'cn__s', l.p));
+        left.appendChild(el('p', 'cn__m',
+          'The seller has been told a member is interested and nothing more. You are named only if you both agree to be.'));
+        row.appendChild(left); box.appendChild(row);
+      });
+      $('#mk-mine-n').textContent = mine.length ? mine.length + ' registered' : 'None';
+      $('#mk-mine-empty').hidden = mine.length > 0;
+    }
+
+    CATS.forEach(function (c) {
+      var b = el('button', 'chip' + (c.id === cat ? ' is-on' : ''), c.label);
+      b.type = 'button'; b.setAttribute('data-mk', c.id); b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', c.id === cat ? 'true' : 'false');
+      b.addEventListener('click', function () { cat = c.id; render(); });
+      $('#mk-cats').appendChild(b);
+    });
+    $('#mk-prov').addEventListener('change', render);
+
+    occForm($('#mk-form'), {
+      id: 'mk-f',
+      fields: [
+        { k: 'what', label: 'What is it', type: 'select',
+          opts: ['A picture', 'Property', 'A motor car', 'A cellar', 'A company or a stake in one', 'Something else'] },
+        { k: 'price', label: 'What you want for it', type: 'line', ph: 'A figure, a range, or "on application"' },
+        { k: 'where', label: 'Where it is', type: 'line', ph: 'City or country' },
+        { k: 'held', label: 'How long you have held it', type: 'line', ph: 'And from whom, if you can say' },
+        { k: 'about', label: 'About it', type: 'text', wide: true,
+          ph: 'Including whatever is wrong with it. A lot that arrives honest sells; one that arrives perfect does not.' }
+      ],
+      go: 'Send to the house',
+      doneT: 'Received',
+      done: 'The house checks provenance, title and your right to sell before it is shown to anyone. That takes days rather than hours, and if it cannot be checked it is listed as unchecked rather than quietly listed anyway.'
+    });
+
+    render(); renderMine();
+  })();
+
+  /* --- Media --------------------------------------------------------------- */
+  (function () {
+    if (!$('#view-media')) return;
+    var el = MATCH.el;
+
+    // The film and the room already sit in the page — as files in the source
+    // and as data URIs in the single-file bundle. Reading the sources off those
+    // elements is what lets one piece of code be right in both, rather than a
+    // path here and a sixty-kilobyte copy of the same film there.
+    function srcOf(sel, attr) { var e = $(sel); return e ? e.getAttribute(attr) : ''; }
+    var MEDIA_FILM   = srcOf('.tile__video', 'src');
+    var MEDIA_POSTER = srcOf('.tile__video', 'poster');
+    var MEDIA_ROOM   = srcOf('.occ-t[data-occ="parties"] .tile__img', 'src');
+
+    var ITEMS = [
+      { id: 'v1', kind: 'film', t: 'The last gathering', d: '14 min · filmed August',
+        n: 'The Marylebone dinner, filmed at dusk in the room it was held in. Fourteen members, none of whom are shown.',
+        video: true },
+      { id: 'v2', kind: 'film', t: 'A room at dusk', d: '6 min · filmed June',
+        n: 'The house before anyone arrives. Made because a member asked what the rooms actually look like.',
+        img: 'salon' },
+      { id: 'e1', kind: 'essay', t: 'On being introduced', d: '3,400 words · C. Vasseur',
+        n: 'Why the house writes a case rather than sending a profile, and what is lost when it does not.',
+        body: 'A profile invites comparison, which is the wrong operation to perform on a person. A case invites a decision — accept this one, or do not — and a decision made once is worth more than a comparison made forty times. The cost is that we must be right more often, and be told when we are not.' },
+      { id: 'e2', kind: 'essay', t: 'The second meeting', d: '2,100 words · A former negotiator',
+        n: 'Where most introductions fail, and why it is almost never about the first one.',
+        body: 'The first meeting asks only whether you want a second. The second asks a harder question, which is whether either of you is prepared to be inconvenienced. Most people answer it without noticing they have been asked.' },
+      { id: 'e3', kind: 'essay', t: 'Against the marketplace', d: '5,600 words · The house',
+        n: 'The argument for a practice rather than a platform, written when we were deciding what to be.',
+        body: 'A marketplace is optimised for the number of matches it can claim. A practice is optimised for the number of people it does not waste. These produce opposite products, and no amount of good intention reconciles them.' },
+      { id: 'r1', kind: 'recording', t: 'A conversation about succession', d: '48 min · recorded July',
+        n: 'Two members who took family companies through a handover, and disagreed about almost all of it. Neither is named.',
+        body: 'Recorded with both members present at the editing, which is why it runs forty-eight minutes rather than the ninety it was.' },
+      { id: 'r2', kind: 'recording', t: 'What a first year actually costs', d: '31 min · recorded May',
+        n: 'A psychotherapist who runs Formation, on the year most couples describe afterwards as the difficult one.',
+        body: 'The first year is not difficult because the people are wrong for each other. It is difficult because two settled lives are being merged and nobody has said out loud which parts are not up for negotiation.' },
+      { id: 'q1', kind: 'journal', t: 'The quarterly — Autumn', d: '64 pages · September',
+        n: 'What the house has learned in three months, the rooms it ran, and one essay it disagrees with.',
+        body: 'Sent on paper, sealed, unaddressed on the outside. There is no digital edition and there will not be one.' },
+      { id: 'q2', kind: 'journal', t: 'The quarterly — Summer', d: '58 pages · June',
+        n: 'Including the note on why we stopped publishing the number of introductions we make.',
+        body: 'We stopped publishing the figure because it was being read as a measure of success, and it is a measure of volume.' }
+    ];
+
+    var KINDS = [
+      { id: 'all',       label: 'Everything' },
+      { id: 'film',      label: 'Films' },
+      { id: 'essay',     label: 'Essays' },
+      { id: 'recording', label: 'Recordings' },
+      { id: 'journal',   label: 'The quarterly' }
+    ];
+    var kind = 'all';
+    var saved = [];
+    var open = null;
+
+    function plateFor(it) {
+      return MATCH.plate('media-' + it.id + '-' + it.t);
+    }
+
+    function render() {
+      var box = $('#md-list'); box.textContent = '';
+      var rows = ITEMS.filter(function (i) { return kind === 'all' || i.kind === kind; });
+      rows.forEach(function (it) {
+        var c = el('button', 'md'); c.type = 'button';
+        c.setAttribute('aria-expanded', open === it ? 'true' : 'false');
+        var fig = el('span', 'md__fig');
+        if (it.video) {
+          var v = el('video'); v.className = 'md__v';
+          v.src = MEDIA_FILM; v.poster = MEDIA_POSTER;
+          v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+          v.setAttribute('aria-hidden', 'true');
+          fig.appendChild(v);
+        } else {
+          var img = el('img'); img.className = 'md__v';
+          img.src = it.img === 'salon' ? MEDIA_ROOM : plateFor(it);
+          img.alt = ''; img.setAttribute('aria-hidden', 'true');
+          fig.appendChild(img);
+        }
+        fig.appendChild(el('span', 'md__kind', KINDS.filter(function (k) { return k.id === it.kind; })[0].label));
+        c.appendChild(fig);
+        c.appendChild(el('span', 'md__t', it.t));
+        c.appendChild(el('span', 'md__d', it.d));
+        c.appendChild(el('span', 'md__n', it.n));
+        c.addEventListener('click', function () { show(it); });
+        box.appendChild(c);
+      });
+      $('#md-n').textContent = rows.length + ' of ' + ITEMS.length;
+      $('#md-note').textContent = kind === 'all'
+        ? 'Everything the house has made. None of it is anywhere a person who is not a member can reach.'
+        : KINDS.filter(function (k) { return k.id === kind; })[0].label + ' — ' + rows.length + '.';
+      $$('#md-kinds button').forEach(function (b) {
+        var on = b.getAttribute('data-md') === kind;
+        b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+    }
+
+    function show(it) {
+      open = it;
+      $('#md-open').hidden = false;
+      $('#md-open-t').textContent = it.t;
+      var body = $('#md-open-body'); body.textContent = '';
+
+      if (it.video) {
+        var v = el('video'); v.className = 'md__player';
+        v.src = MEDIA_FILM; v.poster = MEDIA_POSTER;
+        v.controls = true; v.muted = true; v.loop = true; v.playsInline = true;
+        v.setAttribute('aria-label', it.t);
+        body.appendChild(v);
+      } else if (it.img) {
+        var img = el('img'); img.className = 'md__player';
+        img.src = MEDIA_ROOM; img.alt = it.t;
+        body.appendChild(img);
+      }
+
+      body.appendChild(el('p', 'md__meta', it.d));
+      body.appendChild(el('p', 'occ-d__s', it.n));
+      if (it.body) body.appendChild(el('p', 'md__body', it.body));
+
+      var acts = el('div', 'ad-acts');
+      var on = saved.indexOf(it.id) > -1;
+      var keep = el('button', 'btn ' + (on ? 'btn--quiet' : 'btn--solid'), on ? 'Remove from kept' : 'Keep for later');
+      keep.type = 'button';
+      keep.addEventListener('click', function () {
+        if (on) saved.splice(saved.indexOf(it.id), 1); else saved.push(it.id);
+        show(it); renderSaved();
+      });
+      acts.appendChild(keep);
+      body.appendChild(acts);
+      renderRules(it);
+      $('#md-open-t').focus();
+    }
+
+    function shut() {
+      open = null;
+      $('#md-open').hidden = true;
+      $('#md-open-body').textContent = '';
+      renderRules(null);
+      render();
+    }
+
+    function renderSaved() {
+      var box = $('#md-saved'); box.textContent = '';
+      saved.forEach(function (id) {
+        var it = ITEMS.filter(function (x) { return x.id === id; })[0];
+        var row = el('div', 'cn');
+        var left = el('div');
+        left.appendChild(el('p', 'cn__n', it.t));
+        left.appendChild(el('p', 'cn__s', it.d));
+        var acts = el('div', 'cn__acts');
+        var go = el('button', 'btn btn--quiet', 'Open'); go.type = 'button';
+        go.addEventListener('click', function () { show(it); });
+        acts.appendChild(go);
+        row.appendChild(left); row.appendChild(acts); box.appendChild(row);
+      });
+      $('#md-saved-n').textContent = saved.length ? saved.length + ' kept' : 'None';
+      $('#md-saved-empty').hidden = saved.length > 0;
+    }
+
+    var RULES = [
+      { k: 'Where it may be watched or read', v: 'Here, and on your own devices' },
+      { k: 'Downloading', v: 'Not offered' },
+      { k: 'Showing it to someone who is not a member', v: 'No' },
+      { k: 'The quarterly', v: 'On paper, sealed, and no digital edition' },
+      { k: 'Watermark', v: 'Your membership reference, in every file' }
+    ];
+    function renderRules(it) {
+      var box = $('#md-rules'); box.textContent = '';
+      RULES.forEach(function (r) {
+        var row = el('div', 'nt-pref');
+        row.appendChild(el('span', 'nt-pref__k', r.k));
+        row.appendChild(el('span', 'nt-pref__v',
+          r.k === 'Watermark' && it ? 'SG-2411 · ' + it.t : r.v));
+        box.appendChild(row);
+      });
+    }
+
+    KINDS.forEach(function (k) {
+      var b = el('button', 'chip' + (k.id === kind ? ' is-on' : ''), k.label);
+      b.type = 'button'; b.setAttribute('data-md', k.id); b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', k.id === kind ? 'true' : 'false');
+      b.addEventListener('click', function () { kind = k.id; render(); });
+      $('#md-kinds').appendChild(b);
+    });
+
+    $('#md-close').addEventListener('click', shut);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && open && $('#view-media').classList.contains('is-active')) shut();
+    });
+
+    render(); renderSaved(); renderRules(null);
   })();
 
   route();

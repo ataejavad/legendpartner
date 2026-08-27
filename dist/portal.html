@@ -122,6 +122,24 @@
           <a class="sub" href="#occasions-travel" data-view="occasions-travel">Travel companionship</a>
           <a class="sub" href="#occasions-social" data-view="occasions-social">Social occasions</a>
         </div>
+        <hr class="rail__rule">
+        <a class="cat" href="#business" data-view="business" data-label="Business Connections">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.8" y="7.2" width="18.4" height="13" rx="2"/><path d="M8.6 7.2V5.4a1.8 1.8 0 0 1 1.8-1.8h3.2a1.8 1.8 0 0 1 1.8 1.8v1.8"/><path d="M2.8 12.4h18.4"/><path d="M10.4 12.4h3.2"/></svg></span>
+          <span>Business Connections<span class="cat__n">Introduced for work, on the same terms</span></span>
+        </a>
+        <a class="cat" href="#network" data-view="network" data-label="Private Social Network">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="6.2" r="2.6"/><circle cx="5.4" cy="17" r="2.6"/><circle cx="18.6" cy="17" r="2.6"/><path d="M10.1 8 7.3 14.6"/><path d="M13.9 8l2.8 6.6"/><path d="M8 17.6h8"/></svg></span>
+          <span>Private Social Network<span class="cat__n">Rooms of members, and no feed</span></span>
+        </a>
+        <a class="cat" href="#market" data-view="market" data-label="Marketplace">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.6 8.4h16.8l-1.2 11a2 2 0 0 1-2 1.8H6.8a2 2 0 0 1-2-1.8Z"/><path d="M8.6 11.4V6.8a3.4 3.4 0 0 1 6.8 0v4.6"/></svg></span>
+          <span>Marketplace<span class="cat__n">Sold between members, quietly</span></span>
+        </a>
+        <a class="cat" href="#media" data-view="media" data-label="Media">
+          <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.6" y="5" width="18.8" height="14" rx="2"/><path d="m10.4 9.4 4.8 2.6-4.8 2.6Z"/></svg></span>
+          <span>Media<span class="cat__n">What the house makes and publishes</span></span>
+        </a>
+        <hr class="rail__rule">
         <a class="cat" href="#management" data-view="management" data-label="Relationship management">
           <span class="nav-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="M16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88Z"/></svg></span>
           <span>Relationship management<span class="cat__n">Formation, counsel, continuity</span></span>
@@ -4616,6 +4634,223 @@
               <button class="btn btn--solid" type="button" id="hp-send">Send</button>
             </div>
             <p class="cas-curated" id="hp-sent" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= BUSINESS CONNECTIONS -->
+      <section class="view" id="view-business" tabindex="-1" aria-label="Business connections">
+        <p class="lede">Business Connections</p>
+        <p class="sub">
+          The same practice, applied to work. An advisor who knows both files proposes two members
+          to each other, with a reason written down — and the introduction is refused as easily as
+          any other. Nobody is sold a list, and nobody is approached to raise money.
+        </p>
+
+        <div class="panel" style="margin-top:2rem">
+          <div class="panel__head">
+            <h2>Proposed to you</h2>
+            <span class="pill pill--action" id="bz-n">—</span>
+          </div>
+          <div class="panel__body">
+            <div class="ev-tabs" id="bz-tabs" role="tablist" aria-label="Which introductions"></div>
+            <p class="cas-curated" id="bz-note"></p>
+            <p class="ltr-empty" id="bz-empty" hidden>Nothing in this group.</p>
+            <div id="bz-list" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Ask for an introduction</h2></div>
+            <div class="panel__body">
+              <div id="bz-form"></div>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.2rem">
+            <div class="panel">
+              <div class="panel__head"><h2>What the house holds for this</h2></div>
+              <div class="panel__body">
+                <div id="bz-profile"></div>
+                <div class="note-inline">
+                  Separate from your private file. Nothing your advisor knows about your personal
+                  life is ever read into a business introduction, and the reverse is also true.
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>The four rules</h2></div>
+              <div class="panel__body">
+                <ul class="spine">
+                  <li><span class="no">01</span><span>No introduction is made to raise money unless both members have said in writing that they want one</span></li>
+                  <li><span class="no">02</span><span>A refusal is never passed on with a reason, and never counted against you</span></li>
+                  <li><span class="no">03</span><span>Nobody is introduced twice after a no, at any interval</span></li>
+                  <li><span class="no">04</span><span>The house takes no fee, no commission and no equity on anything that follows</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= PRIVATE SOCIAL NETWORK -->
+      <section class="view" id="view-network" tabindex="-1" aria-label="Private social network">
+        <p class="lede">Private Social Network</p>
+        <p class="sub">
+          Rooms rather than a feed. A room holds a dozen or so members with one thing in common, it
+          is entered by invitation, and what is said in it stays in it. There is nothing to scroll,
+          nothing to follow, and no number attached to anyone.
+        </p>
+
+        <div class="panel" style="margin-top:2rem">
+          <div class="panel__head">
+            <h2>What this is not</h2>
+            <span class="pill pill--rest">Said plainly</span>
+          </div>
+          <div class="panel__body">
+            <div class="qa" id="nw-nots"></div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.2rem">
+          <div class="panel__head"><h2>Rooms</h2><span class="pill pill--rest" id="nw-n">—</span></div>
+          <div class="panel__body">
+            <div class="chips" id="nw-filters" role="group" aria-label="Which rooms"></div>
+            <p class="cas-curated" id="nw-note"></p>
+            <div id="nw-rooms" style="margin-top:1.2rem" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Say something in a room</h2><span class="pill pill--rest" id="nw-to">—</span></div>
+            <div class="panel__body">
+              <label class="sr-only" for="nw-say">What you want to say</label>
+              <textarea id="nw-say" rows="3" class="ad-input"
+                placeholder="It is read by the members of that room and by nobody else. It is not indexed, not forwarded, and it does not appear on your file."></textarea>
+              <div class="ad-acts">
+                <button class="btn btn--solid" type="button" id="nw-send">Post to the room</button>
+              </div>
+              <p class="cas-curated" id="nw-said" aria-live="polite"></p>
+              <div id="nw-thread" style="margin-top:1.2rem"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>How you appear here</h2></div>
+            <div class="panel__body">
+              <div id="nw-vis"></div>
+              <div class="note-inline">
+                Members of a room see the name you choose for that room and nothing else. Two rooms
+                need not know they hold the same person.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= MARKETPLACE -->
+      <section class="view" id="view-market" tabindex="-1" aria-label="Marketplace">
+        <p class="lede">Marketplace</p>
+        <p class="sub">
+          Things that change hands between members rather than at auction — a picture, a house, a
+          car, a cellar, a company. Neither side is named until both have agreed to be, and the
+          house takes no commission on any of it.
+        </p>
+
+        <div class="panel" style="margin-top:2rem">
+          <div class="panel__head">
+            <h2>What is offered</h2>
+            <span class="pill pill--rest" id="mk-n">—</span>
+          </div>
+          <div class="panel__body">
+            <div class="chips" id="mk-cats" role="group" aria-label="Category"></div>
+            <div class="ltr-toggles" style="margin-top:1rem">
+              <label class="ltr-toggle">
+                <input type="checkbox" id="mk-prov" checked><span>Only what the house has checked itself</span>
+              </label>
+            </div>
+            <p class="cas-curated" id="mk-note"></p>
+            <p class="ltr-empty" id="mk-empty" hidden>Nothing in this category answers to that.</p>
+            <div id="mk-list" style="margin-top:1.2rem" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Offer something</h2></div>
+            <div class="panel__body">
+              <div id="mk-form"></div>
+            </div>
+          </div>
+          <div class="stack" style="gap:1.2rem">
+            <div class="panel">
+              <div class="panel__head"><h2>Your interests</h2><span class="pill pill--rest" id="mk-mine-n">—</span></div>
+              <div class="panel__body">
+                <div id="mk-mine"></div>
+                <p class="ltr-empty" id="mk-mine-empty" hidden>You have registered no interest.</p>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel__head"><h2>How a sale is handled</h2></div>
+              <div class="panel__body">
+                <ul class="spine">
+                  <li><span class="no">01</span><span>You register interest; the seller is told only that a member has, never which</span></li>
+                  <li><span class="no">02</span><span>The house checks provenance, title and the right to sell before either of you is named</span></li>
+                  <li><span class="no">03</span><span>Both agree to be named, or the matter ends there with nothing disclosed</span></li>
+                  <li><span class="no">04</span><span>Your own solicitors do the rest. The house holds no money and takes no commission</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= MEDIA -->
+      <section class="view" id="view-media" tabindex="-1" aria-label="Media">
+        <p class="lede">Media</p>
+        <p class="sub">
+          What the house makes: films of its own rooms, essays it will not put on the open web,
+          recorded conversations, and the quarterly. None of it is published anywhere a person who
+          is not a member can reach.
+        </p>
+
+        <div class="panel" style="margin-top:2rem">
+          <div class="panel__head">
+            <h2>The library</h2>
+            <span class="pill pill--rest" id="md-n">—</span>
+          </div>
+          <div class="panel__body">
+            <div class="chips" id="md-kinds" role="group" aria-label="Kind"></div>
+            <p class="cas-curated" id="md-note"></p>
+            <div class="md-grid" id="md-list" style="margin-top:1.4rem" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="panel" id="md-open" hidden style="margin-top:1.2rem">
+          <div class="panel__head">
+            <h2 id="md-open-t" tabindex="-1">—</h2>
+            <button class="occ-d__x" type="button" id="md-close">Close<span class="occ-d__esc">Esc</span></button>
+          </div>
+          <div class="panel__body"><div id="md-open-body"></div></div>
+        </div>
+
+        <div class="cols cols--7-5" style="margin-top:1.2rem">
+          <div class="panel">
+            <div class="panel__head"><h2>Kept for later</h2><span class="pill pill--rest" id="md-saved-n">—</span></div>
+            <div class="panel__body">
+              <div id="md-saved"></div>
+              <p class="ltr-empty" id="md-saved-empty" hidden>Nothing kept yet.</p>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h2>Where this can go</h2></div>
+            <div class="panel__body">
+              <div id="md-rules"></div>
+              <div class="note-inline">
+                Every film and every essay carries your membership reference in the file itself. It
+                is not a threat — it is why we can afford to show you the rooms at all.
+              </div>
+            </div>
           </div>
         </div>
       </section>
