@@ -24,3 +24,7 @@ tmp/
 # Note: dist/ IS tracked on purpose — it is the deploy payload uploaded to
 # Cloudflare Pages, not an incidental build artefact. Regenerate it with
 # build.ps1 before deploying so it does not drift from the source pages.
+app/data/
+app/*.db
+app/*.db-wal
+app/*.db-shm
