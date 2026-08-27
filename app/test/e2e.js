@@ -339,13 +339,21 @@ async function main() {
 
   const reused = await req('POST', '/signup', { body: {
     email: 'second@example.com', handle: 'second', display_name: 'S', password: 'twelve-characters-plus', ref: code } });
-  const stillOne = (await req('GET', '/api/referrals', { cookie: marchand.cookie })).json();
-  eq('a code cannot be used twice', stillOne.introduced.length, 1);
+  // Asserted by who is on the list, not by its length: the seed introduces
+  // somebody already, so a count would be measuring the fixture.
+  const after = (await req('GET', '/api/referrals', { cookie: marchand.cookie })).json();
+  const handles = after.introduced.map((x) => x.handle);
+  ok('a code cannot be used twice', !handles.includes('second'), handles.join(','));
+  ok('the first redemption stands', handles.includes('introduced'));
   ok('the second sign-up still succeeds, without a referrer', !!reused.sid);
+  const orphan = { cookie: 'sid=' + reused.sid };
+  orphan.csrf = (await req('GET', '/api/me', orphan)).json().csrf;
+  eq('and has no referrer recorded', (await req('GET', '/api/referrals', orphan)).json().referred_by, null);
 
   const refStanding = (await req('GET', '/api/referrals', { cookie: marchand.cookie })).json();
-  eq('the referrer sees who they introduced', refStanding.introduced[0].handle, 'introduced');
-  eq('and that they are in good standing', refStanding.introduced[0].upheld, 0);
+  const brought = refStanding.introduced.find((x) => x.handle === 'introduced');
+  ok('the referrer sees who they introduced', !!brought);
+  eq('and that they are in good standing', brought.upheld, 0);
 
   // it is private on both profiles until each side opens it
   ok('who introduced whom is private by default',
