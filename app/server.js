@@ -38,7 +38,7 @@ export function build(db) {
   r.get('/sitemap.xml', (c, res) => Pages.sitemap(c, res));
 
   /* account */
-  r.get('/signup', (c, res) => Account.signupForm(c, res));
+  r.get('/signup', (c, res, p, url) => Account.signupForm(c, res, null, url.searchParams.get('ref')));
   r.post('/signup', (c, res, p, url, req) => Account.signup(c, res, req));
   r.get('/signin', (c, res) => Account.signinForm(c, res));
   r.post('/signin', (c, res, p, url, req) => Account.signin(c, res, req));
@@ -72,6 +72,9 @@ export function build(db) {
   r.get('/dashboard/posts', member((c, res) => Dash.posts(c, res)));
   r.post('/dashboard/posts', member((c, res, p, url, req) => Dash.postAction(c, res, req, 'create')));
   r.post('/dashboard/posts/delete', member((c, res, p, url, req) => Dash.postAction(c, res, req, 'delete')));
+  r.get('/dashboard/referrals', member((c, res) => Dash.referrals(c, res)));
+  r.post('/dashboard/referrals', member((c, res, p, url, req) => Dash.referralAction(c, res, req, 'issue')));
+  r.post('/dashboard/referrals/revoke', member((c, res, p, url, req) => Dash.referralAction(c, res, req, 'revoke')));
   r.get('/dashboard/privacy', member((c, res) => Dash.privacy(c, res)));
   r.post('/dashboard/privacy', member((c, res, p, url, req) => Dash.savePrivacy(c, res, req)));
   r.post('/dashboard/unblock', member((c, res, p, url, req) => Dash.unblock(c, res, req)));

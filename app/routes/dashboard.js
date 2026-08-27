@@ -15,11 +15,12 @@ import * as Content from '../engines/content.js';
 import * as Score from '../engines/score.js';
 import * as Notif from '../engines/notification.js';
 import * as Moderation from '../engines/moderation.js';
+import * as Referral from '../engines/referral.js';
 
 const TABS = [
   ['', 'Overview'], ['profile', 'My profile'], ['relationship', 'My relationship'],
   ['score', 'Dating Score'], ['proposals', 'Proposals'], ['connections', 'Connections'],
-  ['posts', 'Posts'], ['privacy', 'Privacy'], ['verification', 'Verification'],
+  ['posts', 'Posts'], ['referrals', 'Referrals'], ['privacy', 'Privacy'], ['verification', 'Verification'],
   ['security', 'Security'], ['notifications', 'Notifications']
 ];
 
@@ -367,6 +368,89 @@ export async function postAction(ctx, res, req, what) {
   posts(ctx, res, r.error ? { text: r.error, kind: 'bad' } : { text: 'Done.', kind: 'ok' });
 }
 
+/* ---- referrals ---------------------------------------------------------- */
+export function referrals(ctx, res, msg) {
+  const issued = Referral.issuedBy(ctx.db, ctx.userId);
+  const open = issued.filter((r) => r.status === 'open');
+  const joined = Referral.introduced(ctx.db, ctx.userId);
+  const by = Referral.referrerOf(ctx.db, ctx.userId);
+  const origin = process.env.PUBLIC_ORIGIN || 'http://localhost:8910';
+
+  html(res, shell(ctx, 'referrals', 'Referrals', h`
+    <h1 class="h1">Introducing someone.</h1>
+    <p class="lead">A member introduces a person, not a link. You name who it is and why you are
+    vouching for them, and your own standing is attached to theirs from the day they join.</p>
+
+    ${by ? h`<section class="panel"><h2>You were introduced by</h2>
+      <div class="rrow"><div>
+        <p class="rrow__t"><a href="/u/${by.handle}">${by.name}</a></p>
+        <p class="quiet">On ${String(by.on).slice(0, 10)}. Shown on your profile only if you open
+        <em>Who introduced me</em> under Privacy — and only if they have not closed their own name.</p>
+      </div></div></section>` : ''}
+
+    <section class="panel"><h2>Introduce someone</h2>
+      ${ctx.user.id_verified ? h`
+        <form method="post" action="/dashboard/referrals" class="fform">${CSRF(ctx)}
+          ${field('to_name', 'Who they are', '', { required: true, ph: 'Their name, as you would say it' })}
+          ${field('to_email', 'Their email', '', { type: 'email', ph: 'Optional. We do not write to them — you send the link yourself.' })}
+          ${field('note', 'Why you are vouching for them', '', { textarea: true, rows: 3,
+            ph: 'How you know them, and why you would put your name to it. A sentence or two at minimum.' })}
+          <button class="btn btn--solid" type="submit">Issue an invitation</button></form>
+        <p class="quiet">${Referral.LIMITS.open} open at a time, ${Referral.LIMITS.perWeek} in any week,
+        and each lapses after ${Referral.LIMITS.expiryDays} days. The scarcity is the point: an
+        invitation that costs nothing to give is worth nothing to receive.</p>`
+      : h`<p class="empty">Introductions open once your own identity is verified. Vouching for
+        someone puts your standing behind them, and standing has to exist first.</p>
+        <a class="btn" href="/dashboard/verification">Verification</a>`}
+    </section>
+
+    <section class="panel"><h2>Open invitations</h2>
+      ${open.length ? open.map((r) => h`<div class="rrow">
+        <div>
+          <p class="rrow__t">${r.to_name}${r.to_email ? h` · ${r.to_email}` : ''}</p>
+          <p class="ref-code">${r.code}</p>
+          <p class="quiet">${r.note}</p>
+          <p class="quiet">Lapses ${String(r.expires_at).slice(0, 10)}</p>
+        </div>
+        <div class="rrow__a">
+          <button class="btn btn--sm" type="button" data-copy="${origin}/signup?ref=${r.code}">Copy the link</button>
+          <form method="post" action="/dashboard/referrals/revoke">${CSRF(ctx)}
+            <input type="hidden" name="id" value="${r.id}">
+            <button class="btn btn--sm" type="submit">Withdraw</button></form>
+        </div></div>`) : h`<p class="empty">None outstanding.</p>`}
+    </section>
+
+    <section class="panel"><h2>Members you introduced</h2>
+      ${joined.length ? joined.map((m) => h`<div class="rrow">
+        <div><p class="rrow__t"><a href="/u/${m.handle}">${m.name}</a></p>
+          <p class="quiet">Joined ${String(m.accepted_at).slice(0, 10)}</p></div>
+        <div>${m.acct_status === 'active' && m.upheld === 0
+          ? badge('In good standing')
+          : badge(m.acct_status !== 'active' ? m.acct_status : 'A report was upheld', 'is-off')}</div>
+      </div>`) : h`<p class="empty">Nobody yet.</p>`}
+      <p class="quiet">If a report against one of them is ever upheld, you are told, and it shows on
+      your own score under <em>Who you vouched for</em>. Introducing a hundred people is worth no more
+      there than introducing one — what it reads is whether they are still in good standing.</p>
+    </section>
+
+    ${issued.filter((r) => r.status !== 'open' && r.status !== 'accepted').length ? h`
+      <section class="panel"><h2>Lapsed and withdrawn</h2>
+        ${issued.filter((r) => r.status !== 'open' && r.status !== 'accepted').map((r) => h`
+          <div class="prow"><span>${r.to_name}</span><span class="quiet">${r.status}</span></div>`)}
+      </section>` : ''}`, msg));
+}
+
+export async function referralAction(ctx, res, req, what) {
+  const b = await readForm(req);
+  if (!checkCsrf(ctx, b)) return referrals(ctx, res, { text: 'Session expired.', kind: 'bad' });
+  const r = what === 'revoke'
+    ? Referral.revoke(ctx.db, parseInt(b.id, 10), ctx.userId)
+    : Referral.issue(ctx.db, ctx.userId, b);
+  Score.refresh(ctx.db, ctx.userId);
+  referrals(ctx, res, r.error ? { text: r.error, kind: 'bad' }
+    : { text: r.code ? `Issued. The code is ${r.code} — send it to them yourself.` : 'Withdrawn.', kind: 'ok' });
+}
+
 /* ---- privacy, verification, security, notifications --------------------- */
 export function privacy(ctx, res, msg) {
   const levels = Privacy.allLevels(ctx.db, ctx.userId);
@@ -377,7 +461,8 @@ export function privacy(ctx, res, msg) {
     education: 'Education', lifestyle: 'Lifestyle', interests: 'Interests', personality: 'Personality',
     bio: 'About you', intent: 'What you are looking for', goals: 'What you hope for',
     partner_prefs: 'In a partner', rel_status: 'Relationship status', relationship: 'My partner, named',
-    score: 'Dating Score', stats: 'Activity statistics', posts: 'Posts', full_name: 'Full name'
+    score: 'Dating Score', stats: 'Activity statistics', posts: 'Posts',
+    referred_by: 'Who introduced me', referrals: 'Members I introduced', full_name: 'Full name'
   };
   html(res, shell(ctx, 'privacy', 'Privacy', h`
     <h1 class="h1">Privacy.</h1>

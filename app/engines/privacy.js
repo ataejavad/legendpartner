@@ -36,6 +36,8 @@ export const DEFAULTS = {
   score:        'private',
   stats:        'private',
   posts:        'registered',
+  referred_by:  'private',      // who vouched for you is theirs to disclose too
+  referrals:    'private',      // how many you have introduced, and their standing
   full_name:    'private'       // never defaults open, at any level
 };
 

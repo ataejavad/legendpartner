@@ -12,6 +12,7 @@ import * as Proposal from '../engines/proposal.js';
 import * as Moderation from '../engines/moderation.js';
 import * as Content from '../engines/content.js';
 import * as Score from '../engines/score.js';
+import * as Referral from '../engines/referral.js';
 import { hit } from '../engines/rate.js';
 import { notFound } from './pages.js';
 
@@ -21,15 +22,25 @@ function shell(ctx, title, body) {
   return layout({ title: title + ' — Legend', ctx, body });
 }
 
-export function signupForm(ctx, res, err) {
+export function signupForm(ctx, res, err, code) {
   if (ctx.user) return redirect(res, '/dashboard');
+  const inv = Referral.look(ctx.db, code);
   html(res, shell(ctx, 'Create a profile', h`
     <section class="wrap band narrow">
       <h1 class="h1">Create a profile.</h1>
+      ${inv ? h`<section class="panel panel--rel">
+        <h2>You were introduced</h2>
+        <p><strong>${inv.by ? inv.by.name : 'A member'}</strong> is vouching for you${inv.to_name ? h` as ${inv.to_name}` : ''}.</p>
+        <p class="prose">${inv.note}</p>
+        <p class="quiet">Their standing is attached to yours from the day you join. That is what an
+        introduction means here, and it is why they are told if a report against you is ever upheld.</p>
+      </section>` : ''}
+      ${code && !inv ? notice('That invitation is not open — it may have been used, withdrawn, or lapsed. You can still create a profile without one.', 'warn') : ''}
       <p class="lead">Nothing is published when you sign up. Every field starts closed, and the profile
       itself stays unpublished until you choose otherwise.</p>
       ${notice(err, 'bad')}
       <form method="post" action="/signup" class="fform">
+        <input type="hidden" name="ref" value="${code || ''}">
         ${field('email', 'Email', '', { type: 'email', required: true })}
         ${field('handle', 'Profile address', '', { required: true, note: 'Letters, numbers and hyphens. Your page will be /u/your-handle.' })}
         ${field('display_name', 'Display name', '', { required: true, note: 'What people see. It need not be your legal name.' })}
@@ -47,13 +58,13 @@ export async function signup(ctx, res, req) {
   const name = String(b.display_name || '').trim();
   const pass = String(b.password || '');
 
-  if (!hit(ctx.db, `signup:${ctx.ip}`, 5, 3600000)) return signupForm(ctx, res, 'Too many attempts. Try again later.');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return signupForm(ctx, res, 'That email does not look right.');
-  if (!HANDLE_RX.test(handle)) return signupForm(ctx, res, 'A profile address is 3–30 characters: letters, numbers, hyphens.');
-  if (!name) return signupForm(ctx, res, 'A display name is needed.');
-  if (pass.length < 12) return signupForm(ctx, res, 'Twelve characters at least — this protects a great deal about you.');
-  if (ctx.db.prepare('SELECT 1 FROM users WHERE email=?').get(email)) return signupForm(ctx, res, 'That email is already registered.');
-  if (ctx.db.prepare('SELECT 1 FROM users WHERE handle=?').get(handle)) return signupForm(ctx, res, 'That profile address is taken.');
+  if (!hit(ctx.db, `signup:${ctx.ip}`, 5, 3600000)) return signupForm(ctx, res, 'Too many attempts. Try again later.', b.ref);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return signupForm(ctx, res, 'That email does not look right.', b.ref);
+  if (!HANDLE_RX.test(handle)) return signupForm(ctx, res, 'A profile address is 3–30 characters: letters, numbers, hyphens.', b.ref);
+  if (!name) return signupForm(ctx, res, 'A display name is needed.', b.ref);
+  if (pass.length < 12) return signupForm(ctx, res, 'Twelve characters at least — this protects a great deal about you.', b.ref);
+  if (ctx.db.prepare('SELECT 1 FROM users WHERE email=?').get(email)) return signupForm(ctx, res, 'That email is already registered.', b.ref);
+  if (ctx.db.prepare('SELECT 1 FROM users WHERE handle=?').get(handle)) return signupForm(ctx, res, 'That profile address is taken.', b.ref);
 
   const { hash, salt } = hashPassword(pass);
   const info = ctx.db.prepare(
@@ -64,6 +75,12 @@ export async function signup(ctx, res, req) {
   ctx.db.prepare('UPDATE profiles SET display_name=?, photo_seed=? WHERE user_id=?').run(name, handle, id);
   Score.refresh(ctx.db, id);
   audit(ctx.db, id, 'account.create', `user:${id}`);
+
+  // Redeemed after the account exists, so a bad code costs the sign-up nothing.
+  if (b.ref) {
+    const r = Referral.redeem(ctx.db, b.ref, id);
+    if (r.ok) Score.refresh(ctx.db, r.referrer);
+  }
 
   const s = startSession(ctx.db, id, req.headers['user-agent']);
   setCookie(res, 'sid', s.id, { maxAge: 60 * 60 * 24 * 14 });

@@ -10,6 +10,7 @@ import { visible, relationOf } from './privacy.js';
 import * as Rel from './relationship.js';
 import * as Score from './score.js';
 import * as Proposal from './proposal.js';
+import * as Referral from './referral.js';
 
 export const EDITABLE = [
   'display_name','full_name','birth_year','gender','city','country','nationality','languages',
@@ -119,6 +120,16 @@ export function publicView(db, owner, viewerId) {
     v.score = s ? s.score : null;
   }
   if (owner.show_stats && can('stats')) v.stats = Proposal.stats(db, uid);
+
+  // Being introduced is a fact about two people, so it needs both of them to
+  // have opened it: the member's own setting, and the referrer's.
+  if (can('referred_by')) {
+    const by = Referral.referrerOf(db, uid);
+    if (by && (by.id === viewerId || visible(db, by.id, viewerId, 'display_name'))) {
+      v.referred_by = { handle: by.handle, name: by.name, on: by.on };
+    }
+  }
+  if (can('referrals')) v.referrals = Referral.standing(db, uid);
 
   // The couple is shown only when it is verified AND the owner has opened it.
   if (can('relationship')) {

@@ -15,6 +15,7 @@ import * as Score from '../engines/score.js';
 import * as Privacy from '../engines/privacy.js';
 import * as Notif from '../engines/notification.js';
 import * as Moderation from '../engines/moderation.js';
+import * as Referral from '../engines/referral.js';
 
 const need = (ctx, res) => { if (!ctx.user) { json(res, { error: 'Sign in required.' }, 401); return false; } return true; };
 const csrf = async (ctx, res, req) => {
@@ -123,6 +124,35 @@ export const routes = {
     if (!other) return json(res, { error: 'No such member.' }, 404);
     const r = Moderation.report(ctx.db, ctx.userId, 'user', other.id, b.reason, b.detail);
     json(res, r, r.error ? 400 : 200);
+  },
+  'GET /api/referrals': (ctx, res) => {
+    if (!need(ctx, res)) return;
+    json(res, {
+      issued: Referral.issuedBy(ctx.db, ctx.userId),
+      introduced: Referral.introduced(ctx.db, ctx.userId),
+      referred_by: Referral.referrerOf(ctx.db, ctx.userId),
+      limits: Referral.LIMITS
+    });
+  },
+  'GET /api/referral/:code': (ctx, res, p) => {
+    // Deliberately answers only whether the code is open and who is vouching:
+    // it is reached before sign-in, so it must reveal nothing else.
+    const inv = Referral.look(ctx.db, p.code);
+    if (!inv) return json(res, { error: 'Not open.' }, 404);
+    json(res, { code: inv.code, to_name: inv.to_name, note: inv.note, by: inv.by });
+  },
+  'POST /api/referral': async (ctx, res, p, url, req) => {
+    if (!need(ctx, res)) return;
+    const b = await csrf(ctx, res, req); if (!b) return;
+    const r = Referral.issue(ctx.db, ctx.userId, b);
+    if (r.id) Score.refresh(ctx.db, ctx.userId);
+    json(res, r, r.error ? 400 : 200);
+  },
+  'POST /api/referral/revoke': async (ctx, res, p, url, req) => {
+    if (!need(ctx, res)) return;
+    const b = await csrf(ctx, res, req); if (!b) return;
+    const r = Referral.revoke(ctx.db, parseInt(b.id, 10), ctx.userId);
+    json(res, r, r.error ? 403 : 200);
   },
   'GET /api/notifications': (ctx, res) => {
     if (!need(ctx, res)) return;

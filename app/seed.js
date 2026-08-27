@@ -8,6 +8,7 @@ import * as Rel from './engines/relationship.js';
 import * as Proposal from './engines/proposal.js';
 import * as Content from './engines/content.js';
 import * as Score from './engines/score.js';
+import * as Referral from './engines/referral.js';
 import { DB_FILE } from './server.js';
 
 const PEOPLE = [
@@ -93,6 +94,22 @@ export function seed(file = DB_FILE) {
     message: 'You wrote that you took a family company through a succession. I am halfway through the same thing and handling it worse. I would like to hear how you did it, and I would like to meet you.'
   });
   Score.refresh(db, ids['h-okonjo']);
+
+  // One introduction already taken up, and one still open, so the section has
+  // both states to show.
+  const taken = Referral.issue(db, ids['a-marchand'], {
+    to_name: 'R. Achebe', to_email: '',
+    note: 'We worked on the same building for two years. He is slower than everyone wants him to be and right more often than anyone expects.'
+  });
+  if (taken.code) {
+    db.prepare("UPDATE referrals SET status='accepted', accepted_by=?, accepted_at=? WHERE id=?")
+      .run(ids['r-achebe'], now(), taken.id);
+    Score.refresh(db, ids['a-marchand']);
+  }
+  Referral.issue(db, ids['a-marchand'], {
+    to_name: 'A colleague from Zurich', to_email: '',
+    note: 'She has asked me twice, which is once more than most people are prepared to ask, and I would put my name to her.'
+  });
 
   console.log('Seeded', PEOPLE.length, 'members, one verified couple, one administrator (office@example.com).');
   return db;

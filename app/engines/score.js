@@ -9,6 +9,7 @@
    here can be bought, because no signal reads a payment, a plan or a tier.
    ========================================================================== */
 import { now } from '../lib/db.js';
+import * as Referral from './referral.js';
 
 const COMPLETION_FIELDS = [
   'display_name','birth_year','gender','city','country','languages',
@@ -67,6 +68,22 @@ export const SIGNALS = [
       : 'Reports upheld against this account have reduced this.'
   },
   {
+    key: 'vouching', label: 'Who you vouched for', weight: 8,
+    // Reads accountability, not volume: introducing nobody is neutral, and a
+    // hundred introductions is worth no more than one. What moves it is whether
+    // the people you put your name to are still in good standing.
+    of(ctx) {
+      const { count, troubled } = ctx.referrals;
+      if (count === 0) return 0.6;
+      return troubled === 0 ? 1 : Math.max(0, 1 - troubled / count);
+    },
+    say: (v, ctx) => ctx.referrals.count === 0
+      ? 'You have introduced nobody. This sits neutral — it is not something you are expected to do.'
+      : ctx.referrals.troubled === 0
+        ? `The ${ctx.referrals.count} you introduced are all in good standing.`
+        : `${ctx.referrals.troubled} of the ${ctx.referrals.count} you introduced is no longer in good standing. Vouching carries this.`
+  },
+  {
     key: 'presence', label: 'Reliability', weight: 10,
     // Recency of use, flattened hard so that living on the site earns nothing.
     of(ctx) {
@@ -89,7 +106,8 @@ function gather(db, userId) {
     "SELECT COUNT(*) n FROM proposals WHERE from_user=? AND status='accepted'").get(userId).n;
   const upheldReports = db.prepare(
     "SELECT COUNT(*) n FROM reports WHERE subject_type='user' AND subject_id=? AND status='actioned'").get(userId).n;
-  return { user, profile, proposals: { received, answered, sent, accepted }, upheldReports };
+  const referrals = Referral.standing(db, userId);
+  return { user, profile, proposals: { received, answered, sent, accepted }, upheldReports, referrals };
 }
 
 export function compute(db, userId) {

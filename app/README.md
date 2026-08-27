@@ -58,6 +58,15 @@ function with a sentence explaining itself. Changing the algorithm touches
 `SIGNALS` and nothing else. Volume of attention received is deliberately not a
 signal, and no signal reads a payment, plan or tier — there is nothing to buy.
 
+**A referral is a vouch, not a coupon.** An invitation is issued to a named
+person with a reason attached, five open at a time, expiring after ninety days —
+and only by a member whose own identity is verified, because vouching lends
+standing and standing has to exist first. Redeeming a code links the two
+accounts permanently: the referrer is told if a report against the person they
+introduced is ever upheld, and it shows on their score under *Who you vouched
+for*. That signal reads whether those people are still in good standing, never
+how many there were: a hundred introductions are worth no more than one.
+
 **The operator panel is narrow.** Accounts, reports, the reported items and the
 audit trail. Not private profile fields, not correspondence, not the contents of
 approaches nobody reported. Every administrative action — and every read of the

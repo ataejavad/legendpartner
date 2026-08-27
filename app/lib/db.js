@@ -241,6 +241,25 @@ CREATE TABLE IF NOT EXISTS audit_log (
 );
 CREATE INDEX IF NOT EXISTS ix_audit ON audit_log(at);
 
+-- An introduction of one person by another. Issued to a named someone rather
+-- than broadcast: a member vouches for a person, not for a link.
+CREATE TABLE IF NOT EXISTS referrals (
+  id          INTEGER PRIMARY KEY,
+  referrer    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  code        TEXT NOT NULL UNIQUE,
+  to_name     TEXT NOT NULL DEFAULT '',
+  to_email    TEXT NOT NULL DEFAULT '',
+  note        TEXT NOT NULL DEFAULT '',          -- why they are vouching
+  status      TEXT NOT NULL DEFAULT 'open',      -- open|accepted|revoked|expired
+  created_at  TEXT NOT NULL,
+  expires_at  TEXT NOT NULL,
+  accepted_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  accepted_at TEXT,
+  revoked_at  TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_ref_referrer ON referrals(referrer, status);
+CREATE UNIQUE INDEX IF NOT EXISTS ix_ref_accepted ON referrals(accepted_by) WHERE accepted_by IS NOT NULL;
+
 CREATE TABLE IF NOT EXISTS score_snapshots (
   user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   score       INTEGER NOT NULL,

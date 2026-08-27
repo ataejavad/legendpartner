@@ -171,6 +171,19 @@ export function profile(ctx, res, handle) {
             <a class="btn" href="/c/${v.relationship.id}">The couple page</a>
           </section>` : ''}
 
+        ${v.referred_by || (v.referrals && v.referrals.count) ? h`
+          <section class="panel"><h2>Introductions</h2>
+            <dl class="kv">
+              ${v.referred_by ? h`<dt>Introduced by</dt>
+                <dd><a href="/u/${v.referred_by.handle}">${v.referred_by.name}</a>
+                  <span class="quiet"> · ${String(v.referred_by.on).slice(0, 10)}</span></dd>` : ''}
+              ${v.referrals && v.referrals.count ? h`<dt>Members introduced</dt>
+                <dd>${v.referrals.count}, of whom ${v.referrals.inGoodStanding} in good standing</dd>` : ''}
+            </dl>
+            <p class="quiet">A member who introduces someone has their own standing attached to that
+            person's. It is shown here because both sides opened it.</p>
+          </section>` : ''}
+
         <section class="panel"><h2>Trust &amp; verification</h2>
           <div class="marks">${marks(v)}</div>
           <p class="quiet">A mark confirms what it names and nothing else. It is not a statement about

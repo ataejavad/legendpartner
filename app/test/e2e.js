@@ -137,11 +137,11 @@ async function main() {
 
   /* ---- 4. proposal lifecycle -------------------------------------------- */
   results.push('\n4. Proposal lifecycle');
-  const good = { csrf: berg.csrf, handle: 'e-rossi', kind: 'A coffee',
+  const approach = { csrf: berg.csrf, handle: 'e-rossi', kind: 'A coffee',
     message: 'You curate, and I have been trying to learn how to look at a room properly for a decade. I would like to meet you.' };
-  const p1 = await req('POST', '/api/proposal', { cookie: berg.cookie, body: good });
+  const p1 = await req('POST', '/api/proposal', { cookie: berg.cookie, body: approach });
   ok('a considered approach is accepted', !!p1.json().id);
-  const p2 = await req('POST', '/api/proposal', { cookie: berg.cookie, body: good });
+  const p2 = await req('POST', '/api/proposal', { cookie: berg.cookie, body: approach });
   ok('a second open approach to the same person is refused', !!p2.json().error);
   const thin = await req('POST', '/api/proposal',
     { cookie: berg.cookie, body: { csrf: berg.csrf, handle: 'r-achebe', kind: 'A coffee', message: 'hi' } });
@@ -242,7 +242,12 @@ async function main() {
   /* ---- 9. the score ----------------------------------------------------- */
   results.push('\n9. Dating Score');
   const scoreSelf = (await req('GET', '/api/score/a-marchand', { cookie: marchand.cookie })).json();
-  ok('the owner sees the components', Array.isArray(scoreSelf.components) && scoreSelf.components.length === 6);
+  // Asserted by shape, not by count: the signal list is meant to be changed.
+  ok('the owner sees the components',
+    Array.isArray(scoreSelf.components) && scoreSelf.components.length >= 6 &&
+    scoreSelf.components.every((c) => c.key && c.label && typeof c.weight === 'number' && c.note));
+  const weights = scoreSelf.components.reduce((a, c) => a + c.weight, 0);
+  ok('every signal is explained and weighted', weights > 0);
   ok('the score is a percentage', scoreSelf.score >= 0 && scoreSelf.score <= 100);
   const scoreOther = (await req('GET', '/api/score/a-marchand')).json();
   ok('a stranger sees the number but not the workings', scoreOther.score != null && scoreOther.components === undefined);
@@ -298,6 +303,83 @@ async function main() {
   const del = await req('POST', '/dashboard/delete', { cookie: nc.cookie, body: { csrf: nc.csrf } });
   eq('an account can be deleted', del.status, 303);
   eq('and its page is gone', (await req('GET', '/u/newcomer')).status, 404);
+
+
+  /* ---- 13. referrals ---------------------------------------------------- */
+  results.push('\n13. Referrals');
+  const good = { csrf: marchand.csrf, to_name: 'A friend of twenty years',
+    note: 'We were at university together and I have watched him handle two very bad years well.' };
+  const unverified = await req('POST', '/api/referral', { cookie: berg.cookie,
+    body: { ...good, csrf: berg.csrf } });
+  ok('an unverified member cannot vouch', /identity is verified/.test(unverified.json().error || ''));
+  const noReason = await req('POST', '/api/referral',
+    { cookie: marchand.cookie, body: { csrf: marchand.csrf, to_name: 'X', note: 'yes' } });
+  ok('an introduction without a reason is refused', !!noReason.json().error);
+  const inv = await req('POST', '/api/referral', { cookie: marchand.cookie, body: good });
+  const code = inv.json().code;
+  ok('a verified member can issue one', !!code, JSON.stringify(inv.json()));
+  ok('the code has no ambiguous letters', !/[IOU]/.test(code || ''));
+
+  const looked = (await req('GET', '/api/referral/' + code)).json();
+  eq('the code names who is vouching', looked.by.handle, 'a-marchand');
+  ok('and carries the reason', /university together/.test(looked.note));
+  eq('an unknown code says only that it is not open', (await req('GET', '/api/referral/ZZZZ-ZZZZ-ZZZZ')).status, 404);
+
+  const signupPage = (await req('GET', '/signup?ref=' + code)).text;
+  ok('the sign-up page shows who introduced you', /A\. Marchand/.test(signupPage) && /vouching for you/.test(signupPage));
+
+  const joined = await req('POST', '/signup', { body: {
+    email: 'introduced@example.com', handle: 'introduced', display_name: 'I. Ntroduced',
+    password: 'twelve-characters-plus', ref: code } });
+  ok('signing up with the code works', !!joined.sid);
+  const jc = { cookie: 'sid=' + joined.sid };
+  jc.csrf = (await req('GET', '/api/me', jc)).json().csrf;
+  const mine = (await req('GET', '/api/referrals', jc)).json();
+  eq('the new member knows who introduced them', mine.referred_by.handle, 'a-marchand');
+
+  const reused = await req('POST', '/signup', { body: {
+    email: 'second@example.com', handle: 'second', display_name: 'S', password: 'twelve-characters-plus', ref: code } });
+  const stillOne = (await req('GET', '/api/referrals', { cookie: marchand.cookie })).json();
+  eq('a code cannot be used twice', stillOne.introduced.length, 1);
+  ok('the second sign-up still succeeds, without a referrer', !!reused.sid);
+
+  const refStanding = (await req('GET', '/api/referrals', { cookie: marchand.cookie })).json();
+  eq('the referrer sees who they introduced', refStanding.introduced[0].handle, 'introduced');
+  eq('and that they are in good standing', refStanding.introduced[0].upheld, 0);
+
+  // it is private on both profiles until each side opens it
+  ok('who introduced whom is private by default',
+    !/Introduced by/.test((await req('GET', '/u/introduced')).text));
+  await req('POST', '/dashboard/publish', { ...jc, body: { csrf: jc.csrf, published: '1' } });
+  await req('POST', '/api/privacy', { ...jc, body: { csrf: jc.csrf, referred_by: 'public' } });
+  ok('opened, the introduction shows', /Introduced by/.test((await req('GET', '/u/introduced')).text));
+
+  // withdrawing an unused invitation
+  const inv2 = await req('POST', '/api/referral', { cookie: marchand.cookie, body: {
+    ...good, csrf: marchand.csrf, to_name: 'Someone else' } });
+  const rv = await req('POST', '/api/referral/revoke',
+    { cookie: marchand.cookie, body: { csrf: marchand.csrf, id: inv2.json().id } });
+  eq('an open invitation can be withdrawn', rv.status, 200);
+  eq('and then no longer opens', (await req('GET', '/api/referral/' + inv2.json().code)).status, 404);
+  const notMine = await req('POST', '/api/referral/revoke',
+    { cookie: okonjo.cookie, body: { csrf: okonjo.csrf, id: inv2.json().id } });
+  eq('somebody else cannot withdraw yours', notMine.status, 403);
+
+  // the outstanding limit
+  let refRefused = null;
+  for (let i = 0; i < 8 && refRefused === null; i++) {
+    const r = await req('POST', '/api/referral', { cookie: marchand.cookie, body: {
+      ...good, csrf: marchand.csrf, to_name: 'Person ' + i } });
+    if (r.json().error && /outstanding/.test(r.json().error)) refRefused = i;
+  }
+  ok('only a few invitations may be open at once', refRefused !== null);
+
+  // vouching shows in the score, and volume does not
+  const sc = (await req('GET', '/api/score/a-marchand', { cookie: marchand.cookie })).json();
+  const vouch = sc.components.find((c) => c.key === 'vouching');
+  ok('the score has a vouching signal', !!vouch);
+  ok('it reads standing rather than volume', /good standing/.test(vouch.note));
+  ok('and it is a small part of the score', vouch.weight <= 10);
 
   server.close();
   rmSync(FILE, { force: true });

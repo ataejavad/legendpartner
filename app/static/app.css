@@ -194,3 +194,7 @@ p{ margin:0 0 1rem; }
   .kv dd{ margin-bottom:.6rem; }
   .ms{ grid-template-columns:1fr; gap:.2rem; }
 }
+
+/* referral codes read as credentials, so set them like one */
+.ref-code{ font-family:var(--serif); font-size:1.25rem; letter-spacing:.16em;
+  color:var(--champagne); margin:.3rem 0; }
