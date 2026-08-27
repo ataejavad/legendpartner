@@ -103,6 +103,9 @@ build discretion \
 build about \
   'The House — Legend' \
   'Legend is a private relationship management practice serving international clients from London, New York, Geneva, Dubai and Singapore. Our standards, method and perspective.'
+build services \
+  'Services — Everything the House Does | Legend' \
+  'One list of what Legend can be retained for: search and introduction, events and companionship, relationship management, and more. Retained singly or held together under a mandate.'
 build journal \
   'The Journal — Writing on Partnership & Privacy | Legend' \
   'Considered essays on modern relationships, compatibility, privacy and partnership for people living demanding, international lives.'

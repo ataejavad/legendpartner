@@ -33,6 +33,8 @@ $pages = @(
      d='Visibility by consent, on both sides, withdrawn at a word. How confidentiality, consent and controlled introductions are handled at Legend.' },
   @{ n='about';            t='The House — Legend';
      d='Legend is a private relationship management practice serving international clients from London, New York, Geneva, Dubai and Singapore. Our standards, method and perspective.' },
+  @{ n='services';         t='Services — Everything the House Does | Legend';
+     d='One list of what Legend can be retained for: search and introduction, events and companionship, relationship management, and more. Retained singly or held together under a mandate.' },
   @{ n='journal';          t='The Journal — Writing on Partnership & Privacy | Legend';
      d='Considered essays on modern relationships, compatibility, privacy and partnership for people living demanding, international lives.' },
   @{ n='journal-scarcity'; t='The Scarcity Nobody Names: Time, Not Options | Legend Journal';
