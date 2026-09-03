@@ -102,7 +102,7 @@ export function setVerification(db, adminId, userId, kind, on) {
    private field being surfaced. */
 export function signals(db) {
   const dupHandles = db.prepare(
-    'SELECT LOWER(p.display_name) name, COUNT(*) n FROM profiles p WHERE p.display_name != "" ' +
+    'SELECT LOWER(p.display_name) name, COUNT(*) n FROM profiles p WHERE p.display_name != \'\' ' +
     'GROUP BY LOWER(p.display_name) HAVING n > 1').all();
   const highVolume = db.prepare(
     "SELECT from_user, COUNT(*) n FROM proposals WHERE created_at > datetime('now','-1 day') " +
